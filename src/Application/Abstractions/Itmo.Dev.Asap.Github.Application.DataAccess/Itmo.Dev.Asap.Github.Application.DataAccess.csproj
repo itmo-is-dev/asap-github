@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+        <PackageReference Include="SourceKit.Generators.Builder" />
+        <PackageReference Include="System.Linq.Async" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Domain\Itmo.Dev.Asap.Github.Domain\Itmo.Dev.Asap.Github.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package itmo.dev.asap.kafka;
+
+option csharp_namespace = "Itmo.Dev.Asap.Kafka";
+
+message AssignmentCreatedKey {
+  string assignment_id = 1;
+}
+
+message AssignmentCreatedValue {
+  string id = 1;
+  string subject_course_id = 2;
+  string title = 3;
+  string short_name = 4;
+}

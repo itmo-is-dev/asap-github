@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    
+    <ItemGroup>
+        <PackageReference Include="MediatR.Contracts" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Dto\Itmo.Dev.Asap.Github.Application.Dto.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Commands\Itmo.Dev.Asap.Github.Commands.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Application" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Application.Handlers" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Presentation.Controllers" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Presentation.Webhooks" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Presentation.Grpc" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Presentation.Kafka" />
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Tests" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    
+    <ItemGroup>
+        <PackageReference Include="MediatR" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Abstractions\Itmo.Dev.Asap.Github.Application.Core\Itmo.Dev.Asap.Github.Application.Core.csproj" />
+        <ProjectReference Include="..\Abstractions\Itmo.Dev.Asap.Github.Application.DataAccess\Itmo.Dev.Asap.Github.Application.DataAccess.csproj" />
+        <ProjectReference Include="..\Abstractions\Itmo.Dev.Asap.Github.Application.Octokit\Itmo.Dev.Asap.Github.Application.Octokit.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Contracts\Itmo.Dev.Asap.Github.Application.Contracts.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Specifications\Itmo.Dev.Asap.Github.Application.Specifications.csproj" />
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Commands\Itmo.Dev.Asap.Github.Commands.csproj" />
+    </ItemGroup>
+
+</Project>
