@@ -1,3 +1,5 @@
+using Itmo.Dev.Asap.Github.Application.Core.Models;
+
 namespace Itmo.Dev.Asap.Github.Application.Core.Services;
 
 public interface ISubjectCourseService
@@ -7,7 +9,7 @@ public interface ISubjectCourseService
         IReadOnlyCollection<Guid> userIds,
         CancellationToken cancellationToken);
 
-    Task<IReadOnlyCollection<Guid>> GetSubjectCourseStudentIds(
+    IAsyncEnumerable<StudentDto> GetSubjectCourseStudentIds(
         Guid subjectCourseId,
         CancellationToken cancellationToken);
 }

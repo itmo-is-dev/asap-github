@@ -7,21 +7,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="protos\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Grpc.AspNetCore" />
       <PackageReference Include="Grpc.Net.Client" />
       <PackageReference Include="Grpc.Tools" />
+      <PackageReference Include="Riok.Mapperly" />
     </ItemGroup>
     
     <ItemGroup>
-        <Protobuf Include="protos/*.proto" GrpcServices="Client" />
+        <Protobuf ProtoRoot="protos" Include="protos\**\*.proto" GrpcServices="Client" />
     </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\..\Application\Abstractions\Itmo.Dev.Asap.Github.Application.Core\Itmo.Dev.Asap.Github.Application.Core.csproj" />
+      <ProjectReference Include="..\..\Itmo.Dev.Asap.Github.Common\Itmo.Dev.Asap.Github.Common.csproj" />
     </ItemGroup>
 
 </Project>

@@ -11,7 +11,7 @@
       <ProjectReference Include="..\Application\Itmo.Dev.Asap.Github.Application.Handlers\Itmo.Dev.Asap.Github.Application.Handlers.csproj" />
       <ProjectReference Include="..\Application\Itmo.Dev.Asap.Github.Application\Itmo.Dev.Asap.Github.Application.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Caching\Itmo.Dev.Asap.Github.Caching.csproj" />
-      <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Core\Itmo.Dev.Asap.Github.Core.csproj" />
+      <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Integrations.Core\Itmo.Dev.Asap.Github.Integrations.Core.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.DataAccess\Itmo.Dev.Asap.Github.DataAccess.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Octokit\Itmo.Dev.Asap.Github.Octokit.csproj" />
       <ProjectReference Include="..\Presentation\Itmo.Dev.Asap.Github.Presentation.Grpc\Itmo.Dev.Asap.Github.Presentation.Grpc.csproj" />
