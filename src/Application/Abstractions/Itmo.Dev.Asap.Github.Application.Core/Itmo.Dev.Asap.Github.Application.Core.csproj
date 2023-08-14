@@ -10,4 +10,8 @@
       <ProjectReference Include="..\..\Itmo.Dev.Asap.Github.Application.Dto\Itmo.Dev.Asap.Github.Application.Dto.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.Linq.Async" />
+    </ItemGroup>
+
 </Project>

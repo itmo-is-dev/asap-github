@@ -1,8 +1,8 @@
 using Itmo.Dev.Asap.Github.Application.Extensions;
 using Itmo.Dev.Asap.Github.Application.Handlers.Extensions;
 using Itmo.Dev.Asap.Github.Caching.Extensions;
-using Itmo.Dev.Asap.Github.Core.Extensions;
 using Itmo.Dev.Asap.Github.DataAccess.Extensions;
+using Itmo.Dev.Asap.Github.Integrations.Core.Extensions;
 using Itmo.Dev.Asap.Github.Octokit.Extensions;
 using Itmo.Dev.Asap.Github.Presentation.Grpc.Extensions;
 using Itmo.Dev.Asap.Github.Presentation.Kafka.Extensions;
@@ -17,7 +17,7 @@ builder.Services
     .AddGithubCaching()
     .AddDataAccess()
     .AddOctokitIntegration(builder.Configuration)
-    .AddCoreIntegration(builder.Configuration)
+    .AddCoreIntegration()
     .AddGrpcPresentation()
     .AddWebhooksPresentation()
     .AddKafkaPresentation(builder.Configuration);

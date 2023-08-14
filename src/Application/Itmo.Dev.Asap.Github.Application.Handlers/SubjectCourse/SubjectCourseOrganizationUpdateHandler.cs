@@ -39,7 +39,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
     public async Task Handle(UpdateSubjectCourseOrganizations.Command request, CancellationToken cancellationToken)
     {
         GithubSubjectCourse[] subjectCourses = await _context.SubjectCourses
-            .QueryAsync(GithubSubjectCourseQuery.Build(_ => _), cancellationToken)
+            .QueryAsync(GithubSubjectCourseQuery.Build(builder => builder), cancellationToken)
             .ToArrayAsync(cancellationToken);
 
         foreach (GithubSubjectCourse subjectCourse in subjectCourses)
@@ -80,7 +80,9 @@ internal class SubjectCourseOrganizationUpdateHandler :
     private async Task UpdateOrganizationAsync(GithubSubjectCourse subjectCourse, CancellationToken cancellationToken)
     {
         IReadOnlyCollection<Guid> studentIds = await _asapSubjectCourseService
-            .GetSubjectCourseStudentIds(subjectCourse.Id, cancellationToken);
+            .GetSubjectCourseStudentIds(subjectCourse.Id, cancellationToken)
+            .Select(x => x.User.Id)
+            .ToArrayAsync(cancellationToken);
 
         var githubUserQuery = GithubUserQuery.Build(x => x.WithIds(studentIds));
 

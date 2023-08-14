@@ -67,7 +67,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Presen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github", "src\Itmo.Dev.Asap.Github\Itmo.Dev.Asap.Github.csproj", "{DA782C27-4270-4F36-9E97-89B78F1BA8D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Core", "src\Infrastructure\Itmo.Dev.Asap.Github.Core\Itmo.Dev.Asap.Github.Core.csproj", "{98E87419-952F-4816-823A-67ABF3721E90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Integrations.Core", "src\Infrastructure\Itmo.Dev.Asap.Github.Integrations.Core\Itmo.Dev.Asap.Github.Integrations.Core.csproj", "{98E87419-952F-4816-823A-67ABF3721E90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Presentation.Kafka", "src\Presentation\Itmo.Dev.Asap.Github.Presentation.Kafka\Itmo.Dev.Asap.Github.Presentation.Kafka.csproj", "{9D9F0459-76B5-47BF-ACCB-957478521498}"
 EndProject
