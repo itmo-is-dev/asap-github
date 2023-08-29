@@ -75,8 +75,15 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddGithubServices(this IServiceCollection services)
     {
+        services.AddHttpClient<IGithubUserService, GithubUserService>(o =>
+        {
+            o.BaseAddress = new Uri("https://api.github.com/", UriKind.Absolute);
+            o.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+            o.DefaultRequestHeaders.TryAddWithoutValidation("X-GitHub-Api-Version", "2022-11-28");
+            o.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N)");
+        });
+
         return services
-            .AddScoped<IGithubUserService, GithubUserService>()
             .AddScoped<IGithubOrganizationService, GithubOrganizationService>()
             .AddScoped<IGithubRepositoryService, GithubRepositoryService>();
     }
