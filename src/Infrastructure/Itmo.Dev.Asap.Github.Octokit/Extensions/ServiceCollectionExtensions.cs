@@ -26,12 +26,16 @@ public static class ServiceCollectionExtensions
         collection.AddOptions<GithubOctokitConfiguration>().BindConfiguration("Infrastructure:Octokit");
         collection.AddSingleton<IValidateOptions<GithubOctokitConfiguration>, GithubOctokitConfiguration>();
 
-        collection.AddHttpClient<GithubApiClient>(o =>
+        collection.AddHttpClient<GithubApiClient>((p, o) =>
         {
+            IGitHubClient client = p.GetRequiredService<IGitHubClient>();
+            var connection = client.Connection as Connection;
+            string? userAgent = connection?.UserAgent;
+
             o.BaseAddress = new Uri("https://api.github.com/", UriKind.Absolute);
             o.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
             o.DefaultRequestHeaders.TryAddWithoutValidation("X-GitHub-Api-Version", "2022-11-28");
-            o.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N)");
+            o.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
         });
 
         collection.AddGithubClients(configuration);
