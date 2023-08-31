@@ -189,7 +189,9 @@ internal class GithubRepositoryService : IGithubRepositoryService
 
         var userRepositoryFromTemplate = new NewRepositoryFromTemplate(newRepositoryName)
         {
-            Owner = organization.Name, Description = null, Private = true,
+            Owner = organization.Name,
+            Description = null,
+            Private = true,
         };
 
         _logger.LogInformation(
