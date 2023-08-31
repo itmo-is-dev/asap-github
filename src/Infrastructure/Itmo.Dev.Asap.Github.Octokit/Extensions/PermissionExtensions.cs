@@ -13,7 +13,7 @@ internal static class PermissionExtensions
             RepositoryPermission.Push => "push",
             RepositoryPermission.Maintain => "maintain",
             RepositoryPermission.Admin => "admin",
-            _ => throw new ArgumentOutOfRangeException(nameof(permission), permission, null),
+            _ => throw new ArgumentOutOfRangeException(nameof(permission), permission, "Repository permission not supported"),
         };
     }
 }
