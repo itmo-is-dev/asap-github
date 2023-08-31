@@ -19,8 +19,5 @@
         <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Tests" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Tools\" />
-    </ItemGroup>
 
 </Project>
