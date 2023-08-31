@@ -13,13 +13,11 @@ public static class GithubUserExtensions
         long githubUserId,
         CancellationToken cancellationToken = default)
     {
-        var query = GithubUserQuery.Build(x => x
-            .WithGithubUserId(githubUserId)
-            .WithLimit(1));
+        var query = GithubUserQuery.Build(x => x.WithGithubUserId(githubUserId));
 
         GithubUser? user = await repository
             .QueryAsync(query, cancellationToken)
-            .SingleOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken);
 
         return user ?? throw EntityNotFoundException.User().TaggedWithNotFound();
     }
