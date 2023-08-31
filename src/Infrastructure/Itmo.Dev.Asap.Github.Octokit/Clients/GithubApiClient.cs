@@ -30,11 +30,7 @@ internal class GithubApiClient
         if (response.StatusCode is HttpStatusCode.NotFound)
             return null;
 
-        await using Stream content = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var reader = new StreamReader(content);
-        await using var jsonReader = new JsonTextReader(reader);
-
-        return _serializer.Deserialize<GithubOrganizationModel>(jsonReader);
+        return await response.Content.DeserializeAsync<GithubOrganizationModel>(_serializer, cancellationToken);
     }
 
     public async Task<GithubTeamModel?> FindTeamByIdAsync(
@@ -54,11 +50,7 @@ internal class GithubApiClient
         if (response.StatusCode is HttpStatusCode.NotFound)
             return null;
 
-        await using Stream content = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var reader = new StreamReader(content);
-        await using var jsonReader = new JsonTextReader(reader);
-
-        return _serializer.Deserialize<GithubTeamModel>(jsonReader);
+        return await response.Content.DeserializeAsync<GithubTeamModel>(_serializer, cancellationToken);
     }
 
     public async Task<GithubUserModel?> FindUserByIdAsync(
@@ -74,11 +66,8 @@ internal class GithubApiClient
         if (response.StatusCode is HttpStatusCode.NotFound)
             return null;
 
-        await using Stream content = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var reader = new StreamReader(content);
-        await using var jsonReader = new JsonTextReader(reader);
-
-        GithubUserModel[]? users = _serializer.Deserialize<GithubUserModel[]>(jsonReader);
+        GithubUserModel[]? users = await response.Content
+            .DeserializeAsync<GithubUserModel[]>(_serializer, cancellationToken);
 
         return users is [GithubUserModel user] && user.Id.Equals(userId) ? user : null;
     }
@@ -96,11 +85,7 @@ internal class GithubApiClient
         if (response.StatusCode is HttpStatusCode.NotFound)
             return null;
 
-        await using Stream content = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var reader = new StreamReader(content);
-        await using var jsonReader = new JsonTextReader(reader);
-
-        return _serializer.Deserialize<GithubRepositoryModel>(jsonReader);
+        return await response.Content.DeserializeAsync<GithubRepositoryModel>(_serializer, cancellationToken);
     }
 
     /// <summary>
