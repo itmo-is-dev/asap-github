@@ -1,5 +1,6 @@
 using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 using Itmo.Dev.Asap.Github.Octokit.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
@@ -10,11 +11,13 @@ internal class GithubApiClient
 {
     private readonly HttpClient _githubHttpClient;
     private readonly JsonSerializer _serializer;
+    private readonly ILogger<GithubApiClient> _logger;
 
-    public GithubApiClient(HttpClient githubHttpClient, JsonSerializer serializer)
+    public GithubApiClient(HttpClient githubHttpClient, JsonSerializer serializer, ILogger<GithubApiClient> logger)
     {
         _githubHttpClient = githubHttpClient;
         _serializer = serializer;
+        _logger = logger;
     }
 
     public async Task<GithubOrganizationModel?> FindOrganizationByIdAsync(
@@ -27,7 +30,7 @@ internal class GithubApiClient
 
         HttpResponseMessage response = await _githubHttpClient.SendAsync(message, cancellationToken);
 
-        if (response.StatusCode is HttpStatusCode.NotFound)
+        if (IsValidResponse(response) is false)
             return null;
 
         return await response.Content.DeserializeAsync<GithubOrganizationModel>(_serializer, cancellationToken);
@@ -47,7 +50,7 @@ internal class GithubApiClient
 
         HttpResponseMessage response = await _githubHttpClient.SendAsync(message, cancellationToken);
 
-        if (response.StatusCode is HttpStatusCode.NotFound)
+        if (IsValidResponse(response) is false)
             return null;
 
         return await response.Content.DeserializeAsync<GithubTeamModel>(_serializer, cancellationToken);
@@ -63,7 +66,7 @@ internal class GithubApiClient
 
         HttpResponseMessage response = await _githubHttpClient.SendAsync(message, cancellationToken);
 
-        if (response.StatusCode is HttpStatusCode.NotFound)
+        if (IsValidResponse(response) is false)
             return null;
 
         GithubUserModel[]? users = await response.Content
@@ -82,7 +85,7 @@ internal class GithubApiClient
 
         HttpResponseMessage response = await _githubHttpClient.SendAsync(message, cancellationToken);
 
-        if (response.StatusCode is HttpStatusCode.NotFound)
+        if (IsValidResponse(response) is false)
             return null;
 
         return await response.Content.DeserializeAsync<GithubRepositoryModel>(_serializer, cancellationToken);
@@ -112,5 +115,21 @@ internal class GithubApiClient
         message.Content = new StringContent(content);
 
         await _githubHttpClient.SendAsync(message, cancellationToken);
+    }
+
+    private bool IsValidResponse(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return true;
+
+        if (response.StatusCode is HttpStatusCode.NotFound)
+            return false;
+
+        _logger.LogError(
+            "Failed to execute github request = {RequestUri}, response code = {ResponseCode}",
+            response.RequestMessage?.RequestUri,
+            response.StatusCode);
+
+        return false;
     }
 }
