@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Octokit;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace Itmo.Dev.Asap.Github.Octokit.Services;
 
@@ -79,15 +78,25 @@ internal class GithubSearchService : IGithubSearchService
             yield break;
         }
 
-        IReadOnlyList<Repository> repositories = await client.Repository.GetAllForOrg(organization.Name);
-        var regex = new Regex($".*{query}.*");
+        query = $"org:{organization.Name} {query}";
 
-        foreach (Repository repository in repositories)
+        var request = new SearchRepositoriesRequest(query);
+        int count = 0;
+
+        while (count < _configuration.MaxSearchResponseSize)
         {
-            if (regex.IsMatch(repository.Name) is false)
-                continue;
+            SearchRepositoryResult response = await client.Search.SearchRepo(request);
 
-            yield return new GithubRepositoryModel(repository.Id, repository.Name);
+            foreach (Repository repository in response.Items)
+            {
+                count++;
+                yield return new GithubRepositoryModel(repository.Id, repository.Name);
+            }
+
+            if (response.IncompleteResults is false)
+                yield break;
+
+            request.Page++;
         }
     }
 
@@ -112,11 +121,10 @@ internal class GithubSearchService : IGithubSearchService
         }
 
         IReadOnlyList<Team> teams = await client.Organization.Team.GetAllForCurrent();
-        var regex = new Regex($".*{query}.*");
 
         foreach (Team team in teams)
         {
-            if (regex.IsMatch(team.Name) is false)
+            if (team.Name.StartsWith(query, StringComparison.OrdinalIgnoreCase) is false)
                 continue;
 
             yield return new GithubTeamModel(team.Id, team.Name);
