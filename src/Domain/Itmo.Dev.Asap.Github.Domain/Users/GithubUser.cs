@@ -4,10 +4,10 @@ namespace Itmo.Dev.Asap.Github.Domain.Users;
 
 public partial class GithubUser : IEntity<Guid>
 {
-    public GithubUser(Guid id, string username) : this(id)
+    public GithubUser(Guid id, long githubId) : this(id)
     {
-        Username = username;
+        GithubId = githubId;
     }
 
-    public string Username { get; set; }
+    public long GithubId { get; set; }
 }

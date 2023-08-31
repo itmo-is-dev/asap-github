@@ -49,9 +49,9 @@ internal class SubjectCourseCreatedHandler : INotificationHandler<SubjectCourseC
 
         var subjectCourse = new GithubSubjectCourse(
             notification.SubjectCourse.Id,
-            provisionedSubjectCourse.OrganizationName,
-            provisionedSubjectCourse.TemplateRepositoryName,
-            provisionedSubjectCourse.MentorTeamName);
+            provisionedSubjectCourse.OrganizationId,
+            provisionedSubjectCourse.TemplateRepositoryId,
+            provisionedSubjectCourse.MentorTeamId);
 
         _context.SubjectCourses.Add(subjectCourse);
         _context.ProvisionedSubjectCourses.Remove(provisionedSubjectCourse.CorrelationId);

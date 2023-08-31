@@ -147,55 +147,51 @@ public class AsapWebhookEventProcessor : WebhookEventProcessor
         return webhookEvent.Sender is null || webhookEvent.Sender.Type == UserType.Bot;
     }
 
-    private static PullRequestDto CreateDescriptor(PullRequestReviewEvent pullRequestReviewEvent)
+    private static PullRequestDto CreateDescriptor(PullRequestReviewEvent evt)
     {
         return new PullRequestDto(
-            pullRequestReviewEvent.Sender!.Login,
-            pullRequestReviewEvent.Review.HtmlUrl,
-            pullRequestReviewEvent.Organization!.Login,
-            pullRequestReviewEvent.Repository!.Name,
-            pullRequestReviewEvent.PullRequest.Head.Ref,
-            pullRequestReviewEvent.PullRequest.Number);
+            SenderId: evt.Sender!.Id,
+            SenderUsername: evt.Sender!.Login,
+            Payload: evt.Review.HtmlUrl,
+            OrganizationId: evt.Organization!.Id,
+            OrganizationName: evt.Organization!.Login,
+            RepositoryId: evt.Repository!.Id,
+            RepositoryName: evt.Repository!.Name,
+            BranchName: evt.PullRequest.Head.Ref,
+            PullRequestId: evt.PullRequest.Number);
     }
 
     private PullRequestDto CreateDescriptor(PullRequestEvent evt)
     {
-        string login = evt.Sender!.Login;
-        string payload = evt.PullRequest.HtmlUrl;
-        string organization = evt.Organization!.Login;
-        string repository = evt.Repository!.Name;
-        string branch = evt.PullRequest.Head.Ref;
-        long prNum = evt.PullRequest.Number;
-
-        var pullRequestDescriptor = new PullRequestDto(
-            login,
-            payload,
-            organization,
-            repository,
-            branch,
-            prNum);
-
-        return pullRequestDescriptor;
+        return new PullRequestDto(
+            SenderId: evt.Sender!.Id,
+            SenderUsername: evt.Sender!.Login,
+            Payload: evt.PullRequest.HtmlUrl,
+            OrganizationId: evt.Organization!.Id,
+            OrganizationName: evt.Organization!.Login,
+            RepositoryId: evt.Repository!.Id,
+            RepositoryName: evt.Repository!.Name,
+            BranchName: evt.PullRequest.Head.Ref,
+            PullRequestId: evt.PullRequest.Number);
     }
 
-    private async Task<PullRequestDto> GetPullRequestDescriptor(IssueCommentEvent issueCommentEvent)
+    private async Task<PullRequestDto> GetPullRequestDescriptor(IssueCommentEvent evt)
     {
-        ArgumentNullException.ThrowIfNull(issueCommentEvent.Sender);
-        ArgumentNullException.ThrowIfNull(issueCommentEvent.Organization);
-        ArgumentNullException.ThrowIfNull(issueCommentEvent.Repository);
-
         IGitHubClient gitHubClient = await _clientProvider
-            .GetClientForOrganizationAsync(issueCommentEvent.Organization.Login, default);
+            .GetOrganizationClientAsync(evt.Organization!.Id, default);
 
         PullRequest pullRequest = await gitHubClient.PullRequest
-            .Get(issueCommentEvent.Repository.Id, (int)issueCommentEvent.Issue.Number);
+            .Get(evt.Repository!.Id, (int)evt.Issue.Number);
 
         return new PullRequestDto(
-            issueCommentEvent.Sender.Login,
-            pullRequest.HtmlUrl,
-            issueCommentEvent.Organization.Login,
-            issueCommentEvent.Repository.Name,
-            pullRequest.Head.Ref,
-            pullRequest.Number);
+            SenderId: evt.Sender!.Id,
+            SenderUsername: evt.Sender!.Login,
+            Payload: pullRequest.HtmlUrl,
+            OrganizationId: evt.Organization!.Id,
+            OrganizationName: evt.Organization!.Login,
+            RepositoryId: evt.Repository!.Id,
+            RepositoryName: evt.Repository!.Name,
+            BranchName: pullRequest.Head.Ref,
+            PullRequestId: pullRequest.Number);
     }
 }

@@ -5,11 +5,11 @@ namespace Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
 
 [GenerateBuilder]
 public partial record GithubSubmissionQuery(
-    IReadOnlyCollection<Guid> Ids,
-    IReadOnlyCollection<string> RepositoryNames,
-    IReadOnlyCollection<long> PullRequestNumbers,
-    IReadOnlyCollection<string> OrganizationNames,
-    IReadOnlyCollection<string> AssignmentBranchNames,
+    Guid[] Ids,
+    long[] RepositoryIds,
+    long[] PullRequestIds,
+    long[] OrganizationIds,
+    string[] AssignmentBranchNames,
     OrderDirection? OrderByCreatedAt)
 {
     public bool HasOrderParameters => OrderByCreatedAt is not null;

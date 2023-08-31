@@ -1,21 +1,31 @@
 using Itmo.Dev.Asap.Github.Application.Octokit.Models;
-using Octokit;
 
 namespace Itmo.Dev.Asap.Github.Application.Octokit.Services;
 
 public interface IGithubRepositoryService
 {
-    Task AddTeamPermission(
-        string organization,
-        string repositoryName,
-        Team team,
-        Permission permission);
+    Task<GithubRepositoryModel?> FindByIdAsync(
+        long organizationId,
+        long repositoryId,
+        CancellationToken cancellationToken);
 
-    Task CreateRepositoryFromTemplate(string organization, string newRepositoryName, string templateName);
+    Task AddTeamPermissionAsync(
+        long organizationId,
+        long repositoryId,
+        long teamId,
+        RepositoryPermission permission,
+        CancellationToken cancellationToken);
 
-    Task<AddPermissionResult> AddUserPermission(
-        string organization,
-        string repositoryName,
-        string username,
-        Permission permission);
+    Task<long?> CreateRepositoryFromTemplateAsync(
+        long organizationId,
+        string newRepositoryName,
+        long templateRepositoryId,
+        CancellationToken cancellationToken);
+
+    Task<AddPermissionResult> AddUserPermissionAsync(
+        long organizationId,
+        long repositoryId,
+        long userId,
+        RepositoryPermission permission,
+        CancellationToken cancellationToken);
 }

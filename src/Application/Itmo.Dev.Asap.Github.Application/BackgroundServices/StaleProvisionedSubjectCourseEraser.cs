@@ -81,9 +81,9 @@ public class StaleProvisionedSubjectCourseEraser : BackgroundService
             foreach (ProvisionedSubjectCourse subjectCourse in staleProvisionedSubjectCourses)
             {
                 _logger.LogWarning(
-                    "Removed stale provisioned subject course CorrelationId = {CorrelationId}, OrganizationName = {OrganizationName}",
+                    "Removed stale provisioned subject course CorrelationId = {CorrelationId}, OrganizationId = {OrganizationId}",
                     subjectCourse.CorrelationId,
-                    subjectCourse.OrganizationName);
+                    subjectCourse.OrganizationId);
             }
 
             if (staleProvisionedSubjectCourses.Length < pageSize)

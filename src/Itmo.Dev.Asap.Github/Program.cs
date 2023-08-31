@@ -2,7 +2,9 @@
 
 using Itmo.Dev.Asap.Github.Application.Extensions;
 using Itmo.Dev.Asap.Github.Application.Handlers.Extensions;
+using Itmo.Dev.Asap.Github.Application.Mapping.Extensions;
 using Itmo.Dev.Asap.Github.Caching.Extensions;
+using Itmo.Dev.Asap.Github.Common.Extensions;
 using Itmo.Dev.Asap.Github.DataAccess.Extensions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Extensions;
 using Itmo.Dev.Asap.Github.Octokit.Extensions;
@@ -21,8 +23,10 @@ builder.AddPlatformSentry();
 builder.Host.AddPlatformSerilog(builder.Configuration);
 
 builder.Services
+    .AddCommon()
     .AddApplication()
     .AddApplicationHandlers()
+    .AddMapping()
     .AddGithubCaching()
     .AddDataAccess()
     .AddOctokitIntegration(builder.Configuration)

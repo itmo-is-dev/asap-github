@@ -9,16 +9,16 @@ public partial class GithubSubmission : IEntity<Guid>
         Guid assignmentId,
         Guid userId,
         DateTime createdAt,
-        string organization,
-        string repository,
-        long pullRequestNumber) : this(id)
+        long organizationId,
+        long repositoryId,
+        long pullRequestId) : this(id)
     {
         AssignmentId = assignmentId;
         UserId = userId;
         CreatedAt = DateTime.SpecifyKind(createdAt, DateTimeKind.Utc);
-        Repository = repository;
-        PullRequestNumber = pullRequestNumber;
-        Organization = organization;
+        RepositoryId = repositoryId;
+        PullRequestId = pullRequestId;
+        OrganizationId = organizationId;
     }
 
     public Guid AssignmentId { get; protected init; }
@@ -27,9 +27,9 @@ public partial class GithubSubmission : IEntity<Guid>
 
     public DateTime CreatedAt { get; protected init; }
 
-    public string Organization { get; protected set; }
+    public long OrganizationId { get; protected set; }
 
-    public string Repository { get; protected set; }
+    public long RepositoryId { get; protected set; }
 
-    public long PullRequestNumber { get; protected set; }
+    public long PullRequestId { get; protected set; }
 }

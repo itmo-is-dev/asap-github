@@ -31,16 +31,16 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
                s.assignment_id, 
                s.user_id, 
                s.submission_created_at, 
-               s.submission_organization,
-               s.submission_repository, 
+               s.submission_organization_id,
+               s.submission_repository_id, 
                s.submission_pull_request_number
         from submissions as s
         join assignments as a using (assignment_id)
         where 
             (cardinality(:submission_ids) = 0 or s.submission_id = any(:submission_ids))
-            and (cardinality(:repository_names) = 0 or s.submission_repository = any(:repository_names))
-            and (cardinality(:pull_request_numbers) = 0 or s.submission_pull_request_number = any(:pull_request_numbers))
-            and (cardinality(:organization_names) = 0 or s.submission_organization = any(:organization_names))
+            and (cardinality(:repository_ids) = 0 or s.submission_repository_id = any(:repository_ids))
+            and (cardinality(:pull_request_ids) = 0 or s.submission_pull_request_id = any(:pull_request_ids))
+            and (cardinality(:organization_ids) = 0 or s.submission_organization_id = any(:organization_ids))
             and (cardinality(:assignment_branch_names) = 0 or a.assignment_branch_name = any(:assignment_branch_names))
         """;
 
@@ -52,8 +52,8 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             {
                 query.OrderByCreatedAt switch
                 {
-                    OrderDirection.Ascending => "\"CreatedAt\" asc",
-                    OrderDirection.Descending => "\"CreatedAt\" desc",
+                    OrderDirection.Ascending => "\"submission_created_at\" asc",
+                    OrderDirection.Descending => "\"submission_created_at\" desc",
                     _ => null,
                 },
             };
@@ -71,9 +71,9 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
 #pragma warning disable CA2100
         await using NpgsqlCommand command = new NpgsqlCommand(sql, connection)
             .AddParameter("submission_ids", query.Ids)
-            .AddParameter("repository_names", query.RepositoryNames)
-            .AddParameter("pull_request_numbers", query.PullRequestNumbers)
-            .AddParameter("organization_names", query.OrganizationNames)
+            .AddParameter("repository_ids", query.RepositoryIds)
+            .AddParameter("pull_request_ids", query.PullRequestIds)
+            .AddParameter("organization_ids", query.OrganizationIds)
             .AddParameter("assignment_branch_names", query.AssignmentBranchNames);
 #pragma warning restore CA2100
 
@@ -83,20 +83,20 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         int assignmentId = reader.GetOrdinal("assignment_id");
         int userId = reader.GetOrdinal("user_id");
         int createdAt = reader.GetOrdinal("submission_created_at");
-        int organization = reader.GetOrdinal("submission_organization");
-        int repository = reader.GetOrdinal("submission_repository");
-        int pullRequestNumber = reader.GetOrdinal("submission_pull_request_number");
+        int organization = reader.GetOrdinal("submission_organization_id");
+        int repository = reader.GetOrdinal("submission_repository_id");
+        int pullRequest = reader.GetOrdinal("submission_pull_request_id");
 
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubSubmission(
-                reader.GetGuid(submissionId),
-                reader.GetGuid(assignmentId),
-                reader.GetGuid(userId),
-                reader.GetDateTime(createdAt),
-                reader.GetString(organization),
-                reader.GetString(repository),
-                reader.GetInt64(pullRequestNumber));
+                id: reader.GetGuid(submissionId),
+                assignmentId: reader.GetGuid(assignmentId),
+                userId: reader.GetGuid(userId),
+                createdAt: reader.GetDateTime(createdAt),
+                organizationId: reader.GetInt64(organization),
+                repositoryId: reader.GetInt64(repository),
+                pullRequestId: reader.GetInt64(pullRequest));
         }
     }
 
@@ -108,12 +108,12 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             submission_id, 
             assignment_id, 
             user_id, 
-            submission_created_at, 
-            submission_organization, 
-            submission_repository,
-            submission_pull_request_number
+            submission_created_at,
+            submission_organization_id, 
+            submission_repository_id,
+            submission_pull_request_id
         )
-        values (:id, :assignment_id, :user_id, :created_at, :organization, :repository, :pull_request_number)
+        values (:id, :assignment_id, :user_id, :created_at, :organization_id, :repository_id, :pull_request_id)
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
@@ -121,9 +121,9 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             .AddParameter("assignment_id", submission.AssignmentId)
             .AddParameter("user_id", submission.UserId)
             .AddParameter("created_at", submission.CreatedAt)
-            .AddParameter("organization", submission.Organization)
-            .AddParameter("repository", submission.Repository)
-            .AddParameter("pull_request_number", submission.PullRequestNumber);
+            .AddParameter("organization_id", submission.OrganizationId)
+            .AddParameter("repository_id", submission.RepositoryId)
+            .AddParameter("pull_request_id", submission.PullRequestId);
 
         _unitOfWork.Enqueue(command);
     }

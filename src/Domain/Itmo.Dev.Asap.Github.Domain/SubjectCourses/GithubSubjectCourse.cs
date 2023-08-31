@@ -6,19 +6,18 @@ public partial class GithubSubjectCourse : IEntity<Guid>
 {
     public GithubSubjectCourse(
         Guid id,
-        string organizationName,
-        string templateRepositoryName,
-        string mentorTeamName)
-        : this(id)
+        long organizationId,
+        long templateRepositoryId,
+        long mentorTeamId) : this(id)
     {
-        OrganizationName = organizationName;
-        TemplateRepositoryName = templateRepositoryName;
-        MentorTeamName = mentorTeamName;
+        OrganizationId = organizationId;
+        TemplateRepositoryId = templateRepositoryId;
+        MentorTeamId = mentorTeamId;
     }
 
-    public string OrganizationName { get; }
+    public long OrganizationId { get; }
 
-    public string TemplateRepositoryName { get; }
+    public long TemplateRepositoryId { get; }
 
-    public string MentorTeamName { get; set; }
+    public long MentorTeamId { get; set; }
 }

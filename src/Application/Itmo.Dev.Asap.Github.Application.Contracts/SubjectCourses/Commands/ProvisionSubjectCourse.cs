@@ -6,7 +6,7 @@ internal static class ProvisionSubjectCourse
 {
     public record Command(
         string CorrelationId,
-        string OrganizationName,
-        string TemplateRepositoryName,
-        string MentorTeamName) : IRequest;
+        long OrganizationId,
+        long TemplateRepositoryId,
+        long MentorTeamId) : IRequest;
 }

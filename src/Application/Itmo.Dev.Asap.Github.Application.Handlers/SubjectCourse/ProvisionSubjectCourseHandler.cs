@@ -23,9 +23,9 @@ internal class ProvisionSubjectCourseHandler : IRequestHandler<Command>
 
         var subjectCourse = new ProvisionedSubjectCourse(
             request.CorrelationId,
-            request.OrganizationName,
-            request.TemplateRepositoryName,
-            request.MentorTeamName,
+            request.OrganizationId,
+            request.TemplateRepositoryId,
+            request.MentorTeamId,
             now);
 
         _context.ProvisionedSubjectCourses.Add(subjectCourse);

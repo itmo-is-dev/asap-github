@@ -16,9 +16,9 @@ public static class SubmissionSpecifications
         CancellationToken cancellationToken = default)
     {
         var query = GithubSubmissionQuery.Build(x => x
-            .WithRepositoryName(pullRequest.Repository)
-            .WithPullRequestNumber(pullRequest.PullRequestNumber)
-            .WithOrganizationName(pullRequest.Organization)
+            .WithRepositoryId(pullRequest.RepositoryId)
+            .WithPullRequestId(pullRequest.PullRequestId)
+            .WithOrganizationId(pullRequest.OrganizationId)
             .WithAssignmentBranchName(pullRequest.BranchName)
             .WithOrderByCreatedAt(OrderDirection.Descending));
 

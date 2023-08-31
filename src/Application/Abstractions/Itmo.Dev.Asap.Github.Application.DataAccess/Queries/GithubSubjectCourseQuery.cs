@@ -4,8 +4,8 @@ namespace Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
 
 [GenerateBuilder]
 public partial record GithubSubjectCourseQuery(
-    IReadOnlyCollection<Guid> Ids,
-    IReadOnlyCollection<string> OrganizationNames,
-    IReadOnlyCollection<string> TemplateRepositoryNames,
-    IReadOnlyCollection<string> MentorTeamNames,
+    Guid[] Ids,
+    long[] OrganizationIds,
+    long[] TemplateRepositoryIds,
+    long[] MentorTeamIds,
     int? Limit);

@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\Application\Abstractions\Itmo.Dev.Asap.Github.Application.Octokit\Itmo.Dev.Asap.Github.Application.Octokit.csproj" />
         <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Github.Application.Contracts\Itmo.Dev.Asap.Github.Application.Contracts.csproj" />
         <ProjectReference Include="..\Itmo.Dev.Asap.Github.Presentation.Grpc.Contracts\Itmo.Dev.Asap.Github.Presentation.Grpc.Contracts.csproj" />
     </ItemGroup>

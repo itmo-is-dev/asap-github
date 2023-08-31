@@ -29,7 +29,7 @@ internal class PullRequestReopenedHandler : IRequestHandler<Command>
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
         GithubUser issuer = await _context.Users
-            .GetForUsernameAsync(request.PullRequest.Sender, cancellationToken);
+            .GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
         GithubSubmission submission = await _context.Submissions
             .GetSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);

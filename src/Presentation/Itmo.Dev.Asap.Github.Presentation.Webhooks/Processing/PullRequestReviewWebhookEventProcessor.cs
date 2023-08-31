@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Octokit.Webhooks.Events;
 using Octokit.Webhooks.Events.PullRequestReview;
+using Octokit.Webhooks.Models.PullRequestReviewEvent;
 
 namespace Itmo.Dev.Asap.Github.Presentation.Webhooks.Processing;
 
@@ -49,19 +50,19 @@ public class PullRequestReviewWebhookEventProcessor
         try
         {
             string? reviewBody = reviewEvent.Review.Body;
-            string reviewState = reviewEvent.Review.State;
+            ReviewState? reviewState = reviewEvent.Review.State?.Value;
 
             switch (action)
             {
-                case PullRequestReviewActionValue.Submitted when reviewState is "approved":
+                case PullRequestReviewActionValue.Submitted when reviewState is ReviewState.Approved:
                     await ProcessApprovedAsync(pullRequest, reviewBody, reviewEvent.Review.Id);
                     break;
 
-                case PullRequestReviewActionValue.Submitted when reviewState is "changes_requested":
+                case PullRequestReviewActionValue.Submitted when reviewState is ReviewState.ChangesRequested:
                     await ProcessRequestedChangesAsync(pullRequest, reviewBody, reviewEvent.Review.Id);
                     break;
 
-                case PullRequestReviewActionValue.Submitted when reviewState is "commented":
+                case PullRequestReviewActionValue.Submitted when reviewState is ReviewState.Commented:
                     await ProcessCommentedAsync(pullRequest, reviewBody, logger, _notifier, reviewEvent.Review.Id);
                     break;
 

@@ -33,7 +33,7 @@ internal class PullRequestClosedHandler : IRequestHandler<Command>
 
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(request.PullRequest.Sender, cancellationToken);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
         GithubSubmission submission = await _context.Submissions
             .GetSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);

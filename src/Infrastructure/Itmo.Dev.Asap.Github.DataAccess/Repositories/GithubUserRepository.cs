@@ -29,7 +29,7 @@ internal class GithubUserRepository : IGithubUserRepository
         from users as u
         where
             (cardinality(:user_ids) = 0 or u.user_id = any(:user_ids))
-            and (cardinality(:usernames) = 0 or lower(u.user_name) = any(select lower(x) from unnest(:usernames) as x))
+            and (cardinality(:github_ids) = 0 or u.user_github_id = any(:github_ids))
         """;
 
         string sql = baseSql;
@@ -44,7 +44,7 @@ internal class GithubUserRepository : IGithubUserRepository
 #pragma warning disable CA2100
         NpgsqlCommand command = new NpgsqlCommand(sql, connection)
             .AddParameter("user_ids", query.Ids)
-            .AddParameter("usernames", query.Usernames);
+            .AddParameter("github_ids", query.GithubUserIds);
 
         if (query.Limit is not null)
         {
@@ -61,21 +61,21 @@ internal class GithubUserRepository : IGithubUserRepository
         {
             yield return new GithubUser(
                 reader.GetGuid(userId),
-                reader.GetString(username));
+                reader.GetInt64(username));
         }
     }
 
     public void AddRange(IReadOnlyCollection<GithubUser> users)
     {
         const string sql = """
-        insert into users(user_id, user_name)
-        select user_id, user_name
-        from unnest(:user_ids, :user_names) as source(user_id, user_name);
+        insert into users(user_id, user_github_id)
+        select user_id, github_id
+        from unnest(:user_ids, :github_ids) as source(user_id, github_id);
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
             .AddParameter("user_ids", users.Select(x => x.Id).ToArray())
-            .AddParameter("user_names", users.Select(x => x.Username).ToArray());
+            .AddParameter("github_ids", users.Select(x => x.GithubId).ToArray());
 
         _unitOfWork.Enqueue(command);
     }
@@ -83,13 +83,13 @@ internal class GithubUserRepository : IGithubUserRepository
     public void Add(GithubUser user)
     {
         const string sql = """
-        insert into users (user_id, user_name)
-        values (:id, :name)
+        insert into users(user_id, user_github_id)
+        values (:id, :github_id)
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
             .AddParameter("id", user.Id)
-            .AddParameter("name", user.Username);
+            .AddParameter("github_id", user.GithubId);
 
         _unitOfWork.Enqueue(command);
     }
@@ -98,13 +98,13 @@ internal class GithubUserRepository : IGithubUserRepository
     {
         const string sql = """
         update users
-        set user_name = :name
+        set user_github_id = :github_id
         where user_id = :id
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
             .AddParameter("id", user.Id)
-            .AddParameter("name", user.Username);
+            .AddParameter("github_id", user.GithubId);
 
         _unitOfWork.Enqueue(command);
     }

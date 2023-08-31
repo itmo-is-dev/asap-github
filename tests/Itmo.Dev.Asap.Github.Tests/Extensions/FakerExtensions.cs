@@ -20,27 +20,27 @@ public static class FakerExtensions
     {
         return new GithubSubjectCourseModel(
             id ?? faker.Random.Guid(),
-            faker.Company.CompanyName(),
-            faker.Commerce.ProductName(),
-            faker.Company.CompanySuffix());
+            OrganizationId: faker.Random.Long(1000, 2000),
+            TemplateRepositoryId: faker.Random.Long(1000, 2000),
+            MentorTeamId: faker.Random.Long(1000, 2000));
     }
 
     public static GithubSubjectCourse GithubSubjectCourse(
         this Faker faker,
         Guid? id = null,
-        string? organizationName = null,
-        string? templateRepositoryName = null,
-        string? mentorTeamName = null)
+        long? organizationId = null,
+        long? templateRepositoryId = null,
+        long? mentorTeamId = null)
     {
         return new GithubSubjectCourse(
             id ?? faker.Random.Guid(),
-            organizationName ?? faker.Company.CompanyName(),
-            templateRepositoryName ?? faker.Commerce.ProductName(),
-            mentorTeamName ?? faker.Commerce.ProductName());
+            organizationId ?? faker.Random.Long(1000, 2000),
+            templateRepositoryId ?? faker.Random.Long(1000, 2000),
+            mentorTeamId ?? faker.Random.Long(1000, 2000));
     }
 
     public static GithubUser GithubUser(this Faker faker)
     {
-        return new GithubUser(faker.Random.Guid(), faker.Internet.UserName());
+        return new GithubUser(faker.Random.Guid(), faker.Random.Long(1000, 2000));
     }
 }

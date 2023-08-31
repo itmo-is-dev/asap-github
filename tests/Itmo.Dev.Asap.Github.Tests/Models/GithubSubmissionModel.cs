@@ -1,5 +1,3 @@
-using Itmo.Dev.Asap.Github.Domain.Submissions;
-
 namespace Itmo.Dev.Asap.Github.Tests.Models;
 
 public record GithubSubmissionModel(
@@ -7,12 +5,6 @@ public record GithubSubmissionModel(
     Guid AssignmentId,
     Guid UserId,
     DateTime CreatedAt,
-    string Organization,
-    string Repository,
-    long PullRequestNumber)
-{
-    public GithubSubmission ToEntity()
-    {
-        return new GithubSubmission(Id, AssignmentId, UserId, CreatedAt, Organization, Repository, PullRequestNumber);
-    }
-}
+    long OrganizationId,
+    long RepositoryId,
+    long PullRequestId);

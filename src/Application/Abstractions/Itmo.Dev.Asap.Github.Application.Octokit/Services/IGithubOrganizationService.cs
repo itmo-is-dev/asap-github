@@ -1,15 +1,15 @@
-using Octokit;
+using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 
 namespace Itmo.Dev.Asap.Github.Application.Octokit.Services;
 
 public interface IGithubOrganizationService
 {
-    Task<IReadOnlyCollection<string>> GetTeamMemberUsernamesAsync(
-        string organizationName,
-        string teamName,
+    Task<GithubOrganizationModel?> FindByIdAsync(long organizationId, CancellationToken cancellationToken);
+
+    Task<GithubTeamModel?> FindTeamAsync(long organizationId, long teamId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<GithubUserModel>> GetTeamMembersAsync(
+        long organizationId,
+        long teamId,
         CancellationToken cancellationToken);
-
-    Task<IReadOnlyCollection<string>> GetRepositoriesAsync(string organizationName, CancellationToken cancellationToken);
-
-    Task<Team> GetTeamAsync(string organizationName, string teamName, CancellationToken cancellationToken);
 }

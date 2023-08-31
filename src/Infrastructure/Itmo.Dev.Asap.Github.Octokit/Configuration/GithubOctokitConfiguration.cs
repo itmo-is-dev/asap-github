@@ -11,6 +11,8 @@ public class GithubOctokitConfiguration : IValidateOptions<GithubOctokitConfigur
 
     public int JwtExpirationSeconds { get; init; }
 
+    public int MaxSearchResponseSize { get; init; }
+
     public ValidateOptionsResult Validate(string? name, GithubOctokitConfiguration options)
     {
         return Validate(options);

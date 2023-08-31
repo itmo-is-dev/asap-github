@@ -1,15 +1,18 @@
 namespace Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
 
 public record PullRequestDto(
-    string Sender,
+    long SenderId,
+    string SenderUsername,
     string Payload,
-    string Organization,
-    string Repository,
+    long OrganizationId,
+    string OrganizationName,
+    long RepositoryId,
+    string RepositoryName,
     string BranchName,
-    long PullRequestNumber)
+    long PullRequestId)
 {
     public override string ToString()
     {
-        return $"{Payload} with branch {BranchName} from {Sender}";
+        return $"{Payload} with branch {BranchName} from {SenderUsername}";
     }
 }

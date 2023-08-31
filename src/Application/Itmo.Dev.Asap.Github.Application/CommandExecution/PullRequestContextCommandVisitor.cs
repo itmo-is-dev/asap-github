@@ -35,7 +35,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(ActivateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
         GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
 
         try
@@ -55,8 +55,8 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(BanCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
-        GithubUser student = await _context.Users.GetForUsernameAsync(_pullRequest.Repository);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
+        GithubUser student = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
 
         try
@@ -81,8 +81,8 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(CreateSubmissionCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
-        GithubUser user = await _context.Users.GetForUsernameAsync(_pullRequest.Repository);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
+        GithubUser user = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
 
         try
@@ -99,9 +99,9 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
                 assignment.Id,
                 user.Id,
                 submission.SubmissionDate,
-                _pullRequest.Organization,
-                _pullRequest.Repository,
-                _pullRequest.PullRequestNumber);
+                _pullRequest.OrganizationId,
+                _pullRequest.RepositoryId,
+                _pullRequest.PullRequestId);
 
             _context.Submissions.Add(githubSubmission);
             await _context.CommitAsync(default);
@@ -123,7 +123,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(DeactivateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
         GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
 
         try
@@ -143,7 +143,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(DeleteCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
         GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
 
         try
@@ -172,7 +172,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(MarkReviewedCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
         GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
 
         try
@@ -195,7 +195,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(RateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
         GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
 
         try
@@ -224,8 +224,8 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(UpdateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(_pullRequest.Sender);
-        GithubUser user = await _context.Users.GetForUsernameAsync(_pullRequest.Repository);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
+        GithubUser user = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
 
         try
