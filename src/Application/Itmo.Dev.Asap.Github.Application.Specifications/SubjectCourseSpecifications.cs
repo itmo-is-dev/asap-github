@@ -8,12 +8,12 @@ namespace Itmo.Dev.Asap.Github.Application.Specifications;
 
 public static class SubjectCourseSpecifications
 {
-    public static IAsyncEnumerable<GithubSubjectCourse> ForOrganizationName(
+    public static IAsyncEnumerable<GithubSubjectCourse> ForOrganization(
         this IGithubSubjectCourseRepository repository,
-        string organizationName,
+        long organizationId,
         CancellationToken cancellationToken)
     {
-        var query = GithubSubjectCourseQuery.Build(x => x.WithOrganizationName(organizationName));
+        var query = GithubSubjectCourseQuery.Build(x => x.WithOrganizationId(organizationId));
         return repository.QueryAsync(query, cancellationToken);
     }
 

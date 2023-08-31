@@ -8,13 +8,13 @@ namespace Itmo.Dev.Asap.Github.Application.Specifications;
 
 public static class GithubUserExtensions
 {
-    public static async Task<GithubUser> GetForUsernameAsync(
+    public static async Task<GithubUser> GetForGithubIdAsync(
         this IGithubUserRepository repository,
-        string username,
+        long githubUserId,
         CancellationToken cancellationToken = default)
     {
         var query = GithubUserQuery.Build(x => x
-            .WithUsername(username)
+            .WithGithubUserId(githubUserId)
             .WithLimit(1));
 
         GithubUser? user = await repository

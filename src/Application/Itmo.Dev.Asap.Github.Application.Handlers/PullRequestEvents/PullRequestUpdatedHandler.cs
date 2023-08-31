@@ -35,8 +35,8 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
 
     public async Task Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users.GetForUsernameAsync(request.PullRequest.Sender, cancellationToken);
-        GithubUser user = await _context.Users.GetForUsernameAsync(request.PullRequest.Repository, cancellationToken);
+        GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+        GithubUser user = await _context.Users.GetForGithubIdAsync(request.PullRequest.RepositoryId, cancellationToken);
 
         GithubAssignment? assignment = await _context.Assignments
             .FindAssignmentForPullRequestAsync(request.PullRequest, cancellationToken);
@@ -47,7 +47,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
 
             throw EntityNotFoundException.AssignmentWasNotFound(
                 request.PullRequest.BranchName,
-                request.PullRequest.Organization,
+                request.PullRequest.OrganizationName,
                 message);
         }
 
@@ -65,9 +65,9 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
                 assignment.Id,
                 user.Id,
                 result.Submission.SubmissionDate,
-                request.PullRequest.Organization,
-                request.PullRequest.Repository,
-                request.PullRequest.PullRequestNumber);
+                request.PullRequest.OrganizationId,
+                request.PullRequest.RepositoryId,
+                request.PullRequest.PullRequestId);
 
             _context.Submissions.Add(submission);
             await _context.CommitAsync(default);
@@ -90,7 +90,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
         CancellationToken cancellationToken)
     {
         GithubSubjectCourse? subjectCourse = await _context.SubjectCourses
-            .ForOrganizationName(pullRequest.Organization, cancellationToken)
+            .ForOrganization(pullRequest.OrganizationId, cancellationToken)
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (subjectCourse is null)

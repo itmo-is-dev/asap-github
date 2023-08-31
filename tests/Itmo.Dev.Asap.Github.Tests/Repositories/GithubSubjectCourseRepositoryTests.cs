@@ -71,7 +71,7 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
         repository.Add(subjectCourse);
         await unit.CommitAsync(IsolationLevel.ReadCommitted, default);
 
-        subjectCourse.MentorTeamName = Faker.Company.CompanySuffix();
+        subjectCourse.MentorTeamId = Faker.Random.Long(1000, 2000);
 
         // Act
         repository.Update(subjectCourse);
@@ -119,9 +119,9 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
         await unit.CommitAsync(IsolationLevel.ReadCommitted, default);
 
         var query1 = GithubSubjectCourseQuery.Build(x => x.WithId(courses[0].Id));
-        var query2 = GithubSubjectCourseQuery.Build(x => x.WithOrganizationName(courses[1].OrganizationName));
-        var query3 = GithubSubjectCourseQuery.Build(x => x.WithTemplateRepositoryName(courses[2].TemplateRepositoryName));
-        var query4 = GithubSubjectCourseQuery.Build(x => x.WithMentorTeamName(courses[3].MentorTeamName));
+        var query2 = GithubSubjectCourseQuery.Build(x => x.WithOrganizationId(courses[1].OrganizationId));
+        var query3 = GithubSubjectCourseQuery.Build(x => x.WithTemplateRepositoryId(courses[2].TemplateRepositoryId));
+        var query4 = GithubSubjectCourseQuery.Build(x => x.WithMentorTeamId(courses[3].MentorTeamId));
 
         // Act
         GithubSubjectCourse course1 = await repository.QueryAsync(query1, default).SingleAsync();

@@ -1,5 +1,4 @@
 using Grpc.Core;
-using Itmo.Dev.Asap.Github.Application.Contracts.Users.Commands;
 using Itmo.Dev.Asap.Github.Application.Contracts.Users.Queries;
 using Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping;
 using Itmo.Dev.Asap.Github.Users;
@@ -14,16 +13,6 @@ public class GithubUserController : GithubUserService.GithubUserServiceBase
     public GithubUserController(IMediator mediator)
     {
         _mediator = mediator;
-    }
-
-    public override async Task<UpdateUsernameResponse> UpdateUsername(
-        UpdateUsernameRequest request,
-        ServerCallContext context)
-    {
-        UpdateGithubUser.Command command = request.MapTo();
-        UpdateGithubUser.Response response = await _mediator.Send(command, context.CancellationToken);
-
-        return response.MapFrom();
     }
 
     public override async Task<FindByIdsResponse> FindByIds(FindByIdsRequest request, ServerCallContext context)

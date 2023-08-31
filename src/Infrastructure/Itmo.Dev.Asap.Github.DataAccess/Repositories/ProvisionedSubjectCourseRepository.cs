@@ -29,9 +29,9 @@ public class ProvisionedSubjectCourseRepository : IProvisionedSubjectCourseRepos
         const string baseSql = """
         select correlation_id,
                created_at,
-               subject_course_organization_name,
-               subject_course_template_repository_name,
-               subject_course_mentor_team_name
+               subject_course_organization_id,
+               subject_course_template_repository_id,
+               subject_course_mentor_team_id
         from provisioned_subject_courses psc
         where 
             cardinality(:correlation_ids) = 0 or correlation_id = any (:correlation_ids)
@@ -96,18 +96,18 @@ public class ProvisionedSubjectCourseRepository : IProvisionedSubjectCourseRepos
 
         int correlationId = reader.GetOrdinal("correlation_id");
         int createdAt = reader.GetOrdinal("created_at");
-        int organization = reader.GetOrdinal("subject_course_organization_name");
-        int templateRepository = reader.GetOrdinal("subject_course_template_repository_name");
-        int mentorTeam = reader.GetOrdinal("subject_course_mentor_team_name");
+        int organization = reader.GetOrdinal("subject_course_organization_id");
+        int templateRepository = reader.GetOrdinal("subject_course_template_repository_id");
+        int mentorTeam = reader.GetOrdinal("subject_course_mentor_team_id");
 
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new ProvisionedSubjectCourse(
-                reader.GetString(correlationId),
-                reader.GetString(organization),
-                reader.GetString(templateRepository),
-                reader.GetString(mentorTeam),
-                reader.GetDateTime(createdAt));
+                CorrelationId: reader.GetString(correlationId),
+                OrganizationId: reader.GetInt32(organization),
+                TemplateRepositoryId: reader.GetInt32(templateRepository),
+                MentorTeamId: reader.GetInt32(mentorTeam),
+                CreatedAt: reader.GetDateTime(createdAt));
         }
     }
 
@@ -118,9 +118,9 @@ public class ProvisionedSubjectCourseRepository : IProvisionedSubjectCourseRepos
         (
             correlation_id,
             created_at,
-            subject_course_organization_name,
-            subject_course_template_repository_name,
-            subject_course_mentor_team_name
+            subject_course_organization_id,
+            subject_course_template_repository_id,
+            subject_course_mentor_team_id
         )
         values (:correlation_id, :created_at, :organization, :template_repository, :mentor_team);
         """;
@@ -128,9 +128,9 @@ public class ProvisionedSubjectCourseRepository : IProvisionedSubjectCourseRepos
         NpgsqlCommand command = new NpgsqlCommand(sql)
             .AddParameter("correlation_id", subjectCourse.CorrelationId)
             .AddParameter("created_at", subjectCourse.CreatedAt)
-            .AddParameter("organization", subjectCourse.OrganizationName)
-            .AddParameter("template_repository", subjectCourse.TemplateRepositoryName)
-            .AddParameter("mentor_team", subjectCourse.MentorTeamName);
+            .AddParameter("organization", subjectCourse.OrganizationId)
+            .AddParameter("template_repository", subjectCourse.TemplateRepositoryId)
+            .AddParameter("mentor_team", subjectCourse.MentorTeamId);
 
         _unitOfWork.Enqueue(command);
     }

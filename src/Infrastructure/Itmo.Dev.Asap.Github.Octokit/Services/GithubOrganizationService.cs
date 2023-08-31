@@ -1,69 +1,51 @@
 using Itmo.Dev.Asap.Github.Application.Octokit.Clients;
+using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Octokit.Services;
-using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
-using Itmo.Dev.Asap.Github.Common.Extensions;
+using Itmo.Dev.Asap.Github.Octokit.Clients;
 using Octokit;
 
 namespace Itmo.Dev.Asap.Github.Octokit.Services;
 
-public class GithubOrganizationService : IGithubOrganizationService
+internal class GithubOrganizationService : IGithubOrganizationService
 {
     private readonly IGithubClientProvider _clientProvider;
+    private readonly GithubApiClient _apiClient;
 
-    public GithubOrganizationService(IGithubClientProvider clientProvider)
+    public GithubOrganizationService(
+        IGithubClientProvider clientProvider,
+        GithubApiClient apiClient)
     {
         _clientProvider = clientProvider;
+        _apiClient = apiClient;
     }
 
-    public async Task<IReadOnlyCollection<string>> GetTeamMemberUsernamesAsync(
-        string organizationName,
-        string teamName,
+    public async Task<GithubOrganizationModel?> FindByIdAsync(long organizationId, CancellationToken cancellationToken)
+    {
+        IGitHubClient client = await _clientProvider.GetClientAsync(cancellationToken);
+        string token = client.Connection.Credentials.GetToken();
+
+        return await _apiClient.FindOrganizationByIdAsync(organizationId, token, cancellationToken);
+    }
+
+    public async Task<GithubTeamModel?> FindTeamAsync(
+        long organizationId,
+        long teamId,
         CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        IGitHubClient client = await _clientProvider.GetOrganizationClientAsync(organizationId, cancellationToken);
+        string token = client.Connection.Credentials.GetToken();
 
-        IGitHubClient client = await _clientProvider
-            .GetClientForOrganizationAsync(organizationName, cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        IReadOnlyList<Team> teams = await client.Organization.Team.GetAll(organizationName);
-
-        Team? team = teams.FirstOrDefault(t => t.Name == teamName);
-
-        if (team is null)
-            throw EntityNotFoundException.Create<string, Team>(teamName).TaggedWithBadRequest();
-
-        cancellationToken.ThrowIfCancellationRequested();
-        IReadOnlyList<User> teamMembers = await client.Organization.Team.GetAllMembers(team.Id);
-
-        return teamMembers.Select(u => u.Login).ToArray();
+        return await _apiClient.FindTeamByIdAsync(organizationId, teamId, token, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<string>> GetRepositoriesAsync(
-        string organizationName,
+    public async Task<IReadOnlyCollection<GithubUserModel>> GetTeamMembersAsync(
+        long organizationId,
+        long teamId,
         CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        IGitHubClient client = await _clientProvider.GetOrganizationClientAsync(organizationId, cancellationToken);
+        IReadOnlyList<User> teamMembers = await client.Organization.Team.GetAllMembers((int)teamId);
 
-        IGitHubClient client = await _clientProvider
-            .GetClientForOrganizationAsync(organizationName, cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        IReadOnlyList<Repository> repositories = await client.Repository.GetAllForOrg(organizationName);
-
-        return repositories.Select(repository => repository.Name).ToArray();
-    }
-
-    public async Task<Team> GetTeamAsync(string organizationName, string teamName, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        IGitHubClient client = await _clientProvider
-            .GetClientForOrganizationAsync(organizationName, cancellationToken);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        IReadOnlyList<Team> teams = await client.Organization.Team.GetAll(organizationName);
-
-        return teams.Single(x => teamName.Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+        return teamMembers.Select(u => new GithubUserModel(u.Id, u.Login)).ToArray();
     }
 }

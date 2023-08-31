@@ -9,7 +9,13 @@ public interface IGithubSubjectCourseRepository
         GithubSubjectCourseQuery query,
         CancellationToken cancellationToken);
 
+    IAsyncEnumerable<GithubSubjectCourseStudent> QueryStudentsAsync(
+        GithubSubjectCourseStudentQuery query,
+        CancellationToken cancellationToken);
+
     void Add(GithubSubjectCourse subjectCourse);
+
+    void AddStudent(GithubSubjectCourseStudent student);
 
     void Update(GithubSubjectCourse subjectCourse);
 }

@@ -4,6 +4,7 @@ using Itmo.Dev.Asap.Github.Application.Core.Services;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.Dto.Users;
+using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Specifications;
 using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
@@ -45,11 +46,11 @@ internal class SyncGithubMentorsHandler :
     public async Task Handle(SyncGithubMentors.Command request, CancellationToken cancellationToken)
     {
         GithubSubjectCourse? subjectCourse = await _context.SubjectCourses
-            .ForOrganizationName(request.OrganizationName, cancellationToken)
+            .ForOrganization(request.OrganizationId, cancellationToken)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (subjectCourse is null)
-            throw EntityNotFoundException.SubjectCourse(request.OrganizationName);
+            throw EntityNotFoundException.SubjectCourse($"with organization id = {request.OrganizationId}");
 
         await UpdateMentorsAsync(subjectCourse, cancellationToken);
     }
@@ -72,39 +73,47 @@ internal class SyncGithubMentorsHandler :
             "Started updating github mentors for subject course {SubjectCourseId}",
             subjectCourse.Id);
 
-        IReadOnlyCollection<string> mentorsTeamMembers = await _githubOrganizationService
-            .GetTeamMemberUsernamesAsync(
-                subjectCourse.OrganizationName,
-                subjectCourse.MentorTeamName,
+        IReadOnlyCollection<GithubUserModel> mentorTeamMembers = await _githubOrganizationService
+            .GetTeamMembersAsync(
+                subjectCourse.OrganizationId,
+                subjectCourse.MentorTeamId,
                 cancellationToken);
 
-        var exitingUsersQuery = GithubUserQuery.Build(x => x.WithUsernames(mentorsTeamMembers));
+        var exitingUsersQuery = GithubUserQuery.Build(x => x
+            .WithGithubUserIds(mentorTeamMembers.Select(u => u.Id)));
 
-        List<GithubUser> existingGithubUsers = await _context.Users
+        List<GithubUser> existingUsers = await _context.Users
             .QueryAsync(exitingUsersQuery, cancellationToken)
             .ToListAsync(cancellationToken);
 
-        IEnumerable<string> existingGithubUsernames = existingGithubUsers.Select(x => x.Username);
+        var existingUserGithubIds = existingUsers
+            .Select(x => x.GithubId)
+            .ToHashSet();
 
-        List<GithubUser> createdUsers = await mentorsTeamMembers
-            .Except(existingGithubUsernames)
+        List<GithubUser> createdUsers = await mentorTeamMembers
+            .Where(x => existingUserGithubIds.Contains(x.Id) is false)
             .ToAsyncEnumerable()
-            .SelectAwait(async username =>
+            .SelectAwait(async model =>
             {
-                bool userExists = await _githubUserService.IsUserExistsAsync(username, default);
+                GithubUserModel? githubUser = await _githubUserService.FindByIdAsync(model.Id, default);
 
-                if (userExists is false)
-                    throw EntityNotFoundException.Create<string, GithubUser>(username).TaggedWithNotFound();
+                if (githubUser is null)
+                    throw EntityNotFoundException.Create<string, GithubUser>(model.Username).TaggedWithNotFound();
 
-                UserDto user = await _userService.CreateUserAsync(username, username, username, default);
-                return new GithubUser(user.Id, username);
+                UserDto user = await _userService.CreateUserAsync(
+                    model.Username,
+                    model.Username,
+                    model.Username,
+                    default);
+
+                return new GithubUser(user.Id, model.Id);
             })
             .ToListAsync(default);
 
         _context.Users.AddRange(createdUsers);
         await _context.CommitAsync(cancellationToken);
 
-        Guid[] userIds = existingGithubUsers.Concat(createdUsers).Select(x => x.Id).ToArray();
+        Guid[] userIds = existingUsers.Concat(createdUsers).Select(x => x.Id).ToArray();
         await _asapSubjectCourseService.UpdateMentorsAsync(subjectCourse.Id, userIds, default);
 
         _logger.LogInformation("Updated github mentors for subject course {SubjectCourseId}", subjectCourse.Id);

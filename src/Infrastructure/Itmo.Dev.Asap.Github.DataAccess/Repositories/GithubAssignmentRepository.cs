@@ -33,8 +33,8 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
             and (cardinality(:subject_course_ids) = 0 or a.subject_course_id = any(:subject_course_ids))
             and (cardinality(:branch_names) = 0 
                 or lower(a.assignment_branch_name) = any(select lower(x) from unnest(:branch_names) as x))
-            and (cardinality(:subject_course_organization_names) = 0 
-                or lower(sc.subject_course_organization_name) = any(select lower(x) from unnest(:subject_course_organization_names) as x))
+            and (cardinality(:subject_course_organization_ids) = 0 
+                or sc.subject_course_organization_id = any(:subject_course_organization_ids))
         """;
 
         NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
@@ -43,7 +43,7 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
             .AddParameter("assignment_ids", query.Ids)
             .AddParameter("subject_course_ids", query.SubjectCourseIds)
             .AddParameter("branch_names", query.BranchNames)
-            .AddParameter("subject_course_organization_names", query.SubjectCourseOrganizationNames);
+            .AddParameter("subject_course_organization_ids", query.SubjectCourseOrganizationIds);
 
         await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
 
@@ -54,9 +54,9 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubAssignment(
-                reader.GetGuid(assignmentId),
-                reader.GetGuid(subjectCourseId),
-                reader.GetString(assignmentBranchName));
+                id: reader.GetGuid(assignmentId),
+                subjectCourseId: reader.GetGuid(subjectCourseId),
+                branchName: reader.GetString(assignmentBranchName));
         }
     }
 

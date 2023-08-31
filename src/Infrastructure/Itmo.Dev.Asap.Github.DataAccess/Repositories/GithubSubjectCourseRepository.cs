@@ -1,6 +1,7 @@
 using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
 using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
+using Itmo.Dev.Asap.Github.Domain.Users;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
@@ -13,36 +14,50 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
 {
     public const string QuerySql = """
     select subject_course_id, 
-           subject_course_organization_name, 
-           subject_course_template_repository_name, 
-           subject_course_mentor_team_name
+           subject_course_organization_id, 
+           subject_course_template_repository_id, 
+           subject_course_mentor_team_id
     from subject_courses as sc
     where 
         (cardinality(:subject_course_ids) = 0 or sc.subject_course_id = any(:subject_course_ids))
-        and (cardinality(:organization_names) = 0 
-            or lower(sc.subject_course_organization_name) = any(select lower(x) from unnest(:organization_names) as x))
-        and (cardinality(:template_repository_names) = 0 
-            or lower(sc.subject_course_template_repository_name) = any(select lower(x) from unnest(:template_repository_names) as x))
-        and (cardinality(:mentor_team_names) = 0 
-            or lower(sc.subject_course_mentor_team_name) = any(select lower(x) from unnest(:mentor_team_names) as x))
+        and (cardinality(:organization_ids) = 0 or sc.subject_course_organization_id = any(:organization_ids))
+        and (cardinality(:template_repository_ids) = 0 or sc.subject_course_template_repository_id = any(:template_repository_ids))
+        and (cardinality(:mentor_team_names) = 0 or sc.subject_course_mentor_team_id = any(:mentor_team_ids))
+    """;
+
+    public const string QueryStudentsSql = """
+    select s.subject_course_id subject_course_id,
+           u.user_id user_id,
+           u.user_github_id user_github_id,
+           s.subject_course_student_repository_id subject_course_student_repository_id
+    from subject_course_students s
+    join users u on (user_id)
+    where 
+        (cardinality(:subject_course_ids) = 0 or s.subject_course_id = any (:subject_course_ids))
     """;
 
     public const string AddSql = """
     insert into subject_courses
     (
         subject_course_id, 
-        subject_course_organization_name, 
-        subject_course_template_repository_name, 
-        subject_course_mentor_team_name
+        subject_course_organization_id, 
+        subject_course_template_repository_id, 
+        subject_course_mentor_team_id
     )
-    values (:id, :organization_name, :template_repository_name, :mentor_team_name)
+    values (:id, :organization_id, :template_repository_id, :mentor_team_id)
+    """;
+
+    public const string AddStudentSql = """
+    insert into subject_course_students
+    (subject_course_id, user_id, subject_course_student_repository_id)
+    values (:subject_course_id, :user_id, :repository_id);
     """;
 
     public const string UpdateSql = """
     update subject_courses
-    set subject_course_organization_name = :organization_name, 
-        subject_course_template_repository_name = :template_repository_name, 
-        subject_course_mentor_team_name = :mentor_team_name 
+    set subject_course_organization_id = :organization_id, 
+        subject_course_template_repository_id = :template_repository_id, 
+        subject_course_mentor_team_id = :mentor_team_id
     where subject_course_id = :id
     """;
 
@@ -68,11 +83,13 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
 
         NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
+#pragma warning disable CA2100
         await using NpgsqlCommand command = new NpgsqlCommand(sql, connection)
             .AddParameter("subject_course_ids", query.Ids)
-            .AddParameter("organization_names", query.OrganizationNames)
-            .AddParameter("template_repository_names", query.TemplateRepositoryNames)
-            .AddParameter("mentor_team_names", query.MentorTeamNames);
+            .AddParameter("organization_ids", query.OrganizationIds)
+            .AddParameter("template_repository_ids", query.TemplateRepositoryIds)
+            .AddParameter("mentor_team_ids", query.MentorTeamIds);
+#pragma warning restore CA2100
 
         if (query.Limit is not null)
         {
@@ -82,17 +99,46 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
         await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
 
         int subjectCourseId = reader.GetOrdinal("subject_course_id");
-        int organization = reader.GetOrdinal("subject_course_organization_name");
-        int templateRepository = reader.GetOrdinal("subject_course_template_repository_name");
-        int mentorTeam = reader.GetOrdinal("subject_course_mentor_team_name");
+        int organization = reader.GetOrdinal("subject_course_organization_id");
+        int templateRepository = reader.GetOrdinal("subject_course_template_repository_id");
+        int mentorTeam = reader.GetOrdinal("subject_course_mentor_team_id");
 
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubSubjectCourse(
-                reader.GetGuid(subjectCourseId),
-                reader.GetString(organization),
-                reader.GetString(templateRepository),
-                reader.GetString(mentorTeam));
+                id: reader.GetGuid(subjectCourseId),
+                organizationId: reader.GetInt64(organization),
+                templateRepositoryId: reader.GetInt64(templateRepository),
+                mentorTeamId: reader.GetInt64(mentorTeam));
+        }
+    }
+
+    public async IAsyncEnumerable<GithubSubjectCourseStudent> QueryStudentsAsync(
+        GithubSubjectCourseStudentQuery query,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
+
+        await using NpgsqlCommand command = new NpgsqlCommand(QueryStudentsSql, connection)
+            .AddParameter("subject_course_ids", query.SubjectCourseIds);
+
+        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        int subjectCourseId = reader.GetOrdinal("subject_course_id");
+        int userId = reader.GetOrdinal("user_id");
+        int userGithubId = reader.GetOrdinal("user_github_id");
+        int repositoryId = reader.GetOrdinal("subject_course_student_repository_id");
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var user = new GithubUser(
+                id: reader.GetGuid(userId),
+                githubId: reader.GetInt64(userGithubId));
+
+            yield return new GithubSubjectCourseStudent(
+                SubjectCourseId: reader.GetGuid(subjectCourseId),
+                User: user,
+                RepositoryId: reader.GetInt64(repositoryId));
         }
     }
 
@@ -100,9 +146,19 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
     {
         NpgsqlCommand command = new NpgsqlCommand(AddSql)
             .AddParameter("id", subjectCourse.Id)
-            .AddParameter("organization_name", subjectCourse.OrganizationName)
-            .AddParameter("template_repository_name", subjectCourse.TemplateRepositoryName)
-            .AddParameter("mentor_team_name", subjectCourse.MentorTeamName);
+            .AddParameter("organization_id", subjectCourse.OrganizationId)
+            .AddParameter("template_repository_id", subjectCourse.TemplateRepositoryId)
+            .AddParameter("mentor_team_id", subjectCourse.MentorTeamId);
+
+        _unitOfWork.Enqueue(command);
+    }
+
+    public void AddStudent(GithubSubjectCourseStudent student)
+    {
+        NpgsqlCommand command = new NpgsqlCommand(AddStudentSql)
+            .AddParameter("subject_course_id", student.SubjectCourseId)
+            .AddParameter("user_id", student.User.Id)
+            .AddParameter("repository_id", student.RepositoryId);
 
         _unitOfWork.Enqueue(command);
     }
@@ -111,9 +167,9 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
     {
         NpgsqlCommand command = new NpgsqlCommand(UpdateSql)
             .AddParameter("id", subjectCourse.Id)
-            .AddParameter("organization_name", subjectCourse.OrganizationName)
-            .AddParameter("template_repository_name", subjectCourse.TemplateRepositoryName)
-            .AddParameter("mentor_team_name", subjectCourse.MentorTeamName);
+            .AddParameter("organization_id", subjectCourse.OrganizationId)
+            .AddParameter("template_repository_id", subjectCourse.TemplateRepositoryId)
+            .AddParameter("mentor_team_id", subjectCourse.MentorTeamId);
 
         _unitOfWork.Enqueue(command);
     }

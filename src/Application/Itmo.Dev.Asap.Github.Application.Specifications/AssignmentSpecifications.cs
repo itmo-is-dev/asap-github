@@ -15,7 +15,7 @@ public static class AssignmentSpecifications
         CancellationToken cancellationToken = default)
     {
         var query = GithubAssignmentQuery.Build(x => x
-            .WithSubjectCourseOrganizationName(pullRequest.Organization)
+            .WithSubjectCourseOrganizationId(pullRequest.OrganizationId)
             .WithBranchName(pullRequest.BranchName));
 
         GithubAssignment? assignment = await repository
@@ -31,7 +31,7 @@ public static class AssignmentSpecifications
         CancellationToken cancellationToken = default)
     {
         var query = GithubAssignmentQuery.Build(x => x
-            .WithSubjectCourseOrganizationName(pullRequest.Organization)
+            .WithSubjectCourseOrganizationId(pullRequest.OrganizationId)
             .WithBranchName(pullRequest.BranchName));
 
         GithubAssignment? assignment = await repository

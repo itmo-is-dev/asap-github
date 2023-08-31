@@ -23,7 +23,7 @@ internal class UpdateSubjectCourseMentorTeamHandler : IRequestHandler<Command>
         GithubSubjectCourse subjectCourse = await _context.SubjectCourses
             .GetByIdAsync(request.SubjectCourseId, cancellationToken);
 
-        subjectCourse.MentorTeamName = request.MentorsTeamName;
+        subjectCourse.MentorTeamId = request.MentorTeamId;
 
         _context.SubjectCourses.Update(subjectCourse);
         await _context.CommitAsync(cancellationToken);

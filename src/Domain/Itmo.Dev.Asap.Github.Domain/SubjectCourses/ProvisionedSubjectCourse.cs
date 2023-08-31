@@ -2,7 +2,7 @@ namespace Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 
 public record ProvisionedSubjectCourse(
     string CorrelationId,
-    string OrganizationName,
-    string TemplateRepositoryName,
-    string MentorTeamName,
+    long OrganizationId,
+    long TemplateRepositoryId,
+    long MentorTeamId,
     DateTime CreatedAt);

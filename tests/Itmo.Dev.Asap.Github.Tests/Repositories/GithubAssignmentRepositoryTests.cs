@@ -72,20 +72,20 @@ public class GithubAssignmentRepositoryTests : TestBase, IAsyncLifetime
         Guid subjectCourseId = Faker.Random.Guid();
         Guid subjectCourseId2 = Faker.Random.Guid();
         Guid subjectCourseId3 = Faker.Random.Guid();
-        string subjectCourseName = Faker.Company.CompanyName();
+        long organizationId = Faker.Random.Long(1000, 2000);
 
         GithubSubjectCourseModel subjectCourse = Faker.GithubSubjectCourseModel(id: subjectCourseId);
 
         var args = new
         {
             id = subjectCourse.Id,
-            organization_name = subjectCourse.OrganizationName,
-            template_repository_name = subjectCourse.TemplateRepositoryName,
-            mentor_team_name = subjectCourse.MentorTeamName,
+            organization_id = subjectCourse.OrganizationId,
+            template_repository_id = subjectCourse.TemplateRepositoryId,
+            mentor_team_id = subjectCourse.MentorTeamId,
         };
 
         var args2 = args with { id = subjectCourseId2 };
-        var args3 = args with { id = subjectCourseId3, organization_name = subjectCourseName };
+        var args3 = args with { id = subjectCourseId3, organization_id = organizationId };
 
         await _fixture.Connection.ExecuteAsync(GithubSubjectCourseRepository.AddSql, args);
         await _fixture.Connection.ExecuteAsync(GithubSubjectCourseRepository.AddSql, args2);
@@ -109,7 +109,7 @@ public class GithubAssignmentRepositoryTests : TestBase, IAsyncLifetime
         var query1 = GithubAssignmentQuery.Build(x => x.WithId(seedAssignments[0].Id));
         var query2 = GithubAssignmentQuery.Build(x => x.WithSubjectCourseId(subjectCourseId2));
         var query3 = GithubAssignmentQuery.Build(x => x.WithBranchName(seedAssignments[2].BranchName));
-        var query4 = GithubAssignmentQuery.Build(x => x.WithSubjectCourseOrganizationName(subjectCourseName));
+        var query4 = GithubAssignmentQuery.Build(x => x.WithSubjectCourseOrganizationId(organizationId));
 
         // Act
         GithubAssignment assignment1 = await repository.QueryAsync(query1, default).SingleAsync();

@@ -8,7 +8,7 @@ public interface IGithubClientProvider
 
     ValueTask<IGitHubClient> GetClientForInstallationAsync(long installationId, CancellationToken cancellationToken);
 
-    ValueTask<IGitHubClient> GetClientForOrganizationAsync(
-        string organizationName,
+    ValueTask<IGitHubClient> GetOrganizationClientAsync(
+        long organizationId,
         CancellationToken cancellationToken);
 }

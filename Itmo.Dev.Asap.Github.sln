@@ -75,6 +75,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7B163A32
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Tests", "tests\Itmo.Dev.Asap.Github.Tests\Itmo.Dev.Asap.Github.Tests.csproj", "{7964F3C9-83A9-480A-97B0-0ADACC61E8F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Application.Abstractions", "src\Application\Abstractions\Itmo.Dev.Asap.Application.Abstractions\Itmo.Dev.Asap.Application.Abstractions.csproj", "{44CB6769-0A20-4EA4-8A0F-030557128222}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,7 @@ Global
 		{98E87419-952F-4816-823A-67ABF3721E90} = {AA2858F9-2EA3-4D40-9ADB-107F7768879C}
 		{9D9F0459-76B5-47BF-ACCB-957478521498} = {EB4453A8-8973-4B0B-8883-38C1D1FBF3BD}
 		{7964F3C9-83A9-480A-97B0-0ADACC61E8F0} = {7B163A32-2150-4F67-827A-6E28A324CE71}
+		{44CB6769-0A20-4EA4-8A0F-030557128222} = {C6A80192-3738-4963-ABB3-311C8DEADBA1}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D5FECEF9-5E69-4E6C-A302-0BEC4A8766B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -204,5 +207,9 @@ Global
 		{7964F3C9-83A9-480A-97B0-0ADACC61E8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7964F3C9-83A9-480A-97B0-0ADACC61E8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7964F3C9-83A9-480A-97B0-0ADACC61E8F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44CB6769-0A20-4EA4-8A0F-030557128222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44CB6769-0A20-4EA4-8A0F-030557128222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44CB6769-0A20-4EA4-8A0F-030557128222}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44CB6769-0A20-4EA4-8A0F-030557128222}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
