@@ -58,7 +58,7 @@ internal class GithubApiClient
         string bearerToken,
         CancellationToken cancellationToken)
     {
-        using var message = new HttpRequestMessage(HttpMethod.Get, "/users?since=7121897&per_page=1");
+        using var message = new HttpRequestMessage(HttpMethod.Get, $"/users?since={userId - 1}&per_page=1");
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
 
         HttpResponseMessage response = await _githubHttpClient.SendAsync(message, cancellationToken);
