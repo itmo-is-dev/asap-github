@@ -22,7 +22,7 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
         (cardinality(:subject_course_ids) = 0 or sc.subject_course_id = any(:subject_course_ids))
         and (cardinality(:organization_ids) = 0 or sc.subject_course_organization_id = any(:organization_ids))
         and (cardinality(:template_repository_ids) = 0 or sc.subject_course_template_repository_id = any(:template_repository_ids))
-        and (cardinality(:mentor_team_names) = 0 or sc.subject_course_mentor_team_id = any(:mentor_team_ids))
+        and (cardinality(:mentor_team_ids) = 0 or sc.subject_course_mentor_team_id = any(:mentor_team_ids))
     """;
 
     public const string QueryStudentsSql = """

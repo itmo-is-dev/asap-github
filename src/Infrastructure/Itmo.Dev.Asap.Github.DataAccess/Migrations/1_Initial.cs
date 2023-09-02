@@ -30,9 +30,10 @@ public class Initial : SqlMigration
 
         create table subject_course_students
         (
-            subject_course_id uuid not null primary key references subject_courses,
-            user_id uuid not null primary key references users,
-            subject_course_student_repository_id bigint not null 
+            subject_course_id uuid not null references subject_courses,
+            user_id uuid not null references users,
+            subject_course_student_repository_id bigint not null,
+            primary key (subject_course_id, user_id)
         );
 
         create unique index subject_course_students_subject_course_student_repository_id

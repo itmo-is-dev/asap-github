@@ -45,9 +45,9 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
         const string sql =
             """
             select subject_course_id as Id,
-            subject_course_organization_name as OrganizationName,
-            subject_course_template_repository_name as TemplateRepositoryName,
-            subject_course_mentor_team_name as MentorTeamName
+            subject_course_organization_id as OrganizationId,
+            subject_course_template_repository_id as TemplateRepositoryId,
+            subject_course_mentor_team_id as MentorTeamId
             from subject_courses
             """;
 
@@ -81,9 +81,9 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
         const string sql =
             """
             select subject_course_id as Id,
-            subject_course_organization_name as OrganizationName,
-            subject_course_template_repository_name as TemplateRepositoryName,
-            subject_course_mentor_team_name as MentorTeamName
+            subject_course_organization_id as OrganizationId,
+            subject_course_template_repository_id as TemplateRepositoryId,
+            subject_course_mentor_team_id as MentorTeamId
             from subject_courses
             """;
 

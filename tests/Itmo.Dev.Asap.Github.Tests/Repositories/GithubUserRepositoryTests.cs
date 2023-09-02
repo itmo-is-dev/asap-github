@@ -44,7 +44,7 @@ public class GithubUserRepositoryTests : TestBase, IAsyncLifetime
         // Assert
         const string sql =
             """
-            select user_id as Id, user_name as Username
+            select user_id as Id, user_github_id as GithubId
             from users
             """;
 
