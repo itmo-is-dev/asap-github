@@ -6,12 +6,12 @@ using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 
 namespace Itmo.Dev.Asap.Github.Application.Mapping;
 
-internal class SubjectCourseMapper : IGithubSubjectCourseMapper
+internal class GithubSubjectCourseMapper : IGithubSubjectCourseMapper
 {
     private readonly IGithubOrganizationService _organizationService;
     private readonly IGithubRepositoryService _repositoryService;
 
-    public SubjectCourseMapper(
+    public GithubSubjectCourseMapper(
         IGithubOrganizationService organizationService,
         IGithubRepositoryService repositoryService)
     {

@@ -31,7 +31,7 @@ internal class GithubClientProvider : IGithubClientProvider
         _serviceInstallationId = new Lazy<Task<long>>(async () => await serviceClientStrategy.GetInstallationId());
     }
 
-    public async ValueTask<IGitHubClient> GetClientAsync(CancellationToken cancellationToken)
+    public async ValueTask<IGitHubClient> GetServiceClientAsync(CancellationToken cancellationToken)
     {
         long installationId = await _serviceInstallationId.Value;
         return await GetClientForInstallationAsync(installationId, cancellationToken);
@@ -52,9 +52,11 @@ internal class GithubClientProvider : IGithubClientProvider
         if (_organizationCache.TryGetValue(organizationId, out IGitHubClient? client))
             return client;
 
+        IGitHubClient serviceClient = await GetServiceClientAsync(cancellationToken);
+
         GithubOrganizationModel? organization = await _apiClient.FindOrganizationByIdAsync(
             organizationId,
-            _client.Connection.Credentials.GetToken(),
+            serviceClient.Connection.Credentials.GetToken(),
             cancellationToken);
 
         if (organization is null)

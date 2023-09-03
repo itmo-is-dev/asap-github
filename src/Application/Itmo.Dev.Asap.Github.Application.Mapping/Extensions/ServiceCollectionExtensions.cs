@@ -8,6 +8,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMapping(this IServiceCollection collection)
     {
         collection.AddScoped<IGithubUserMapper, GithubUserMapper>();
+        collection.AddScoped<IGithubSubjectCourseMapper, GithubSubjectCourseMapper>();
+
         return collection;
     }
 }

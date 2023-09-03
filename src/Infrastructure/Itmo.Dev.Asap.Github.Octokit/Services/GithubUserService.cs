@@ -21,7 +21,7 @@ internal class GithubUserService : IGithubUserService
 
     public async Task<GithubUserModel?> FindByIdAsync(long userId, CancellationToken cancellationToken)
     {
-        IGitHubClient client = await _clientProvider.GetClientAsync(cancellationToken);
+        IGitHubClient client = await _clientProvider.GetServiceClientAsync(cancellationToken);
         string token = client.Connection.Credentials.GetToken();
 
         return await _apiClient.FindUserByIdAsync(userId, token, cancellationToken);

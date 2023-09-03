@@ -21,7 +21,7 @@ internal class GithubOrganizationService : IGithubOrganizationService
 
     public async Task<GithubOrganizationModel?> FindByIdAsync(long organizationId, CancellationToken cancellationToken)
     {
-        IGitHubClient client = await _clientProvider.GetClientAsync(cancellationToken);
+        IGitHubClient client = await _clientProvider.GetServiceClientAsync(cancellationToken);
         string token = client.Connection.Credentials.GetToken();
 
         return await _apiClient.FindOrganizationByIdAsync(organizationId, token, cancellationToken);

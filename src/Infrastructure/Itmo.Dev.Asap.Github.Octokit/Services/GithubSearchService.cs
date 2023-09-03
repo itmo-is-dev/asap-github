@@ -33,14 +33,16 @@ internal class GithubSearchService : IGithubSearchService
         string query,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        IGitHubClient client = await _clientProvider.GetClientAsync(cancellationToken);
+        IGitHubClient client = await _clientProvider.GetServiceClientAsync(cancellationToken);
 
         var request = new SearchUsersRequest(query);
         int count = 0;
+        int totalCount = 0;
 
         while (count < _configuration.MaxSearchResponseSize)
         {
             SearchUsersResult response = await client.Search.SearchUsers(request);
+            totalCount += response.Items.Count;
 
             foreach (User user in response.Items)
             {
@@ -48,10 +50,10 @@ internal class GithubSearchService : IGithubSearchService
                     continue;
 
                 count++;
-                yield return new GithubOrganizationModel(user.Id, user.Login);
+                yield return new GithubOrganizationModel(user.Id, user.Login, user.AvatarUrl);
             }
 
-            if (response.IncompleteResults is false)
+            if (totalCount >= response.TotalCount)
                 yield break;
 
             request.Page++;
@@ -82,10 +84,12 @@ internal class GithubSearchService : IGithubSearchService
 
         var request = new SearchRepositoriesRequest(query);
         int count = 0;
+        int totalCount = 0;
 
         while (count < _configuration.MaxSearchResponseSize)
         {
             SearchRepositoryResult response = await client.Search.SearchRepo(request);
+            totalCount += response.Items.Count;
 
             foreach (Repository repository in response.Items)
             {
@@ -93,7 +97,7 @@ internal class GithubSearchService : IGithubSearchService
                 yield return new GithubRepositoryModel(repository.Id, repository.Name);
             }
 
-            if (response.IncompleteResults is false)
+            if (totalCount >= response.TotalCount)
                 yield break;
 
             request.Page++;
@@ -120,7 +124,7 @@ internal class GithubSearchService : IGithubSearchService
             yield break;
         }
 
-        IReadOnlyList<Team> teams = await client.Organization.Team.GetAllForCurrent();
+        IReadOnlyList<Team> teams = await client.Organization.Team.GetAll(organization.Name);
 
         foreach (Team team in teams)
         {

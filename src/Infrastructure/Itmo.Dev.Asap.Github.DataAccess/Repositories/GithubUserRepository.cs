@@ -55,13 +55,13 @@ internal class GithubUserRepository : IGithubUserRepository
         await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
 
         int userId = reader.GetOrdinal("user_id");
-        int username = reader.GetOrdinal("user_name");
+        int githubId = reader.GetOrdinal("user_github_id");
 
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubUser(
                 reader.GetGuid(userId),
-                reader.GetInt64(username));
+                reader.GetInt64(githubId));
         }
     }
 

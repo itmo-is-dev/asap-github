@@ -17,6 +17,7 @@ public class GithubSerializationConfiguration : ISerializationConfiguration
         {
             builder.Property(x => x.Id).Called("id");
             builder.Property(x => x.Name).Called("login");
+            builder.Property(x => x.AvatarUrl).Called("avatar_url");
         });
 
         configurationBuilder.Type<GithubRepositoryModel>(builder =>
