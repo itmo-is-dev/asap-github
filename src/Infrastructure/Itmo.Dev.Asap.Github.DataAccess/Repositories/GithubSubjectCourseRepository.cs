@@ -31,7 +31,7 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
            u.user_github_id user_github_id,
            s.subject_course_student_repository_id subject_course_student_repository_id
     from subject_course_students s
-    join users u on (user_id)
+    join users u using (user_id)
     where 
         (cardinality(:subject_course_ids) = 0 or s.subject_course_id = any (:subject_course_ids))
     """;

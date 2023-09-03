@@ -25,7 +25,7 @@ internal class GithubUserRepository : IGithubUserRepository
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string baseSql = """
-        select user_id, user_name
+        select user_id, user_github_id
         from users as u
         where
             (cardinality(:user_ids) = 0 or u.user_id = any(:user_ids))
