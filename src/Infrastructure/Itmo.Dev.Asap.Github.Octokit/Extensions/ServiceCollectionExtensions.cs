@@ -100,8 +100,11 @@ public static class ServiceCollectionExtensions
     {
         return services
             .AddScoped<IGithubUserService, GithubUserService>()
+            .Decorate<IGithubUserService, CachedGithubUserService>()
             .AddScoped<IGithubOrganizationService, GithubOrganizationService>()
+            .Decorate<IGithubOrganizationService, CachedGithubOrganizationService>()
             .AddScoped<IGithubRepositoryService, GithubRepositoryService>()
+            .Decorate<IGithubRepositoryService, CachedGithubRepositoryService>()
             .AddScoped<IGithubSearchService, GithubSearchService>();
     }
 }

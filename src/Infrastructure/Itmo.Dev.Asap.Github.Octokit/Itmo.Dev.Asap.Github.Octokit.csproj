@@ -15,6 +15,7 @@
       <PackageReference Include="Newtonsoft.Json" />
       <PackageReference Include="ronimizy.FluentSerialization" />
       <PackageReference Include="ronimizy.FluentSerialization.Extensions.NewtonsoftJson" />
+      <PackageReference Include="Scrutor" />
     </ItemGroup>
 
 </Project>

@@ -27,6 +27,7 @@
     <PackageVersion Include="Respawn" Version="6.1.0" />
     <PackageVersion Include="Riok.Mapperly" Version="3.0.0" />
     <PackageVersion Include="ronimizy.FluentSerialization" Version="1.2.0" />
+    <PackageVersion Include="Scrutor" Version="4.2.2" />
     <PackageVersion Include="Sentry.AspNetCore" Version="3.33.0" />
     <PackageVersion Include="Sentry.Serilog" Version="3.33.0" />
     <PackageVersion Include="SourceKit.Generators.Builder" Version="1.0.4" />
