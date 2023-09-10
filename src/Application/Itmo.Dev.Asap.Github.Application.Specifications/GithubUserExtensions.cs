@@ -21,4 +21,13 @@ public static class GithubUserExtensions
 
         return user ?? throw EntityNotFoundException.User().TaggedWithNotFound();
     }
+
+    public static async Task<GithubUser?> FindByIdAsync(
+        this IGithubUserRepository repository,
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var query = GithubUserQuery.Build(x => x.WithId(id));
+        return await repository.QueryAsync(query, cancellationToken).FirstOrDefaultAsync(cancellationToken);
+    }
 }

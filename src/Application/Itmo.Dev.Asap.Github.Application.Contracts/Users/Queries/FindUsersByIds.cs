@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Itmo.Dev.Asap.Github.Application.Contracts.Users.Queries;
 
-public static class FindUsersByIds
+internal static class FindUsersByIds
 {
     public record Query(IEnumerable<Guid> UserIds) : IRequest<Response>;
 
