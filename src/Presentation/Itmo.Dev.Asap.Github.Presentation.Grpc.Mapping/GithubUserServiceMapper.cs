@@ -10,7 +10,7 @@ internal static partial class GithubUserServiceMapper
 {
     public static partial FindUsersByIds.Query MapTo(this FindByIdsRequest request);
 
-    public static partial UpdateGithubUsername.Command MapTo(this UpdateUsernameRequest request);
+    public static partial UpdateGithubUsernames.Command MapTo(this UpdateUsernameRequest request);
 
     public static partial FindByIdsResponse MapFrom(this FindUsersByIds.Response response);
 }

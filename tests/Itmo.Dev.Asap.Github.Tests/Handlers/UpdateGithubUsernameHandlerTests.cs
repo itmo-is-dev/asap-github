@@ -34,13 +34,17 @@ public class UpdateGithubUsernameHandlerTests : TestBase
             .ReturnsAsync(githubUser);
 
         var handler = new UpdateGithubUsernameHandler(userService.Object, persistenceContext.Object);
-        var request = new UpdateGithubUsername.Command(user.Id, githubUser.Username);
+
+        var request = new UpdateGithubUsernames.Command(new[]
+        {
+            new UpdateGithubUsernames.Command.Model(user.Id, githubUser.Username),
+        });
 
         // Act
-        UpdateGithubUsername.Response response = await handler.Handle(request, default);
+        UpdateGithubUsernames.Response response = await handler.Handle(request, default);
 
         // Assert
-        response.Should().BeOfType<UpdateGithubUsername.Response.Success>();
+        response.Should().BeOfType<UpdateGithubUsernames.Response.Success>();
 
         persistenceContext.Verify(
             x => x.Users.Update(user),
@@ -67,13 +71,17 @@ public class UpdateGithubUsernameHandlerTests : TestBase
             .ReturnsAsync(githubUser);
 
         var handler = new UpdateGithubUsernameHandler(userService.Object, persistenceContext.Object);
-        var request = new UpdateGithubUsername.Command(userId, githubUser.Username);
+
+        var request = new UpdateGithubUsernames.Command(new[]
+        {
+            new UpdateGithubUsernames.Command.Model(userId, githubUser.Username),
+        });
 
         // Act
-        UpdateGithubUsername.Response response = await handler.Handle(request, default);
+        UpdateGithubUsernames.Response response = await handler.Handle(request, default);
 
         // Assert
-        response.Should().BeOfType<UpdateGithubUsername.Response.Success>();
+        response.Should().BeOfType<UpdateGithubUsernames.Response.Success>();
 
         persistenceContext.Verify(
             x => x.Users.Add(It.Is<GithubUser>(u => u.Id.Equals(userId))),
@@ -81,7 +89,7 @@ public class UpdateGithubUsernameHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task HandleAsync_ShouldReturnGithubUserNotFound_WhenGithubUserDoesNotExist()
+    public async Task HandleAsync_ShouldReturnGithubUsersNotFound_WhenGithubUserDoesNotExist()
     {
         // Arrange
         Guid userId = Faker.Random.Guid();
@@ -96,12 +104,42 @@ public class UpdateGithubUsernameHandlerTests : TestBase
             .ReturnsAsync((GithubUserModel?)null);
 
         var handler = new UpdateGithubUsernameHandler(userService.Object, persistenceContext.Object);
-        var request = new UpdateGithubUsername.Command(userId, githubUsername);
+
+        var request = new UpdateGithubUsernames.Command(new[]
+        {
+            new UpdateGithubUsernames.Command.Model(userId, githubUsername),
+        });
 
         // Act
-        UpdateGithubUsername.Response response = await handler.Handle(request, default);
+        UpdateGithubUsernames.Response response = await handler.Handle(request, default);
 
         // Assert
-        response.Should().BeOfType<UpdateGithubUsername.Response.GithubUserNotFound>();
+        response.Should().BeOfType<UpdateGithubUsernames.Response.GithubUsersNotFound>();
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnDuplicateUsernames_WhenModelsWithDuplicateUsernamesProvided()
+    {
+        // Arrange
+        var persistenceContext = new Mock<IPersistenceContext>();
+        var userService = new Mock<IGithubUserService>();
+
+        var handler = new UpdateGithubUsernameHandler(userService.Object, persistenceContext.Object);
+
+        string username = Faker.Internet.UserName();
+
+        UpdateGithubUsernames.Command.Model[] models =
+        {
+            new UpdateGithubUsernames.Command.Model(Faker.Random.Guid(), username),
+            new UpdateGithubUsernames.Command.Model(Faker.Random.Guid(), username),
+        };
+
+        var request = new UpdateGithubUsernames.Command(models);
+
+        // Act
+        UpdateGithubUsernames.Response response = await handler.Handle(request, default);
+
+        // Assert
+        response.Should().BeOfType<UpdateGithubUsernames.Response.DuplicateUsernames>();
     }
 }

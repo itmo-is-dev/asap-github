@@ -27,15 +27,22 @@ public class GithubUserController : GithubUserService.GithubUserServiceBase
 
     public override async Task<Empty> UpdateUsername(UpdateUsernameRequest request, ServerCallContext context)
     {
-        UpdateGithubUsername.Command command = request.MapTo();
-        UpdateGithubUsername.Response response = await _mediator.Send(command, context.CancellationToken);
+        UpdateGithubUsernames.Command command = request.MapTo();
+        UpdateGithubUsernames.Response response = await _mediator.Send(command, context.CancellationToken);
 
         return response switch
         {
-            UpdateGithubUsername.Response.Success => new Empty(),
+            UpdateGithubUsernames.Response.Success => new Empty(),
 
-            UpdateGithubUsername.Response.GithubUserNotFound => throw new RpcException(
-                new Status(StatusCode.NotFound, "Github user with specified username not found")),
+            UpdateGithubUsernames.Response.DuplicateUsernames e
+                => throw new RpcException(new Status(
+                    StatusCode.InvalidArgument,
+                    $"Duplicate usernames found: {string.Join(", ", e.Duplicates)}")),
+
+            UpdateGithubUsernames.Response.GithubUsersNotFound e
+                => throw new RpcException(new Status(
+                    StatusCode.NotFound,
+                    $"Not existing github users found: {string.Join(", ", e.Usernames)}")),
 
             _ => throw new RpcException(new Status(StatusCode.Internal, "Operation ended unexpectedly")),
         };
