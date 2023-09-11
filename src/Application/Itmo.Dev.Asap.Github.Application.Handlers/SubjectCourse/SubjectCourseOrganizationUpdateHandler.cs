@@ -147,7 +147,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
         {
             if (existingStudents.TryGetValue(student.Id, out GithubSubjectCourseStudent? existingStudent))
             {
-                await TryAddUserPermissionsAsync(subjectCourse, existingStudent.User, cancellationToken);
+                await TryAddUserPermissionsAsync(subjectCourse, existingStudent, cancellationToken);
                 continue;
             }
 
@@ -159,8 +159,6 @@ internal class SubjectCourseOrganizationUpdateHandler :
             if (createdRepositoryId is null)
                 continue;
 
-            await AddTeamPermissionAsync(subjectCourse, createdRepositoryId.Value, cancellationToken);
-
             var subjectCourseStudent = new GithubSubjectCourseStudent(
                 subjectCourse.Id,
                 student,
@@ -168,7 +166,12 @@ internal class SubjectCourseOrganizationUpdateHandler :
 
             _context.SubjectCourses.AddStudent(subjectCourseStudent);
 
-            bool userPermissionsAdded = await TryAddUserPermissionsAsync(subjectCourse, student, cancellationToken);
+            await AddTeamPermissionAsync(subjectCourse, createdRepositoryId.Value, cancellationToken);
+
+            bool userPermissionsAdded = await TryAddUserPermissionsAsync(
+                subjectCourse,
+                subjectCourseStudent,
+                cancellationToken);
 
             if (userPermissionsAdded is false)
                 continue;
@@ -221,7 +224,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
 
     private async Task<bool> TryAddUserPermissionsAsync(
         GithubSubjectCourse subjectCourse,
-        GithubUser user,
+        GithubSubjectCourseStudent student,
         CancellationToken cancellationToken)
     {
         const RepositoryPermission permission = RepositoryPermission.Push;
@@ -230,8 +233,8 @@ internal class SubjectCourseOrganizationUpdateHandler :
         {
             AddPermissionResult result = await _githubRepositoryService.AddUserPermissionAsync(
                 subjectCourse.OrganizationId,
-                subjectCourse.TemplateRepositoryId,
-                user.GithubId,
+                student.RepositoryId,
+                student.User.GithubId,
                 permission,
                 cancellationToken);
 
@@ -239,7 +242,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to add user = {UserId} to repository", user.Id);
+            _logger.LogError(e, "Failed to add user = {UserId} to repository", student.User.Id);
             return false;
         }
     }
