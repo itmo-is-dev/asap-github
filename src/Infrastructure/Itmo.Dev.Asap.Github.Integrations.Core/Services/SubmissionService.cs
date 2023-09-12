@@ -1,6 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Itmo.Dev.Asap.Core.Submissions;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
@@ -119,7 +119,7 @@ public class SubmissionService : ISubmissionService
         return response.Submission.ToDto();
     }
 
-    public async Task<SubmissionRateDto> RateSubmissionAsync(
+    public async Task<RateSubmissionResult> RateSubmissionAsync(
         Guid issuerId,
         Guid submissionId,
         double ratingPercent,
@@ -136,7 +136,12 @@ public class SubmissionService : ISubmissionService
 
         RateResponse response = await _client.RateAsync(request, cancellationToken: cancellationToken);
 
-        return response.Submission.ToDto();
+        return response.ResultCase switch
+        {
+            RateResponse.ResultOneofCase.Submission => new RateSubmissionResult.Success(response.Submission.ToDto()),
+            RateResponse.ResultOneofCase.ErrorMessage => new RateSubmissionResult.Failure(response.ErrorMessage),
+            _ or RateResponse.ResultOneofCase.None => new RateSubmissionResult.Failure("Failed to rate submission"),
+        };
     }
 
     public async Task<SubmissionRateDto> UpdateSubmissionAsync(

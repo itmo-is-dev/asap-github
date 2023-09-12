@@ -1,5 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.Core.Exceptions;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
 using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
@@ -9,6 +9,7 @@ using Itmo.Dev.Asap.Github.Commands.CommandVisitors;
 using Itmo.Dev.Asap.Github.Commands.Models;
 using Itmo.Dev.Asap.Github.Commands.SubmissionCommands;
 using Itmo.Dev.Asap.Github.Domain.Assignments;
+using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 using Itmo.Dev.Asap.Github.Domain.Submissions;
 using Itmo.Dev.Asap.Github.Domain.Users;
 
@@ -56,14 +57,19 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
     public async Task<SubmissionCommandResult> VisitAsync(BanCommand command)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubUser student = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+
+        GithubSubjectCourseStudent? student = await _context.SubjectCourses
+            .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
+
+        if (student is null)
+            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
 
         try
         {
             SubmissionDto submission = await _submissionService.BanSubmissionAsync(
                 issuer.Id,
-                student.Id,
+                student.User.Id,
                 assignment.Id,
                 default,
                 default);
@@ -200,21 +206,29 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
         try
         {
-            SubmissionRateDto submissionDto = await _submissionService.RateSubmissionAsync(
+            RateSubmissionResult result = await _submissionService.RateSubmissionAsync(
                 issuer.Id,
                 submission.Id,
                 command.RatingPercent,
                 command.ExtraPoints,
                 default);
 
-            string message = $"""
-        Submission rated.
-        {submissionDto.ToDisplayString()}
-        """;
+            if (result is RateSubmissionResult.Success s)
+            {
+                string message = $"""
+                Submission rated.
+                {s.Submission.ToDisplayString()}
+                """;
 
-            await _eventNotifier.SendCommentToPullRequest(message);
+                await _eventNotifier.SendCommentToPullRequest(message);
 
-            return new SubmissionCommandResult.Success();
+                return new SubmissionCommandResult.Success();
+            }
+
+            if (result is RateSubmissionResult.Failure f)
+                return new SubmissionCommandResult.Failure(f.Message);
+
+            return new SubmissionCommandResult.Failure("Failed to rate submission");
         }
         catch (AsapCoreException e)
         {

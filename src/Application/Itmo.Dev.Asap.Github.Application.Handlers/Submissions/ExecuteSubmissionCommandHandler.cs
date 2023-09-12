@@ -1,5 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.CommandExecution;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Commands.Models;

@@ -84,7 +84,7 @@ public class GithubAssignmentRepositoryTests : TestBase, IAsyncLifetime
             mentor_team_id = subjectCourse.MentorTeamId,
         };
 
-        var args2 = args with { id = subjectCourseId2 };
+        var args2 = args with { id = subjectCourseId2, organization_id = Faker.Random.Long() };
         var args3 = args with { id = subjectCourseId3, organization_id = organizationId };
 
         await _fixture.Connection.ExecuteAsync(GithubSubjectCourseRepository.AddSql, args);

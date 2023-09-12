@@ -83,7 +83,10 @@ message RateRequest {
 }
 
 message RateResponse {
-  SubmissionRate submission = 1;
+  oneof result {
+    SubmissionRate submission = 1;
+    string error_message = 2;
+  }
 }
 
 message UpdateRequest {
@@ -91,11 +94,11 @@ message UpdateRequest {
   string user_id = 2;
   string assignment_id = 3;
   google.protobuf.Int32Value code = 4;
-  
+
   oneof submission_date {
     google.protobuf.Timestamp submission_date_value = 5;
   }
-  
+
   google.protobuf.DoubleValue rating_percent = 6;
   google.protobuf.DoubleValue extra_points = 7;
 }
