@@ -167,7 +167,7 @@ public class SubmissionService : ISubmissionService
         if (dateTime is not null)
         {
             var dateOnly = dateTime.Value.ToDateTime(TimeOnly.FromTimeSpan(TimeSpan.Zero));
-            request.SubmissionDateValue = Timestamp.FromDateTime(dateOnly);
+            request.SubmissionDateValue = Timestamp.FromDateTime(DateTime.SpecifyKind(dateOnly, DateTimeKind.Utc));
         }
 
         UpdateResponse response = await _client.UpdateAsync(request, cancellationToken: cancellationToken);
