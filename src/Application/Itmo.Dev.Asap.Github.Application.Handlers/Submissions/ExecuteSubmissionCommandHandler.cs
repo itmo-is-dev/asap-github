@@ -66,7 +66,7 @@ internal class ExecuteSubmissionCommandHandler : IRequestHandler<Command>
         {
             string commandName = request.SubmissionCommand.Name;
             string title = $"Error occured while processing {commandName} command";
-            string message = $"{title} {failure.Message}";
+            string message = $"{title} \n{failure.Message}";
 
             _logger.LogWarning("{Title}: {Message}", title, message);
 
