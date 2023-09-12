@@ -34,6 +34,7 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
     join users u using (user_id)
     where 
         (cardinality(:subject_course_ids) = 0 or s.subject_course_id = any (:subject_course_ids))
+        and (cardinality(:repository_ids) = 0 or s.subject_course_student_repository_id = any (:repository_ids))
     """;
 
     public const string AddSql = """
@@ -120,7 +121,8 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
         NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
         await using NpgsqlCommand command = new NpgsqlCommand(QueryStudentsSql, connection)
-            .AddParameter("subject_course_ids", query.SubjectCourseIds);
+            .AddParameter("subject_course_ids", query.SubjectCourseIds)
+            .AddParameter("repository_ids", query.RepositoryIds);
 
         await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
 

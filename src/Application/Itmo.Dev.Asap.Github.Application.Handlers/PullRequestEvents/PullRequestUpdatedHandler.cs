@@ -17,7 +17,7 @@ using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRe
 
 namespace Itmo.Dev.Asap.Github.Application.Handlers.PullRequestEvents;
 
-internal class PullRequestUpdatedHandler : IRequestHandler<Command>
+internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
 {
     private readonly ISubmissionWorkflowService _submissionWorkflowService;
     private readonly IPullRequestEventNotifier _notifier;
@@ -33,10 +33,19 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
         _context = context;
     }
 
-    public async Task Handle(Command request, CancellationToken cancellationToken)
+    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
-        GithubUser user = await _context.Users.GetForGithubIdAsync(request.PullRequest.RepositoryId, cancellationToken);
+
+        var studentQuery = GithubSubjectCourseStudentQuery.Build(x => x
+            .WithRepositoryId(request.PullRequest.RepositoryId));
+
+        GithubSubjectCourseStudent? student = await _context.SubjectCourses
+            .QueryStudentsAsync(studentQuery, cancellationToken)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (student is null)
+            return new Response.StudentNotFound();
 
         GithubAssignment? assignment = await _context.Assignments
             .FindAssignmentForPullRequestAsync(request.PullRequest, cancellationToken);
@@ -53,7 +62,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
 
         SubmissionUpdateResult result = await _submissionWorkflowService.SubmissionUpdatedAsync(
             issuer.Id,
-            user.Id,
+            student.User.Id,
             assignment.Id,
             request.PullRequest.Payload,
             cancellationToken);
@@ -63,7 +72,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
             var submission = new GithubSubmission(
                 result.Submission.Id,
                 assignment.Id,
-                user.Id,
+                student.User.Id,
                 result.Submission.SubmissionDate,
                 request.PullRequest.OrganizationId,
                 request.PullRequest.RepositoryId,
@@ -83,6 +92,8 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command>
         {
             await _notifier.NotifySubmissionUpdate(result.Submission);
         }
+
+        return new Response.Success();
     }
 
     private async Task<string> GetSubjectCourseAssignmentsString(
