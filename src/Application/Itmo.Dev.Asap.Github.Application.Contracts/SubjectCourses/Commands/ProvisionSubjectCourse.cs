@@ -8,5 +8,14 @@ internal static class ProvisionSubjectCourse
         string CorrelationId,
         long OrganizationId,
         long TemplateRepositoryId,
-        long MentorTeamId) : IRequest;
+        long MentorTeamId) : IRequest<Response>;
+
+    public abstract record Response
+    {
+        private Response() { }
+
+        public sealed record Success : Response;
+
+        public sealed record OrganizationAlreadyBound : Response;
+    }
 }

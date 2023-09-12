@@ -238,7 +238,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
                 permission,
                 cancellationToken);
 
-            return result is AddPermissionResult.Invited;
+            return result is not AddPermissionResult.Failed;
         }
         catch (Exception e)
         {
