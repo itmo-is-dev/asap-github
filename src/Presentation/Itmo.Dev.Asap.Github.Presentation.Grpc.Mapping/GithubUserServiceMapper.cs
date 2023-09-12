@@ -14,9 +14,13 @@ internal static partial class GithubUserServiceMapper
 
     public static partial UpdateGithubUsernames.Command MapTo(this UpdateUsernameRequest request);
 
-    public static partial FindByIdsResponse MapFrom(this FindUsersByIds.Response response);
+    public static FindByIdsResponse MapFrom(this FindUsersByIds.Response response)
+    {
+        IEnumerable<GithubUser> users = response.Users.Select(MapToGithubUsers);
+        return new FindByIdsResponse { Users = { users } };
+    }
 
     [MapProperty(nameof(GithubUserDto.Id), nameof(GithubUser.UserId))]
     [MapProperty(nameof(GithubUserDto.GithubUsername), nameof(GithubUser.Username))]
-    private static partial GithubUser MapToGithubUser(GithubUserDto user);
+    private static partial GithubUser MapToGithubUsers(GithubUserDto user);
 }
