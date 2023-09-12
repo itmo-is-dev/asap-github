@@ -144,7 +144,7 @@ public class SubmissionService : ISubmissionService
         };
     }
 
-    public async Task<SubmissionRateDto> UpdateSubmissionAsync(
+    public async Task<UpdateSubmissionResult> UpdateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
@@ -172,6 +172,15 @@ public class SubmissionService : ISubmissionService
 
         UpdateResponse response = await _client.UpdateAsync(request, cancellationToken: cancellationToken);
 
-        return response.Submission.ToDto();
+        return response.ResultCase switch
+        {
+            UpdateResponse.ResultOneofCase.Submission
+                => new UpdateSubmissionResult.Success(response.Submission.ToDto()),
+
+            UpdateResponse.ResultOneofCase.ErrorMessage => new UpdateSubmissionResult.Failure(response.ErrorMessage),
+
+            _ or UpdateResponse.ResultOneofCase.None
+                => new UpdateSubmissionResult.Failure("Failed to update submission"),
+        };
     }
 }

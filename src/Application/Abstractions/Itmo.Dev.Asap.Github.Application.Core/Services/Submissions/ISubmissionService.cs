@@ -36,7 +36,7 @@ public interface ISubmissionService
         double? extraPoints,
         CancellationToken cancellationToken);
 
-    Task<SubmissionRateDto> UpdateSubmissionAsync(
+    Task<UpdateSubmissionResult> UpdateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,

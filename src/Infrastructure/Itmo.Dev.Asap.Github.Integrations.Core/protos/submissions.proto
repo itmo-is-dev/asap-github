@@ -104,5 +104,8 @@ message UpdateRequest {
 }
 
 message UpdateResponse {
-  SubmissionRate submission = 1;
+  oneof result {
+    SubmissionRate submission = 1;
+    string error_message = 2;
+  }
 }

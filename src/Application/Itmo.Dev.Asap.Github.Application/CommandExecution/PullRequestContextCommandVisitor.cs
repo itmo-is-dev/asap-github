@@ -254,7 +254,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
         try
         {
-            SubmissionRateDto submission = await _submissionService.UpdateSubmissionAsync(
+            UpdateSubmissionResult result = await _submissionService.UpdateSubmissionAsync(
                 issuer.Id,
                 user.User.Id,
                 assignment.Id,
@@ -264,14 +264,21 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
                 command.ExtraPoints,
                 default);
 
-            string message = $"""
-            Submission rated.
-            {submission.ToDisplayString()}
-            """;
+            if (result is UpdateSubmissionResult.Success s)
+            {
+                string message = $"""
+                Submission rated.
+                {s.Submission.ToDisplayString()}
+                """;
 
-            await _eventNotifier.SendCommentToPullRequest(message);
+                await _eventNotifier.SendCommentToPullRequest(message);
 
-            return new SubmissionCommandResult.Success();
+                return new SubmissionCommandResult.Success();
+            }
+
+            return result is UpdateSubmissionResult.Failure f
+                ? new SubmissionCommandResult.Failure(f.ErrorMessage)
+                : new SubmissionCommandResult.Failure("Failed to update submission");
         }
         catch (AsapCoreException e)
         {
