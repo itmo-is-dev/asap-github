@@ -98,33 +98,46 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
         try
         {
-            SubmissionDto submission = await _submissionService.CreateSubmissionAsync(
+            CreateSubmissionResult result = await _submissionService.CreateSubmissionAsync(
                 issuer.Id,
                 student.User.Id,
                 assignment.Id,
                 _pullRequest.Payload,
                 default);
 
-            var githubSubmission = new GithubSubmission(
-                submission.Id,
-                assignment.Id,
-                student.User.Id,
-                submission.SubmissionDate,
-                _pullRequest.OrganizationId,
-                _pullRequest.RepositoryId,
-                _pullRequest.PullRequestId);
+            if (result is CreateSubmissionResult.Success s)
+            {
+                SubmissionDto submission = s.Submission;
 
-            _context.Submissions.Add(githubSubmission);
-            await _context.CommitAsync(default);
+                var githubSubmission = new GithubSubmission(
+                    submission.Id,
+                    assignment.Id,
+                    student.User.Id,
+                    submission.SubmissionDate,
+                    _pullRequest.OrganizationId,
+                    _pullRequest.RepositoryId,
+                    _pullRequest.PullRequestId);
 
-            string message = $"""
-        Submission created.
-        {submission.ToDisplayString()}
-        """;
+                _context.Submissions.Add(githubSubmission);
+                await _context.CommitAsync(default);
 
-            await _eventNotifier.SendCommentToPullRequest(message);
+                string message = $"""
+                Submission created.
+                {submission.ToDisplayString()}
+                """;
 
-            return new SubmissionCommandResult.Success();
+                await _eventNotifier.SendCommentToPullRequest(message);
+
+                return new SubmissionCommandResult.Success();
+            }
+
+            if (result is CreateSubmissionResult.Unauthorized)
+            {
+                string message = "You are not authorized to create submission at this repository";
+                return new SubmissionCommandResult.Failure(message);
+            }
+
+            return new SubmissionCommandResult.Failure("Operation produces unexpected result");
         }
         catch (AsapCoreException e)
         {

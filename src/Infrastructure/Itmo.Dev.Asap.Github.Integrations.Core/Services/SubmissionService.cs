@@ -51,7 +51,7 @@ public class SubmissionService : ISubmissionService
         return response.Submission.ToDto();
     }
 
-    public async Task<SubmissionDto> CreateSubmissionAsync(
+    public async Task<CreateSubmissionResult> CreateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
@@ -68,7 +68,14 @@ public class SubmissionService : ISubmissionService
 
         CreateResponse response = await _client.CreateAsync(request, cancellationToken: cancellationToken);
 
-        return response.Submission.ToDto();
+        return response.ResultCase switch
+        {
+            CreateResponse.ResultOneofCase.Success
+                => new CreateSubmissionResult.Success(response.Success.Submission.ToDto()),
+
+            CreateResponse.ResultOneofCase.Unauthorized => new CreateSubmissionResult.Unauthorized(),
+            _ or CreateResponse.ResultOneofCase.None => new CreateSubmissionResult.Unexpected(),
+        };
     }
 
     public async Task<SubmissionDto> DeactivateSubmissionAsync(

@@ -45,7 +45,17 @@ message CreateRequest {
 }
 
 message CreateResponse {
-  Submission submission = 1;
+  oneof result {
+    Success success = 1;
+    Unauthorized unauthorized = 2;
+  }
+
+  message Success {
+    Submission submission = 1;
+  }
+
+  message Unauthorized{
+  }
 }
 
 message DeactivateRequest {

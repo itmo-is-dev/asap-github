@@ -13,7 +13,7 @@ public interface ISubmissionService
         int? code,
         CancellationToken cancellationToken);
 
-    Task<SubmissionDto> CreateSubmissionAsync(
+    Task<CreateSubmissionResult> CreateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
