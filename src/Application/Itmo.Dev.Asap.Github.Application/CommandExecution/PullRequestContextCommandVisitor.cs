@@ -88,14 +88,19 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
     public async Task<SubmissionCommandResult> VisitAsync(CreateSubmissionCommand command)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubUser user = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+
+        GithubSubjectCourseStudent? student = await _context.SubjectCourses
+            .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
+
+        if (student is null)
+            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
 
         try
         {
             SubmissionDto submission = await _submissionService.CreateSubmissionAsync(
                 issuer.Id,
-                user.Id,
+                student.User.Id,
                 assignment.Id,
                 _pullRequest.Payload,
                 default);
@@ -103,7 +108,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
             var githubSubmission = new GithubSubmission(
                 submission.Id,
                 assignment.Id,
-                user.Id,
+                student.User.Id,
                 submission.SubmissionDate,
                 _pullRequest.OrganizationId,
                 _pullRequest.RepositoryId,
@@ -239,14 +244,19 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
     public async Task<SubmissionCommandResult> VisitAsync(UpdateCommand command)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubUser user = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+
+        GithubSubjectCourseStudent? user = await _context.SubjectCourses
+            .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
+
+        if (user is null)
+            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
 
         try
         {
             SubmissionRateDto submission = await _submissionService.UpdateSubmissionAsync(
                 issuer.Id,
-                user.Id,
+                user.User.Id,
                 assignment.Id,
                 command.SubmissionCode,
                 command.GetDate(),

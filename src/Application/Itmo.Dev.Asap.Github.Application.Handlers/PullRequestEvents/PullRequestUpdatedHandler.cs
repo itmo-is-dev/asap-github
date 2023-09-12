@@ -37,12 +37,8 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
-        var studentQuery = GithubSubjectCourseStudentQuery.Build(x => x
-            .WithRepositoryId(request.PullRequest.RepositoryId));
-
         GithubSubjectCourseStudent? student = await _context.SubjectCourses
-            .QueryStudentsAsync(studentQuery, cancellationToken)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FindSubjectCourseStudentByRepositoryId(request.PullRequest.PullRequestId, cancellationToken);
 
         if (student is null)
             return new Response.StudentNotFound();
