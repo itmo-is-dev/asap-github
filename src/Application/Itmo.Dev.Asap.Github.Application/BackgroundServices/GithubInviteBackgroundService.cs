@@ -27,7 +27,7 @@ public class GithubInviteBackgroundService : BackgroundService
     {
         using var timer = new PeriodicTimer(_delayBetweenInviteIteration);
 
-        do
+        while (stoppingToken.IsCancellationRequested is false && await timer.WaitForNextTickAsync(stoppingToken))
         {
             try
             {
@@ -44,6 +44,5 @@ public class GithubInviteBackgroundService : BackgroundService
                 _logger.LogError(ex, template, ex.Message);
             }
         }
-        while (stoppingToken.IsCancellationRequested is false && await timer.WaitForNextTickAsync(stoppingToken));
     }
 }

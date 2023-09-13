@@ -1,13 +1,15 @@
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Commands;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
+using Itmo.Dev.Asap.Github.Application.Handlers.Configuration;
 using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Octokit.Services;
 using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 using Itmo.Dev.Asap.Github.Domain.Users;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Itmo.Dev.Asap.Github.Application.Handlers.SubjectCourse;
 
@@ -21,6 +23,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
     private readonly IGithubRepositoryService _githubRepositoryService;
     private readonly IPersistenceContext _context;
     private readonly IGithubUserService _githubUserService;
+    private readonly SubjectCourseOrganizationUpdateConfiguration _configuration;
 
     public SubjectCourseOrganizationUpdateHandler(
         ILogger<SubjectCourseOrganizationUpdateHandler> logger,
@@ -28,7 +31,8 @@ internal class SubjectCourseOrganizationUpdateHandler :
         IGithubOrganizationService githubOrganizationService,
         IGithubRepositoryService githubRepositoryService,
         IPersistenceContext context,
-        IGithubUserService githubUserService)
+        IGithubUserService githubUserService,
+        IOptions<SubjectCourseOrganizationUpdateConfiguration> configuration)
     {
         _logger = logger;
         _asapSubjectCourseService = asapSubjectCourseService;
@@ -36,6 +40,7 @@ internal class SubjectCourseOrganizationUpdateHandler :
         _githubRepositoryService = githubRepositoryService;
         _context = context;
         _githubUserService = githubUserService;
+        _configuration = configuration.Value;
     }
 
     public async Task Handle(UpdateSubjectCourseOrganizations.Command request, CancellationToken cancellationToken)
@@ -81,21 +86,41 @@ internal class SubjectCourseOrganizationUpdateHandler :
 
     private async Task UpdateOrganizationAsync(GithubSubjectCourse subjectCourse, CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<Guid> studentIds = await _asapSubjectCourseService
-            .GetSubjectCourseStudentIds(subjectCourse.Id, cancellationToken)
-            .Select(x => x.User.Id)
-            .ToArrayAsync(cancellationToken);
+        var request = new GetSubjectCourseStudentsRequest(subjectCourse.Id, null, _configuration.StudentPageSize);
 
+        do
+        {
+            GetSubjectCourseStudentsResponse response = await _asapSubjectCourseService
+                .GetSubjectCourseStudents(request, cancellationToken);
+
+            request = request with { PageToken = response.PageToken };
+
+            Guid[] studentIds = response.Students
+                .Select(x => x.User.Id)
+                .ToArray();
+
+            await UpdateOrganizationBatchAsync(subjectCourse, studentIds, cancellationToken);
+        }
+        while (request.PageToken is not null);
+    }
+
+    private async Task UpdateOrganizationBatchAsync(
+        GithubSubjectCourse subjectCourse,
+        IReadOnlyCollection<Guid> studentIds,
+        CancellationToken cancellationToken)
+    {
         var githubUserQuery = GithubUserQuery.Build(x => x.WithIds(studentIds));
 
         GithubUser[] students = await _context.Users
             .QueryAsync(githubUserQuery, cancellationToken)
             .ToArrayAsync(cancellationToken);
 
+        var existingStudentsQuery = GithubSubjectCourseStudentQuery.Build(x => x
+            .WithSubjectCourseId(subjectCourse.Id)
+            .WithUserIds(studentIds));
+
         Dictionary<Guid, GithubSubjectCourseStudent> existingStudents = await _context.SubjectCourses
-            .QueryStudentsAsync(
-                GithubSubjectCourseStudentQuery.Build(x => x.WithSubjectCourseId(subjectCourse.Id)),
-                cancellationToken)
+            .QueryStudentsAsync(existingStudentsQuery, cancellationToken)
             .ToDictionaryAsync(x => x.User.Id, cancellationToken);
 
         _logger.LogInformation(
