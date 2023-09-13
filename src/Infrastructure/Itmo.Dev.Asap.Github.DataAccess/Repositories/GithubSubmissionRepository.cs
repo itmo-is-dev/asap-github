@@ -33,7 +33,7 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
                s.submission_created_at, 
                s.submission_organization_id,
                s.submission_repository_id, 
-               s.submission_pull_request_number
+               s.submission_pull_request_id
         from submissions as s
         join assignments as a using (assignment_id)
         where 

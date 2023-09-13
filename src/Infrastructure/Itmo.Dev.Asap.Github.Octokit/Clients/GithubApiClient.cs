@@ -108,13 +108,24 @@ internal class GithubApiClient
             $"/organizations/{organizationId}/team/{teamId}/repos/{repositoryOwner}/{repositoryName}");
 
         string content = $$"""
-        {'permission':"{{permission.ToGithubApiString()}}"}
+        {"permission":"{{permission.ToGithubApiString()}}"}
         """;
 
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
         message.Content = new StringContent(content);
 
-        await _githubHttpClient.SendAsync(message, cancellationToken);
+        HttpResponseMessage response = await _githubHttpClient.SendAsync(message, cancellationToken);
+
+        if (response.IsSuccessStatusCode is false)
+        {
+            _logger.LogError(
+                "Failed to update team permissions for organization = {OrganizationId}, team = {TeamId}, repository = {Owner}/{RepositoryName}, permission = {Permission}",
+                organizationId,
+                teamId,
+                repositoryOwner,
+                repositoryName,
+                permission);
+        }
     }
 
     private bool IsValidResponse(HttpResponseMessage response)

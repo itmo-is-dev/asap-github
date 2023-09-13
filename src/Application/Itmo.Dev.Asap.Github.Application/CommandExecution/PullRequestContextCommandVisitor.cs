@@ -1,5 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.Core.Exceptions;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
 using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
@@ -9,6 +9,7 @@ using Itmo.Dev.Asap.Github.Commands.CommandVisitors;
 using Itmo.Dev.Asap.Github.Commands.Models;
 using Itmo.Dev.Asap.Github.Commands.SubmissionCommands;
 using Itmo.Dev.Asap.Github.Domain.Assignments;
+using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 using Itmo.Dev.Asap.Github.Domain.Submissions;
 using Itmo.Dev.Asap.Github.Domain.Users;
 
@@ -56,14 +57,19 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
     public async Task<SubmissionCommandResult> VisitAsync(BanCommand command)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubUser student = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+
+        GithubSubjectCourseStudent? student = await _context.SubjectCourses
+            .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
+
+        if (student is null)
+            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
 
         try
         {
             SubmissionDto submission = await _submissionService.BanSubmissionAsync(
                 issuer.Id,
-                student.Id,
+                student.User.Id,
                 assignment.Id,
                 default,
                 default);
@@ -82,38 +88,56 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
     public async Task<SubmissionCommandResult> VisitAsync(CreateSubmissionCommand command)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubUser user = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+
+        GithubSubjectCourseStudent? student = await _context.SubjectCourses
+            .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
+
+        if (student is null)
+            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
 
         try
         {
-            SubmissionDto submission = await _submissionService.CreateSubmissionAsync(
+            CreateSubmissionResult result = await _submissionService.CreateSubmissionAsync(
                 issuer.Id,
-                user.Id,
+                student.User.Id,
                 assignment.Id,
                 _pullRequest.Payload,
                 default);
 
-            var githubSubmission = new GithubSubmission(
-                submission.Id,
-                assignment.Id,
-                user.Id,
-                submission.SubmissionDate,
-                _pullRequest.OrganizationId,
-                _pullRequest.RepositoryId,
-                _pullRequest.PullRequestId);
+            if (result is CreateSubmissionResult.Success s)
+            {
+                SubmissionDto submission = s.Submission;
 
-            _context.Submissions.Add(githubSubmission);
-            await _context.CommitAsync(default);
+                var githubSubmission = new GithubSubmission(
+                    submission.Id,
+                    assignment.Id,
+                    student.User.Id,
+                    submission.SubmissionDate,
+                    _pullRequest.OrganizationId,
+                    _pullRequest.RepositoryId,
+                    _pullRequest.PullRequestId);
 
-            string message = $"""
-        Submission created.
-        {submission.ToDisplayString()}
-        """;
+                _context.Submissions.Add(githubSubmission);
+                await _context.CommitAsync(default);
 
-            await _eventNotifier.SendCommentToPullRequest(message);
+                string message = $"""
+                Submission created.
+                {submission.ToDisplayString()}
+                """;
 
-            return new SubmissionCommandResult.Success();
+                await _eventNotifier.SendCommentToPullRequest(message);
+
+                return new SubmissionCommandResult.Success();
+            }
+
+            if (result is CreateSubmissionResult.Unauthorized)
+            {
+                string message = "You are not authorized to create submission at this repository";
+                return new SubmissionCommandResult.Failure(message);
+            }
+
+            return new SubmissionCommandResult.Failure("Operation produces unexpected result");
         }
         catch (AsapCoreException e)
         {
@@ -200,21 +224,29 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
         try
         {
-            SubmissionRateDto submissionDto = await _submissionService.RateSubmissionAsync(
+            RateSubmissionResult result = await _submissionService.RateSubmissionAsync(
                 issuer.Id,
                 submission.Id,
                 command.RatingPercent,
                 command.ExtraPoints,
                 default);
 
-            string message = $"""
-        Submission rated.
-        {submissionDto.ToDisplayString()}
-        """;
+            if (result is RateSubmissionResult.Success s)
+            {
+                string message = $"""
+                Submission rated.
+                {s.Submission.ToDisplayString()}
+                """;
 
-            await _eventNotifier.SendCommentToPullRequest(message);
+                await _eventNotifier.SendCommentToPullRequest(message);
 
-            return new SubmissionCommandResult.Success();
+                return new SubmissionCommandResult.Success();
+            }
+
+            if (result is RateSubmissionResult.Failure f)
+                return new SubmissionCommandResult.Failure(f.Message);
+
+            return new SubmissionCommandResult.Failure("Failed to rate submission");
         }
         catch (AsapCoreException e)
         {
@@ -225,14 +257,19 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
     public async Task<SubmissionCommandResult> VisitAsync(UpdateCommand command)
     {
         GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubUser user = await _context.Users.GetForGithubIdAsync(_pullRequest.RepositoryId);
         GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+
+        GithubSubjectCourseStudent? user = await _context.SubjectCourses
+            .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
+
+        if (user is null)
+            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
 
         try
         {
-            SubmissionRateDto submission = await _submissionService.UpdateSubmissionAsync(
+            UpdateSubmissionResult result = await _submissionService.UpdateSubmissionAsync(
                 issuer.Id,
-                user.Id,
+                user.User.Id,
                 assignment.Id,
                 command.SubmissionCode,
                 command.GetDate(),
@@ -240,14 +277,21 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
                 command.ExtraPoints,
                 default);
 
-            string message = $"""
-            Submission rated.
-            {submission.ToDisplayString()}
-            """;
+            if (result is UpdateSubmissionResult.Success s)
+            {
+                string message = $"""
+                Submission rated.
+                {s.Submission.ToDisplayString()}
+                """;
 
-            await _eventNotifier.SendCommentToPullRequest(message);
+                await _eventNotifier.SendCommentToPullRequest(message);
 
-            return new SubmissionCommandResult.Success();
+                return new SubmissionCommandResult.Success();
+            }
+
+            return result is UpdateSubmissionResult.Failure f
+                ? new SubmissionCommandResult.Failure(f.ErrorMessage)
+                : new SubmissionCommandResult.Failure("Failed to update submission");
         }
         catch (AsapCoreException e)
         {

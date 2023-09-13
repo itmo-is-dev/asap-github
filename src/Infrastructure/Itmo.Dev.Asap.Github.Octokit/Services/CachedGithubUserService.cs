@@ -22,4 +22,11 @@ public class CachedGithubUserService : IGithubUserService
             (nameof(CachedGithubUserService), nameof(FindByIdAsync), userId),
             _ => _service.FindByIdAsync(userId, cancellationToken));
     }
+
+    public Task<GithubUserModel?> FindByUsernameAsync(string username, CancellationToken cancellationToken)
+    {
+        return _cache.GetOrCreateAsync(
+            (nameof(CachedGithubUserService), nameof(FindByUsernameAsync), username),
+            _ => _service.FindByUsernameAsync(username, cancellationToken));
+    }
 }

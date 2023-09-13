@@ -39,30 +39,40 @@ public class PullRequestWebhookEventProcessor
 
         try
         {
-            IRequest command;
-
             switch (action)
             {
                 case PullRequestActionValue.Synchronize:
                 case PullRequestActionValue.Opened:
-                    command = new PullRequestUpdated.Command(pullRequest);
-                    await _mediator.Send(command);
+                {
+                    var command = new PullRequestUpdated.Command(pullRequest);
+                    PullRequestUpdated.Response response = await _mediator.Send(command);
+
+                    if (response is PullRequestUpdated.Response.StudentNotFound)
+                    {
+                        const string message = "Current repository is not attached to any student";
+                        await _notifier.SendCommentToPullRequest(message);
+                    }
 
                     break;
+                }
 
                 case PullRequestActionValue.Reopened:
-                    command = new PullRequestReopened.Command(pullRequest);
+                {
+                    var command = new PullRequestReopened.Command(pullRequest);
                     await _mediator.Send(command);
 
                     break;
+                }
 
                 case PullRequestActionValue.Closed:
+                {
                     bool merged = pullRequestEvent.PullRequest.Merged ?? false;
 
-                    command = new PullRequestClosed.Command(pullRequest, merged);
+                    var command = new PullRequestClosed.Command(pullRequest, merged);
                     await _mediator.Send(command);
 
                     break;
+                }
 
                 case PullRequestActionValue.Assigned:
                 case PullRequestActionValue.ReviewRequestRemoved:

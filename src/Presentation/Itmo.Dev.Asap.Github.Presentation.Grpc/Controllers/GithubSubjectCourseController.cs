@@ -22,9 +22,19 @@ public class GithubSubjectCourseController : GithubSubjectCourseService.GithubSu
         ServerCallContext context)
     {
         ProvisionSubjectCourse.Command command = request.MapTo();
-        await _mediator.Send(command, context.CancellationToken);
+        ProvisionSubjectCourse.Response response = await _mediator.Send(command, context.CancellationToken);
 
-        return new Empty();
+        return response switch
+        {
+            Application.Contracts.SubjectCourses.Commands.ProvisionSubjectCourse.Response.Success => new Empty(),
+
+            Application.Contracts.SubjectCourses.Commands.ProvisionSubjectCourse.Response.OrganizationAlreadyBound
+                => throw new RpcException(new Status(
+                    StatusCode.InvalidArgument,
+                    "Specified organization already bound to another subject course")),
+
+            _ => throw new RpcException(new Status(StatusCode.Internal, "Operation finished unexpectedly")),
+        };
     }
 
     public override async Task<Empty> UpdateMentorTeam(UpdateMentorTeamRequest request, ServerCallContext context)

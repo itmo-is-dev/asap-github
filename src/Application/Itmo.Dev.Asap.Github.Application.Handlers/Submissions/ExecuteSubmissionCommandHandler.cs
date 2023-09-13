@@ -1,5 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.CommandExecution;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Commands.Models;
@@ -66,7 +66,7 @@ internal class ExecuteSubmissionCommandHandler : IRequestHandler<Command>
         {
             string commandName = request.SubmissionCommand.Name;
             string title = $"Error occured while processing {commandName} command";
-            string message = $"{title} {failure.Message}";
+            string message = $"{title} \n{failure.Message}";
 
             _logger.LogWarning("{Title}: {Message}", title, message);
 

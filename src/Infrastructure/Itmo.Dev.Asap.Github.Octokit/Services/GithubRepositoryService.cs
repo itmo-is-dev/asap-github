@@ -196,7 +196,7 @@ internal class GithubRepositoryService : IGithubRepositoryService
 
         _logger.LogInformation(
             "Creating repository {OrganizationName}/{RepositoryName} from {Template}",
-            organization,
+            organization.Name,
             newRepositoryName,
             templateRepository.Name);
 

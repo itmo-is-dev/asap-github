@@ -20,4 +20,5 @@
         <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Tests" />
     </ItemGroup>
 
+
 </Project>

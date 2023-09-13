@@ -30,15 +30,11 @@ internal class CachedGithubOrganizationService : IGithubOrganizationService
             _ => _service.FindTeamAsync(organizationId, teamId, cancellationToken));
     }
 
-    public async Task<IReadOnlyCollection<GithubUserModel>> GetTeamMembersAsync(
+    public Task<IReadOnlyCollection<GithubUserModel>> GetTeamMembersAsync(
         long organizationId,
         long teamId,
         CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<GithubUserModel>? members = await _cache.GetOrCreateAsync(
-            (nameof(CachedGithubOrganizationService), nameof(GetTeamMembersAsync), organizationId, teamId),
-            _ => _service.GetTeamMembersAsync(organizationId, teamId, cancellationToken));
-
-        return members ?? Array.Empty<GithubUserModel>();
+        return _service.GetTeamMembersAsync(organizationId, teamId, cancellationToken);
     }
 }

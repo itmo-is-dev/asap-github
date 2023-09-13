@@ -1,6 +1,6 @@
 using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
 
-namespace Itmo.Dev.Asap.Github.Application.Core.Services;
+namespace Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 
 public interface ISubmissionService
 {
@@ -13,7 +13,7 @@ public interface ISubmissionService
         int? code,
         CancellationToken cancellationToken);
 
-    Task<SubmissionDto> CreateSubmissionAsync(
+    Task<CreateSubmissionResult> CreateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
@@ -29,14 +29,14 @@ public interface ISubmissionService
         Guid submissionId,
         CancellationToken cancellationToken);
 
-    Task<SubmissionRateDto> RateSubmissionAsync(
+    Task<RateSubmissionResult> RateSubmissionAsync(
         Guid issuerId,
         Guid submissionId,
         double ratingPercent,
         double? extraPoints,
         CancellationToken cancellationToken);
 
-    Task<SubmissionRateDto> UpdateSubmissionAsync(
+    Task<UpdateSubmissionResult> UpdateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,

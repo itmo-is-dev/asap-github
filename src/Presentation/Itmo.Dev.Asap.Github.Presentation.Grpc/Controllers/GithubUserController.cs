@@ -1,4 +1,6 @@
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Itmo.Dev.Asap.Github.Application.Contracts.Users.Commands;
 using Itmo.Dev.Asap.Github.Application.Contracts.Users.Queries;
 using Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping;
 using Itmo.Dev.Asap.Github.Users;
@@ -21,5 +23,28 @@ public class GithubUserController : GithubUserService.GithubUserServiceBase
         FindUsersByIds.Response response = await _mediator.Send(query, context.CancellationToken);
 
         return response.MapFrom();
+    }
+
+    public override async Task<Empty> UpdateUsername(UpdateUsernameRequest request, ServerCallContext context)
+    {
+        UpdateGithubUsernames.Command command = request.MapTo();
+        UpdateGithubUsernames.Response response = await _mediator.Send(command, context.CancellationToken);
+
+        return response switch
+        {
+            UpdateGithubUsernames.Response.Success => new Empty(),
+
+            UpdateGithubUsernames.Response.DuplicateUsernames e
+                => throw new RpcException(new Status(
+                    StatusCode.InvalidArgument,
+                    $"Duplicate usernames found: {string.Join(", ", e.Duplicates)}")),
+
+            UpdateGithubUsernames.Response.GithubUsersNotFound e
+                => throw new RpcException(new Status(
+                    StatusCode.NotFound,
+                    $"Not existing github users found: {string.Join(", ", e.Usernames)}")),
+
+            _ => throw new RpcException(new Status(StatusCode.Internal, "Operation ended unexpectedly")),
+        };
     }
 }

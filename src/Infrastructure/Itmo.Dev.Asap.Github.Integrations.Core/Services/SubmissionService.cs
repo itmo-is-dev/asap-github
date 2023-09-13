@@ -1,6 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Itmo.Dev.Asap.Core.Submissions;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
@@ -51,7 +51,7 @@ public class SubmissionService : ISubmissionService
         return response.Submission.ToDto();
     }
 
-    public async Task<SubmissionDto> CreateSubmissionAsync(
+    public async Task<CreateSubmissionResult> CreateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
@@ -68,7 +68,14 @@ public class SubmissionService : ISubmissionService
 
         CreateResponse response = await _client.CreateAsync(request, cancellationToken: cancellationToken);
 
-        return response.Submission.ToDto();
+        return response.ResultCase switch
+        {
+            CreateResponse.ResultOneofCase.Success
+                => new CreateSubmissionResult.Success(response.Success.Submission.ToDto()),
+
+            CreateResponse.ResultOneofCase.Unauthorized => new CreateSubmissionResult.Unauthorized(),
+            _ or CreateResponse.ResultOneofCase.None => new CreateSubmissionResult.Unexpected(),
+        };
     }
 
     public async Task<SubmissionDto> DeactivateSubmissionAsync(
@@ -119,7 +126,7 @@ public class SubmissionService : ISubmissionService
         return response.Submission.ToDto();
     }
 
-    public async Task<SubmissionRateDto> RateSubmissionAsync(
+    public async Task<RateSubmissionResult> RateSubmissionAsync(
         Guid issuerId,
         Guid submissionId,
         double ratingPercent,
@@ -136,10 +143,15 @@ public class SubmissionService : ISubmissionService
 
         RateResponse response = await _client.RateAsync(request, cancellationToken: cancellationToken);
 
-        return response.Submission.ToDto();
+        return response.ResultCase switch
+        {
+            RateResponse.ResultOneofCase.Submission => new RateSubmissionResult.Success(response.Submission.ToDto()),
+            RateResponse.ResultOneofCase.ErrorMessage => new RateSubmissionResult.Failure(response.ErrorMessage),
+            _ or RateResponse.ResultOneofCase.None => new RateSubmissionResult.Failure("Failed to rate submission"),
+        };
     }
 
-    public async Task<SubmissionRateDto> UpdateSubmissionAsync(
+    public async Task<UpdateSubmissionResult> UpdateSubmissionAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
@@ -162,11 +174,20 @@ public class SubmissionService : ISubmissionService
         if (dateTime is not null)
         {
             var dateOnly = dateTime.Value.ToDateTime(TimeOnly.FromTimeSpan(TimeSpan.Zero));
-            request.SubmissionDateValue = Timestamp.FromDateTime(dateOnly);
+            request.SubmissionDateValue = Timestamp.FromDateTime(DateTime.SpecifyKind(dateOnly, DateTimeKind.Utc));
         }
 
         UpdateResponse response = await _client.UpdateAsync(request, cancellationToken: cancellationToken);
 
-        return response.Submission.ToDto();
+        return response.ResultCase switch
+        {
+            UpdateResponse.ResultOneofCase.Submission
+                => new UpdateSubmissionResult.Success(response.Submission.ToDto()),
+
+            UpdateResponse.ResultOneofCase.ErrorMessage => new UpdateSubmissionResult.Failure(response.ErrorMessage),
+
+            _ or UpdateResponse.ResultOneofCase.None
+                => new UpdateSubmissionResult.Failure("Failed to update submission"),
+        };
     }
 }
