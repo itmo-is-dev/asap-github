@@ -1,9 +1,7 @@
-using Itmo.Dev.Asap.Core.Models;
 using Itmo.Dev.Asap.Core.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Core.Models;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
-using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Services;
 
@@ -30,16 +28,24 @@ public class SubjectCourseService : ISubjectCourseService
         await _client.UpdateMentorsAsync(request, cancellationToken: cancellationToken);
     }
 
-    public async IAsyncEnumerable<StudentDto> GetSubjectCourseStudentIds(
-        Guid subjectCourseId,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async Task<GetSubjectCourseStudentsResponse> GetSubjectCourseStudents(
+        GetSubjectCourseStudentsRequest request,
+        CancellationToken cancellationToken)
     {
-        var request = new GetStudentsRequest { SubjectCourseId = subjectCourseId.ToString() };
-        GetStudentsResponse response = await _client.GetStudentsAsync(request, cancellationToken: cancellationToken);
-
-        foreach (Student student in response.Students)
+        var grpcRequest = new GetStudentsRequest
         {
-            yield return student.ToDto();
-        }
+            SubjectCourseId = request.SubjectCourseId.ToString(),
+            PageToken = request.PageToken,
+            PageSize = request.PageSize,
+        };
+
+        GetStudentsResponse response = await _client
+            .GetStudentsAsync(grpcRequest, cancellationToken: cancellationToken);
+
+        StudentDto[] students = response.Students
+            .Select(x => x.ToDto())
+            .ToArray();
+
+        return new GetSubjectCourseStudentsResponse(students, response.PageToken);
     }
 }

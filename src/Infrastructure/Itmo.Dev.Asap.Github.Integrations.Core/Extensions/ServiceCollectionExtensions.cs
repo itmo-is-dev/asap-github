@@ -1,5 +1,6 @@
 using Grpc.Net.ClientFactory;
 using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Services;
 using Itmo.Dev.Asap.Github.Integrations.Core.Tools;

@@ -1,6 +1,7 @@
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Commands;
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Notifications;
 using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.Dto.Users;
