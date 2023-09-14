@@ -95,6 +95,11 @@ internal class SubjectCourseOrganizationUpdateHandler :
 
             request = request with { PageToken = response.PageToken };
 
+            _logger.LogInformation(
+                "Received students, count = {Count}, page token = {PageToken}",
+                response.Students.Count,
+                response.PageToken);
+
             Guid[] studentIds = response.Students
                 .Select(x => x.User.Id)
                 .ToArray();

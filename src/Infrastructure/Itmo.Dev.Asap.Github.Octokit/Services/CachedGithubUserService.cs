@@ -16,11 +16,22 @@ public class CachedGithubUserService : IGithubUserService
         _service = service;
     }
 
-    public Task<GithubUserModel?> FindByIdAsync(long userId, CancellationToken cancellationToken)
+    public async Task<GithubUserModel?> FindByIdAsync(long userId, CancellationToken cancellationToken)
     {
-        return _cache.GetOrCreateAsync(
-            (nameof(CachedGithubUserService), nameof(FindByIdAsync), userId),
-            _ => _service.FindByIdAsync(userId, cancellationToken));
+        object key = (nameof(CachedGithubUserService), nameof(FindByIdAsync), userId);
+
+        if (_cache.TryGetValue(key, out GithubUserModel? value))
+        {
+            return value;
+        }
+
+        value = await _service.FindByIdAsync(userId, cancellationToken);
+
+        ICacheEntry entry = _cache.CreateEntry(key);
+        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2);
+        entry.Value = value;
+
+        return value;
     }
 
     public Task<GithubUserModel?> FindByUsernameAsync(string username, CancellationToken cancellationToken)
