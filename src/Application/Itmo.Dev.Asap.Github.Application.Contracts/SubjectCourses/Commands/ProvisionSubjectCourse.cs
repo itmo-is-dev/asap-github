@@ -17,5 +17,13 @@ internal static class ProvisionSubjectCourse
         public sealed record Success : Response;
 
         public sealed record OrganizationAlreadyBound : Response;
+
+        public sealed record OrganizationNotFound : Response;
+
+        public sealed record TemplateRepositoryNotFound : Response;
+
+        public sealed record TemplateRepositoryNotMarkedTemplate : Response;
+
+        public sealed record MentorTeamNotFound : Response;
     }
 }

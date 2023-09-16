@@ -1,5 +1,7 @@
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
+using Itmo.Dev.Asap.Github.Application.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Time;
 using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 using MediatR;
@@ -11,11 +13,19 @@ internal class ProvisionSubjectCourseHandler : IRequestHandler<Command, Response
 {
     private readonly IPersistenceContext _context;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IGithubOrganizationService _organizationService;
+    private readonly IGithubRepositoryService _repositoryService;
 
-    public ProvisionSubjectCourseHandler(IPersistenceContext context, IDateTimeProvider dateTimeProvider)
+    public ProvisionSubjectCourseHandler(
+        IPersistenceContext context,
+        IDateTimeProvider dateTimeProvider,
+        IGithubOrganizationService organizationService,
+        IGithubRepositoryService repositoryService)
     {
         _context = context;
         _dateTimeProvider = dateTimeProvider;
+        _organizationService = organizationService;
+        _repositoryService = repositoryService;
     }
 
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -30,6 +40,11 @@ internal class ProvisionSubjectCourseHandler : IRequestHandler<Command, Response
         if (existingSubjectCourse is not null)
             return new Response.OrganizationAlreadyBound();
 
+        Response? response = await ValidateGithubEntities(request, cancellationToken);
+
+        if (response is not null)
+            return response;
+
         DateTime now = _dateTimeProvider.Current;
 
         var subjectCourse = new ProvisionedSubjectCourse(
@@ -43,5 +58,28 @@ internal class ProvisionSubjectCourseHandler : IRequestHandler<Command, Response
         await _context.CommitAsync(cancellationToken);
 
         return new Response.Success();
+    }
+
+    private async Task<Response?> ValidateGithubEntities(Command command, CancellationToken cancellationToken)
+    {
+        GithubOrganizationModel? organization = await _organizationService
+            .FindByIdAsync(command.OrganizationId, cancellationToken);
+
+        if (organization is null)
+            return new Response.OrganizationNotFound();
+
+        GithubRepositoryModel? templateRepository = await _repositoryService
+            .FindByIdAsync(command.OrganizationId, command.TemplateRepositoryId, cancellationToken);
+
+        if (templateRepository is null)
+            return new Response.TemplateRepositoryNotFound();
+
+        if (templateRepository.IsTemplate is false)
+            return new Response.TemplateRepositoryNotMarkedTemplate();
+
+        GithubTeamModel? mentorTeam = await _organizationService
+            .FindTeamAsync(command.OrganizationId, command.MentorTeamId, cancellationToken);
+
+        return mentorTeam is null ? new Response.MentorTeamNotFound() : null;
     }
 }

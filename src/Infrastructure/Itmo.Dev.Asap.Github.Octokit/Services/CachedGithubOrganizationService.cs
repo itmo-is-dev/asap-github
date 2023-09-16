@@ -1,7 +1,7 @@
 using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Octokit.Services;
+using Itmo.Dev.Asap.Github.Common.Extensions;
 using Itmo.Dev.Asap.Github.Common.Tools;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Itmo.Dev.Asap.Github.Octokit.Services;
 
@@ -18,23 +18,39 @@ internal class CachedGithubOrganizationService : IGithubOrganizationService
 
     public Task<GithubOrganizationModel?> FindByIdAsync(long organizationId, CancellationToken cancellationToken)
     {
+        object key = (nameof(CachedGithubOrganizationService), nameof(FindByIdAsync), organizationId);
+
         return _cache.GetOrCreateAsync(
-            (nameof(CachedGithubOrganizationService), nameof(FindByIdAsync), organizationId),
-            _ => _service.FindByIdAsync(organizationId, cancellationToken));
+            key,
+            () => _service.FindByIdAsync(organizationId, cancellationToken),
+            absoluteExpirationRelativeToNow: TimeSpan.FromHours(24),
+            slidingExpiration: TimeSpan.FromHours(10));
     }
 
     public Task<GithubTeamModel?> FindTeamAsync(long organizationId, long teamId, CancellationToken cancellationToken)
     {
+        object key = (nameof(CachedGithubOrganizationService), nameof(FindTeamAsync), organizationId, teamId);
+
         return _cache.GetOrCreateAsync(
-            (nameof(CachedGithubOrganizationService), nameof(FindTeamAsync), organizationId, teamId),
-            _ => _service.FindTeamAsync(organizationId, teamId, cancellationToken));
+            key,
+            () => _service.FindTeamAsync(organizationId, teamId, cancellationToken),
+            absoluteExpirationRelativeToNow: TimeSpan.FromHours(24),
+            slidingExpiration: TimeSpan.FromHours(10));
     }
 
-    public Task<IReadOnlyCollection<GithubUserModel>> GetTeamMembersAsync(
+    public async Task<IReadOnlyCollection<GithubUserModel>> GetTeamMembersAsync(
         long organizationId,
         long teamId,
         CancellationToken cancellationToken)
     {
-        return _service.GetTeamMembersAsync(organizationId, teamId, cancellationToken);
+        object key = (nameof(CachedGithubOrganizationService), nameof(GetTeamMembersAsync), organizationId, teamId);
+
+        IReadOnlyCollection<GithubUserModel>? members = await _cache.GetOrCreateAsync(
+            key,
+            () => _service.GetTeamMembersAsync(organizationId, teamId, cancellationToken),
+            absoluteExpirationRelativeToNow: TimeSpan.FromMinutes(10),
+            slidingExpiration: TimeSpan.FromSeconds(10));
+
+        return members ?? Array.Empty<GithubUserModel>();
     }
 }

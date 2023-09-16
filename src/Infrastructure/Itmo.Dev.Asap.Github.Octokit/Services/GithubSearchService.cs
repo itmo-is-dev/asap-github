@@ -94,7 +94,7 @@ internal class GithubSearchService : IGithubSearchService
             foreach (Repository repository in response.Items)
             {
                 count++;
-                yield return new GithubRepositoryModel(repository.Id, repository.Name);
+                yield return new GithubRepositoryModel(repository.Id, repository.Name, repository.IsTemplate);
             }
 
             if (totalCount >= response.TotalCount)
