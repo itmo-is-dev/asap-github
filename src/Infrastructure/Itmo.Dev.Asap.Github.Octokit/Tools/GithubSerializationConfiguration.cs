@@ -1,5 +1,6 @@
 using FluentSerialization;
 using Itmo.Dev.Asap.Github.Application.Octokit.Models;
+using Itmo.Dev.Asap.Github.Octokit.Models;
 
 namespace Itmo.Dev.Asap.Github.Octokit.Tools;
 
@@ -7,10 +8,16 @@ public class GithubSerializationConfiguration : ISerializationConfiguration
 {
     public void Configure(ISerializationConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.Type<GithubUserModel>(builder =>
+        configurationBuilder.Type<GithubUserSerializationModel>(builder =>
         {
             builder.Property(x => x.Id).Called("id");
             builder.Property(x => x.Username).Called("login");
+
+            builder.Property(x => x.Type)
+                .Called("type")
+                .ConvertedWith(
+                    x => x.ToString(),
+                    s => Enum.TryParse(s, out GithubUserType type) ? type : GithubUserType.Unknown);
         });
 
         configurationBuilder.Type<GithubOrganizationModel>(builder =>
@@ -24,6 +31,7 @@ public class GithubSerializationConfiguration : ISerializationConfiguration
         {
             builder.Property(x => x.Id).Called("id");
             builder.Property(x => x.Name).Called("name");
+            builder.Property(x => x.IsTemplate).Called("is_template");
         });
 
         configurationBuilder.Type<GithubTeamModel>(builder =>

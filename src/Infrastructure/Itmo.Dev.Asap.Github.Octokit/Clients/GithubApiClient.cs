@@ -1,5 +1,6 @@
 using Itmo.Dev.Asap.Github.Application.Octokit.Models;
 using Itmo.Dev.Asap.Github.Octokit.Extensions;
+using Itmo.Dev.Asap.Github.Octokit.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net;
@@ -69,10 +70,12 @@ internal class GithubApiClient
         if (IsValidResponse(response) is false)
             return null;
 
-        GithubUserModel[]? users = await response.Content
-            .DeserializeAsync<GithubUserModel[]>(_serializer, cancellationToken);
+        GithubUserSerializationModel[]? users = await response.Content
+            .DeserializeAsync<GithubUserSerializationModel[]>(_serializer, cancellationToken);
 
-        return users is [GithubUserModel user] && user.Id.Equals(userId) ? user : null;
+        return users is [{ Type: GithubUserType.User } user] && user.Id.Equals(userId)
+            ? new GithubUserModel(user.Id, user.Username)
+            : null;
     }
 
     public async Task<GithubRepositoryModel?> FindRepositoryByIdAsync(

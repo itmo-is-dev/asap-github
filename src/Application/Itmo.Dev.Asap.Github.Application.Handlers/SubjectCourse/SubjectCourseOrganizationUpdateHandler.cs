@@ -104,6 +104,9 @@ internal class SubjectCourseOrganizationUpdateHandler :
                 .Select(x => x.User.Id)
                 .ToArray();
 
+            if (studentIds is [])
+                break;
+
             await UpdateOrganizationBatchAsync(subjectCourse, studentIds, cancellationToken);
         }
         while (request.PageToken is not null);

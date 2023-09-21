@@ -39,9 +39,13 @@ internal class GithubUserService : IGithubUserService
         try
         {
             User user = await client.User.Get(username);
-            return new GithubUserModel(user.Id, user.Login);
+            return user.Type is AccountType.User ? new GithubUserModel(user.Id, user.Login) : null;
         }
         catch (ApiException e) when (e.StatusCode is HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        catch (ForbiddenException)
         {
             return null;
         }

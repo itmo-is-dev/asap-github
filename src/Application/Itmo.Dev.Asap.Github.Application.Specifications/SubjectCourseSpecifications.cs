@@ -17,6 +17,20 @@ public static class SubjectCourseSpecifications
         return repository.QueryAsync(query, cancellationToken);
     }
 
+    public static async Task<GithubSubjectCourse?> FindByIdAsync(
+        this IGithubSubjectCourseRepository repository,
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var query = GithubSubjectCourseQuery.Build(x => x.WithId(id).WithLimit(1));
+
+        GithubSubjectCourse? subjectCourse = await repository
+            .QueryAsync(query, cancellationToken)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return subjectCourse;
+    }
+
     public static async Task<GithubSubjectCourse> GetByIdAsync(
         this IGithubSubjectCourseRepository repository,
         Guid id,
