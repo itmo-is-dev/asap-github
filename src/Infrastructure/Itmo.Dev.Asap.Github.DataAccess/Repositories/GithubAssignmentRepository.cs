@@ -31,9 +31,8 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
         where 
             (cardinality(:assignment_ids) = 0 or a.assignment_id = any(:assignment_ids))
             and (cardinality(:subject_course_ids) = 0 or a.subject_course_id = any(:subject_course_ids))
-            and (cardinality(:branch_names) = 0 
-                or lower(a.assignment_branch_name) = any(select lower(x) from unnest(:branch_names) as x))
-            and (cardinality(:subject_course_organization_ids) = 0 
+            and (cardinality(:branch_names) = 0 or a.assignment_branch_name = any(:branch_names))
+            and (cardinality(:subject_course_organization_ids) = 0
                 or sc.subject_course_organization_id = any(:subject_course_organization_ids))
         """;
 
