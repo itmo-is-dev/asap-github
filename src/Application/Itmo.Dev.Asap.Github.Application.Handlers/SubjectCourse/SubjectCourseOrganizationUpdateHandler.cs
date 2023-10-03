@@ -178,9 +178,9 @@ internal class SubjectCourseOrganizationUpdateHandler :
 
         foreach (GithubUser student in students)
         {
-            if (existingStudents.TryGetValue(student.Id, out GithubSubjectCourseStudent? existingStudent))
+            if (existingStudents.TryGetValue(student.Id, out _))
             {
-                await TryAddUserPermissionsAsync(subjectCourse, existingStudent, cancellationToken);
+                _logger.LogTrace("Repository for user {User} already exists", student.Id);
                 continue;
             }
 
