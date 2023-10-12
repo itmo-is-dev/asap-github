@@ -8,7 +8,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
-[Mapper]
+[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName)]
 internal static partial class ProtoMapper
 {
     public static partial UserDto ToDto(this User user);
@@ -19,6 +19,8 @@ internal static partial class ProtoMapper
 
     [MapProperty(nameof(SubmissionRate.SubmissionId), nameof(SubmissionRateDto.Id))]
     public static partial SubmissionRateDto ToDto(this SubmissionRate submissionRate);
+
+    public static partial SubmissionStateDto ToDto(this SubmissionState state);
 
     private static DateTime ToDateTime(Timestamp timestamp)
         => timestamp.ToDateTime();
