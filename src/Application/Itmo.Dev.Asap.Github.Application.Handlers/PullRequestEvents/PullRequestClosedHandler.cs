@@ -54,7 +54,7 @@ internal class PullRequestClosedHandler : IRequestHandler<Command>
             (true, false) => await HandleRejectedAsync(issuer, submission, cancellationToken),
             (false, var isMerged) => await HandleAbandonedAsync(issuer, submission, isMerged, cancellationToken),
         };
-#pragma warning enable IDE0072
+#pragma warning restore IDE0072
 
         await _notifier.SendCommentToPullRequest(message);
     }
