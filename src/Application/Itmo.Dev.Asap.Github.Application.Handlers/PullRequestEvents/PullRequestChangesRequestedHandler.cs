@@ -4,6 +4,7 @@ using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Handlers.Models;
 using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Application.Specifications;
+using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Asap.Github.Domain.Submissions;
 using Itmo.Dev.Asap.Github.Domain.Users;
 using MediatR;
@@ -46,7 +47,7 @@ internal class PullRequestChangesRequestedHandler : IRequestHandler<Command>
             SubmissionNotAcceptedResult.InvalidState invalidState
                 => new InvalidStateMessage("Changes request", invalidState.SubmissionState),
 
-            _ => throw new ArgumentOutOfRangeException(nameof(result)),
+            _ => throw new UnexpectedOperationResultException(),
         };
 
         await _notifier.SendCommentToPullRequest(message);
