@@ -1,11 +1,12 @@
-using Itmo.Dev.Asap.Github.Application.Core.Models;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow.Results;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
 using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
 using Itmo.Dev.Asap.Github.Application.Octokit.Extensions;
 using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Application.Specifications;
+using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
 using Itmo.Dev.Asap.Github.Common.Extensions;
 using Itmo.Dev.Asap.Github.Domain.Assignments;
@@ -56,20 +57,23 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
                 message);
         }
 
-        SubmissionUpdateResult result = await _submissionWorkflowService.SubmissionUpdatedAsync(
+        SubmissionUpdatedResult result = await _submissionWorkflowService.SubmissionUpdatedAsync(
             issuer.Id,
             student.User.Id,
             assignment.Id,
             request.PullRequest.Payload,
             cancellationToken);
 
-        if (result.IsCreated)
+        if (result is not SubmissionUpdatedResult.Success success)
+            throw new UnexpectedOperationResultException();
+
+        if (success.IsCreated)
         {
             var submission = new GithubSubmission(
-                result.Submission.Id,
+                success.SubmissionRate.Id,
                 assignment.Id,
                 student.User.Id,
-                result.Submission.SubmissionDate,
+                success.SubmissionRate.SubmissionDate,
                 request.PullRequest.OrganizationId,
                 request.PullRequest.RepositoryId,
                 request.PullRequest.PullRequestId);
@@ -79,14 +83,14 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
 
             string message = $"""
             Submission created.
-            {result.Submission.ToDisplayString()}
+            {success.SubmissionRate.ToDisplayString()}
             """;
 
             await _notifier.SendCommentToPullRequest(message);
         }
         else
         {
-            await _notifier.NotifySubmissionUpdate(result.Submission);
+            await _notifier.NotifySubmissionUpdate(success.SubmissionRate);
         }
 
         return new Response.Success();

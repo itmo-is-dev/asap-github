@@ -1,43 +1,43 @@
-using Itmo.Dev.Asap.Github.Application.Core.Models;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow.Results;
 
-namespace Itmo.Dev.Asap.Github.Application.Core.Services;
+namespace Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow;
 
 public interface ISubmissionWorkflowService
 {
-    Task<SubmissionActionMessageDto> SubmissionApprovedAsync(
+    Task<SubmissionApprovedResult> SubmissionApprovedAsync(
         Guid issuerId,
         Guid submissionId,
         CancellationToken cancellationToken);
 
-    Task<SubmissionActionMessageDto> SubmissionReactivatedAsync(
+    Task<SubmissionReactivatedResult> SubmissionReactivatedAsync(
         Guid issuerId,
         Guid submissionId,
         CancellationToken cancellationToken);
 
-    Task<SubmissionUpdateResult> SubmissionUpdatedAsync(
+    Task<SubmissionUpdatedResult> SubmissionUpdatedAsync(
         Guid issuerId,
         Guid userId,
         Guid assignmentId,
         string payload,
         CancellationToken cancellationToken);
 
-    Task<SubmissionActionMessageDto> SubmissionAcceptedAsync(
+    Task<SubmissionAcceptedResult> SubmissionAcceptedAsync(
         Guid issuerId,
         Guid submissionId,
         CancellationToken cancellationToken);
 
-    Task<SubmissionActionMessageDto> SubmissionRejectedAsync(
+    Task<SubmissionRejectedResult> SubmissionRejectedAsync(
         Guid issuerId,
         Guid submissionId,
         CancellationToken cancellationToken);
 
-    Task<SubmissionActionMessageDto> SubmissionAbandonedAsync(
+    Task<SubmissionAbandonedResult> SubmissionAbandonedAsync(
         Guid issuerId,
         Guid submissionId,
         bool isTerminal,
         CancellationToken cancellationToken);
 
-    Task<SubmissionActionMessageDto> SubmissionNotAcceptedAsync(
+    Task<SubmissionNotAcceptedResult> SubmissionNotAcceptedAsync(
         Guid issuerId,
         Guid submissionId,
         CancellationToken cancellationToken);
