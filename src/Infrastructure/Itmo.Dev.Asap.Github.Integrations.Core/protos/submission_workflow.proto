@@ -2,6 +2,7 @@ syntax = "proto3";
 option csharp_namespace = "Itmo.Dev.Asap.Core.SubmissionWorkflow";
 
 import "models/submission_rate.proto";
+import "models/submission.proto";
 
 service SubmissionWorkflowService {
   rpc Approved(ApprovedRequest) returns (ApprovedResponse);
@@ -19,7 +20,18 @@ message ApprovedRequest {
 }
 
 message ApprovedResponse {
-  string message = 1;
+  oneof result {
+    Success success = 1;
+    InvalidState invalid_state = 2;
+  }
+
+  message Success {
+    SubmissionRate submission_rate = 1;
+  }
+
+  message InvalidState {
+    SubmissionState submission_state = 1;
+  }
 }
 
 message ReactivatedRequest {
@@ -28,8 +40,18 @@ message ReactivatedRequest {
 }
 
 message ReactivatedResponse {
-  string message = 1;
-} 
+  oneof result {
+    Success success = 1;
+    InvalidState invalid_state = 2;
+  }
+
+  message Success {
+  }
+
+  message InvalidState {
+    SubmissionState submission_state = 1;
+  }
+}
 
 message UpdatedRequest {
   string issuer_id = 1;
@@ -39,8 +61,14 @@ message UpdatedRequest {
 }
 
 message UpdatedResponse {
-  bool is_created = 1;
-  SubmissionRate submission = 2;
+  oneof result {
+    Success success = 1;
+  }
+
+  message Success {
+    SubmissionRate submission_rate = 1;
+    bool is_created = 2;
+  }
 }
 
 message AcceptedRequest {
@@ -49,7 +77,18 @@ message AcceptedRequest {
 }
 
 message AcceptedResponse {
-  string message = 1;
+  oneof result {
+    Success success = 1;
+    InvalidState invalid_state = 2;
+  }
+
+  message Success {
+    SubmissionRate submission_rate = 1;
+  }
+
+  message InvalidState {
+    SubmissionState submission_state = 1;
+  }
 }
 
 message RejectedRequest {
@@ -58,7 +97,18 @@ message RejectedRequest {
 }
 
 message RejectedResponse {
-  string message = 1;
+  oneof result {
+    Success success = 1;
+    InvalidState invalid_state = 2;
+  }
+
+  message Success {
+    int32 submission_code = 1;
+  }
+
+  message InvalidState {
+    SubmissionState submission_state = 1;
+  }
 }
 
 message AbandonedRequest {
@@ -68,7 +118,18 @@ message AbandonedRequest {
 }
 
 message AbandonedResponse {
-  string message = 1;
+  oneof result {
+    Success success = 1;
+    InvalidState invalid_state = 2;
+  }
+
+  message Success {
+    int32 submission_code = 1;
+  }
+
+  message InvalidState {
+    SubmissionState submission_state = 1;
+  }
 }
 
 message NotAcceptedRequest {
@@ -77,5 +138,16 @@ message NotAcceptedRequest {
 }
 
 message NotAcceptedResponse {
-  string message = 1;
+  oneof result {
+    Success success = 1;
+    InvalidState invalid_state = 2;
+  }
+
+  message Success {
+    SubmissionRate submission_rate = 1;
+  }
+
+  message InvalidState {
+    SubmissionState submission_state = 1;
+  }
 }

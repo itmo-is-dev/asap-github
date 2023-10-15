@@ -1,8 +1,10 @@
-using Itmo.Dev.Asap.Github.Application.Core.Models;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow;
+using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow.Results;
 using Itmo.Dev.Asap.Github.Application.DataAccess;
+using Itmo.Dev.Asap.Github.Application.Handlers.Models;
 using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Application.Specifications;
+using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Asap.Github.Domain.Submissions;
 using Itmo.Dev.Asap.Github.Domain.Users;
 using MediatR;
@@ -33,11 +35,22 @@ internal class PullRequestApprovedHandler : IRequestHandler<Command>
         GithubSubmission submission = await _context.Submissions
             .GetSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
 
-        SubmissionActionMessageDto result = await _submissionWorkflowService.SubmissionApprovedAsync(
+        SubmissionApprovedResult result = await _submissionWorkflowService.SubmissionApprovedAsync(
             issuer.Id,
             submission.Id,
             cancellationToken);
 
-        await _notifier.SendCommentToPullRequest(result.Message);
+        string message = result switch
+        {
+            SubmissionApprovedResult.Success success
+                => $"Submission reviewed successfully\n\n{success.SubmissionRate.ToDisplayString()}",
+
+            SubmissionApprovedResult.InvalidState invalidState
+                => new InvalidStateMessage("Pull request approve", invalidState.State),
+
+            _ => throw new UnexpectedOperationResultException(),
+        };
+
+        await _notifier.SendCommentToPullRequest(message);
     }
 }
