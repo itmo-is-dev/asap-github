@@ -9,6 +9,8 @@ public interface ISubmissionCommandVisitor
 
     Task<SubmissionCommandResult> VisitAsync(BanCommand command);
 
+    Task<SubmissionCommandResult> VisitAsync(UnbanCommand command);
+
     Task<SubmissionCommandResult> VisitAsync(CreateSubmissionCommand command);
 
     Task<SubmissionCommandResult> VisitAsync(DeactivateCommand command);

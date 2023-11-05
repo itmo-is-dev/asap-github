@@ -9,6 +9,7 @@ import "models/submission_rate.proto";
 service SubmissionService {
   rpc Activate(ActivateRequest) returns (ActivateResponse);
   rpc Ban(BanRequest) returns (BanResponse);
+  rpc Unban(UnbanRequest) returns (UnbanResponse);
   rpc Create(CreateRequest) returns (CreateResponse);
   rpc Deactivate(DeactivateRequest) returns (DeactivateResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
@@ -35,6 +36,32 @@ message BanRequest {
 
 message BanResponse {
   Submission submission = 1;
+}
+
+message UnbanRequest {
+  string issuer_id = 1;
+  string student_id = 2;
+  string assignment_id = 3;
+  google.protobuf.Int32Value code = 4;
+}
+
+message UnbanResponse {
+  oneof result {
+    Success success = 1;
+    Unauthorized unauthorized = 2;
+    InvalidMove invalid_move = 3;
+  }
+
+  message Success {
+    Submission submission = 1;
+  }
+
+  message Unauthorized {
+  }
+
+  message InvalidMove {
+    SubmissionState source_state = 1;
+  }
 }
 
 message CreateRequest {
