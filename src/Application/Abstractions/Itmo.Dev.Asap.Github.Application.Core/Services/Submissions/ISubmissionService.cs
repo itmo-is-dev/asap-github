@@ -13,6 +13,13 @@ public interface ISubmissionService
         int? code,
         CancellationToken cancellationToken);
 
+    Task<UnbanSubmissionResult> UnbanSubmissionAsync(
+        Guid issuerId,
+        Guid studentId,
+        Guid assignmentId,
+        int? code,
+        CancellationToken cancellationToken);
+
     Task<CreateSubmissionResult> CreateSubmissionAsync(
         Guid issuerId,
         Guid userId,

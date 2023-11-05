@@ -2,6 +2,7 @@ using Google.Protobuf.WellKnownTypes;
 using Itmo.Dev.Asap.Core.Submissions;
 using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
+using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Services;
@@ -49,6 +50,38 @@ public class SubmissionService : ISubmissionService
         BanResponse response = await _client.BanAsync(request, cancellationToken: cancellationToken);
 
         return response.Submission.ToDto();
+    }
+
+    public async Task<UnbanSubmissionResult> UnbanSubmissionAsync(
+        Guid issuerId,
+        Guid studentId,
+        Guid assignmentId,
+        int? code,
+        CancellationToken cancellationToken)
+    {
+        var request = new UnbanRequest
+        {
+            IssuerId = issuerId.ToString(),
+            StudentId = studentId.ToString(),
+            AssignmentId = assignmentId.ToString(),
+            Code = code,
+        };
+
+        UnbanResponse response = await _client.UnbanAsync(request, cancellationToken: cancellationToken);
+
+        return response.ResultCase switch
+        {
+            UnbanResponse.ResultOneofCase.Success
+                => new UnbanSubmissionResult.Success(response.Success.Submission.ToDto()),
+
+            UnbanResponse.ResultOneofCase.Unauthorized
+                => new UnbanSubmissionResult.Unauthorized(),
+
+            UnbanResponse.ResultOneofCase.InvalidMove
+                => new UnbanSubmissionResult.InvalidMove(response.InvalidMove.SourceState.ToDto()),
+
+            UnbanResponse.ResultOneofCase.None or _ => throw new UnexpectedOperationResultException(),
+        };
     }
 
     public async Task<CreateSubmissionResult> CreateSubmissionAsync(
