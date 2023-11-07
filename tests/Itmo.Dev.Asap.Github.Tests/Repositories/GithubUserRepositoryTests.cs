@@ -1,7 +1,7 @@
 using Dapper;
 using FluentAssertions;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.Users;
 using Itmo.Dev.Asap.Github.Tests.Extensions;
 using Itmo.Dev.Asap.Github.Tests.Fixtures;
 using Itmo.Dev.Asap.Github.Tests.Models;

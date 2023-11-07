@@ -1,16 +1,15 @@
-using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
-using Itmo.Dev.Asap.Github.Application.DataAccess;
-using Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
-using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
-using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.Submissions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
+using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Commands;
+using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.CommandVisitors;
+using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Models;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
+using Itmo.Dev.Asap.Github.Application.Models.PullRequests;
+using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.Models.Submissions;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Application.Specifications;
-using Itmo.Dev.Asap.Github.Commands.CommandVisitors;
-using Itmo.Dev.Asap.Github.Commands.Models;
-using Itmo.Dev.Asap.Github.Commands.SubmissionCommands;
-using Itmo.Dev.Asap.Github.Domain.Assignments;
-using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
-using Itmo.Dev.Asap.Github.Domain.Submissions;
-using Itmo.Dev.Asap.Github.Domain.Users;
 
 namespace Itmo.Dev.Asap.Github.Application.CommandExecution;
 

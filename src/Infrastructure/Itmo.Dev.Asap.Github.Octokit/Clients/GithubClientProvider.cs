@@ -1,5 +1,5 @@
-using Itmo.Dev.Asap.Github.Application.Octokit.Clients;
-using Itmo.Dev.Asap.Github.Application.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Clients;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Octokit.Clients.Service;
 using Itmo.Dev.Asap.Github.Octokit.CredentialStores;
 using Octokit;

@@ -9,7 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\Itmo.Dev.Asap.Github.Application.Handlers\Itmo.Dev.Asap.Github.Application.Handlers.csproj" />
       <ProjectReference Include="..\Application\Itmo.Dev.Asap.Github.Application\Itmo.Dev.Asap.Github.Application.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Caching\Itmo.Dev.Asap.Github.Caching.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Integrations.Core\Itmo.Dev.Asap.Github.Integrations.Core.csproj" />

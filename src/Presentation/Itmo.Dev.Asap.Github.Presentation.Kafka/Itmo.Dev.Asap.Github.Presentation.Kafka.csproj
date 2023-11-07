@@ -4,7 +4,6 @@
       <PackageReference Include="Grpc.Tools"/>
       <PackageReference Include="Itmo.Dev.Platform.Kafka" />
       <PackageReference Include="MediatR" />
-      <PackageReference Include="Riok.Mapperly" />
     </ItemGroup>
 
     <ItemGroup>

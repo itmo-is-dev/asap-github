@@ -1,5 +1,5 @@
 using Grpc.Core;
-using Itmo.Dev.Asap.Github.Application.Octokit.Services;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping;
 using Itmo.Dev.Asap.Github.Search;
 

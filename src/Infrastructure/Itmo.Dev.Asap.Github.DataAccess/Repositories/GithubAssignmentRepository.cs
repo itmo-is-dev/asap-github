@@ -1,11 +1,11 @@
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.Assignments;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Npgsql;
 using System.Runtime.CompilerServices;
+using GithubAssignmentQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubAssignmentQuery;
 
 namespace Itmo.Dev.Asap.Github.DataAccess.Repositories;
 
@@ -53,9 +53,9 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubAssignment(
-                id: reader.GetGuid(assignmentId),
-                subjectCourseId: reader.GetGuid(subjectCourseId),
-                branchName: reader.GetString(assignmentBranchName));
+                Id: reader.GetGuid(assignmentId),
+                SubjectCourseId: reader.GetGuid(subjectCourseId),
+                BranchName: reader.GetString(assignmentBranchName));
         }
     }
 

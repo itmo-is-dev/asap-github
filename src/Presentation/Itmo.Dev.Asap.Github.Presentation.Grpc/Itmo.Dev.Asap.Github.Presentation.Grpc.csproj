@@ -1,19 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-      <PackageReference Include="Grpc.AspNetCore" />
-      <PackageReference Include="Grpc.AspNetCore.Server.Reflection" />
-      <PackageReference Include="MediatR" />
-      <PackageReference Include="System.Linq.Async" />
+        <PackageReference Include="Grpc.AspNetCore"/>
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
+        <PackageReference Include="MediatR"/>
+        <PackageReference Include="System.Linq.Async"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf ProtoRoot="protos" Include="protos\**\*.proto" GrpcServices="Server" />
+        <Protobuf ProtoRoot="protos" Include="protos\**\*.proto" GrpcServices="Server"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Application\Abstractions\Itmo.Dev.Asap.Github.Application.Octokit\Itmo.Dev.Asap.Github.Application.Octokit.csproj" />
-      <ProjectReference Include="..\Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping\Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping.csproj" />
+        <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Github.Application.Abstractions\Itmo.Dev.Asap.Github.Application.Abstractions.csproj"/>
+        <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Github.Application.Contracts\Itmo.Dev.Asap.Github.Application.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

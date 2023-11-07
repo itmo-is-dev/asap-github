@@ -1,13 +1,13 @@
-using Itmo.Dev.Asap.Github.Application.DataAccess.Models;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
+using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Npgsql;
 using System.Runtime.CompilerServices;
 using System.Text;
+using ProvisionedSubjectCourseQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.ProvisionedSubjectCourseQuery;
 
 namespace Itmo.Dev.Asap.Github.DataAccess.Repositories;
 
@@ -39,7 +39,7 @@ public class ProvisionedSubjectCourseRepository : IProvisionedSubjectCourseRepos
 
         var sql = new StringBuilder(baseSql);
 
-        DateTime? cursor = (query.Cursor, query.OrderDirection) switch
+        DateTimeOffset? cursor = (query.Cursor, query.OrderDirection) switch
         {
             (null, null) => null,
             (not null, not null) => query.Cursor.Value,

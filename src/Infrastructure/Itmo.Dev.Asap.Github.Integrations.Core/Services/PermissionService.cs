@@ -1,5 +1,5 @@
 using Itmo.Dev.Asap.Core.Permissions;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Services;
 
