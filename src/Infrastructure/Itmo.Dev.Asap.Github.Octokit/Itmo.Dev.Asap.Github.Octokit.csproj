@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
+<!--        SA1012OpeningBracesMustBeSpacedCorrectly
+            for list pattern matching 
+            suggested: [ { ... } obj ]
+            preferred: [{ ... } obj]
+-->
         <NoWarn>$(NoWarn);SA1012;</NoWarn>
     </PropertyGroup>
 

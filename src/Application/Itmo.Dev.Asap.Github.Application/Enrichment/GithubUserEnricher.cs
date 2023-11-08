@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Github.Application.Abstractions.Mapping;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Enrichment;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Models.Users;
@@ -14,7 +14,7 @@ internal class GithubUserEnricher : IGithubUserEnricher
         _service = service;
     }
 
-    public async Task<EnrichedGithubUser> MapAsync(GithubUser user, CancellationToken cancellationToken)
+    public async Task<EnrichedGithubUser> EnrichAsync(GithubUser user, CancellationToken cancellationToken)
     {
         GithubUserModel? githubUser = await _service.FindByIdAsync(user.GithubId, cancellationToken);
         return new EnrichedGithubUser(user.Id, user.GithubId, githubUser?.Username ?? string.Empty);

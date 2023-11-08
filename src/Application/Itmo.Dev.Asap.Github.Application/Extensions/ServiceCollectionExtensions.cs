@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Github.Application.Abstractions.Mapping;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Enrichment;
 using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Parsers;
 using Itmo.Dev.Asap.Github.Application.Enrichment;
 using Itmo.Dev.Asap.Github.Application.Invites;

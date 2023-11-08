@@ -1,6 +1,6 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.Abstractions.Mapping;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Enrichment;
 using Itmo.Dev.Asap.Github.Application.Models.Users;
 using MediatR;
 using static Itmo.Dev.Asap.Github.Application.Contracts.Users.Queries.FindUserById;
@@ -29,7 +29,7 @@ internal class FindUserByIdHandler : IRequestHandler<Query, Response>
         if (user is null)
             return new Response(null);
 
-        EnrichedGithubUser dto = await _enricher.MapAsync(user, cancellationToken);
+        EnrichedGithubUser dto = await _enricher.EnrichAsync(user, cancellationToken);
 
         return new Response(dto);
     }

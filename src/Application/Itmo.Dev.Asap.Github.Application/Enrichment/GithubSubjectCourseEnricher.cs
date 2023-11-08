@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Github.Application.Abstractions.Mapping;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Enrichment;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
@@ -18,7 +18,7 @@ internal class GithubSubjectCourseEnricher : IGithubSubjectCourseEnricher
         _repositoryService = repositoryService;
     }
 
-    public async Task<EnrichedGithubSubjectCourse> MapAsync(
+    public async Task<EnrichedGithubSubjectCourse> EnrichAsync(
         GithubSubjectCourse subjectCourse,
         CancellationToken cancellationToken)
     {
