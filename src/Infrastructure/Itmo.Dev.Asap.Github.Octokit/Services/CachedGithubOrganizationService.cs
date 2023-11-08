@@ -1,5 +1,5 @@
-using Itmo.Dev.Asap.Github.Application.Octokit.Models;
-using Itmo.Dev.Asap.Github.Application.Octokit.Services;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Common.Extensions;
 using Itmo.Dev.Asap.Github.Common.Tools;
 

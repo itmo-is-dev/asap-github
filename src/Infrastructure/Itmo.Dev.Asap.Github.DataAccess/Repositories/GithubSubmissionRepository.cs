@@ -1,13 +1,13 @@
-using Itmo.Dev.Asap.Github.Application.DataAccess.Models;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.Submissions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
+using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Npgsql;
 using System.Runtime.CompilerServices;
 using System.Text;
+using GithubSubmissionQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubSubmissionQuery;
 
 namespace Itmo.Dev.Asap.Github.DataAccess.Repositories;
 
@@ -90,13 +90,13 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubSubmission(
-                id: reader.GetGuid(submissionId),
-                assignmentId: reader.GetGuid(assignmentId),
-                userId: reader.GetGuid(userId),
-                createdAt: reader.GetDateTime(createdAt),
-                organizationId: reader.GetInt64(organization),
-                repositoryId: reader.GetInt64(repository),
-                pullRequestId: reader.GetInt64(pullRequest));
+                Id: reader.GetGuid(submissionId),
+                AssignmentId: reader.GetGuid(assignmentId),
+                UserId: reader.GetGuid(userId),
+                CreatedAt: reader.GetDateTime(createdAt),
+                OrganizationId: reader.GetInt64(organization),
+                RepositoryId: reader.GetInt64(repository),
+                PullRequestId: reader.GetInt64(pullRequest));
         }
     }
 

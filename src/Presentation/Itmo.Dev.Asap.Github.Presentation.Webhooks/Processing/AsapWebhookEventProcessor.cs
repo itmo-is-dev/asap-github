@@ -1,6 +1,6 @@
-using Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
-using Itmo.Dev.Asap.Github.Application.Octokit.Clients;
-using Itmo.Dev.Asap.Github.Application.Octokit.Extensions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Clients;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Extensions;
+using Itmo.Dev.Asap.Github.Application.Models.PullRequests;
 using Itmo.Dev.Asap.Github.Presentation.Webhooks.Notifiers;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

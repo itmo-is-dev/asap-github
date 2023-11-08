@@ -1,24 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <LangVersion>11</LangVersion>
-    </PropertyGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\..\Application\Abstractions\Itmo.Dev.Asap.Github.Application.DataAccess\Itmo.Dev.Asap.Github.Application.DataAccess.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="FluentMigrator" />
-        <PackageReference Include="FluentMigrator.Runner" />
-        <PackageReference Include="FluentMigrator.Runner.Postgres" />
         <PackageReference Include="Itmo.Dev.Platform.Postgres" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
         <PackageReference Include="Npgsql" />
     </ItemGroup>
     
     <ItemGroup>
         <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Tests" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Github.Application.Abstractions\Itmo.Dev.Asap.Github.Application.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

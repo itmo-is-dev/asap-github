@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Github.Application.Octokit.Clients;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Clients;
 using Microsoft.Extensions.Logging;
 using Octokit;
 using Octokit.Webhooks;

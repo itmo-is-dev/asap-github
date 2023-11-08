@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Application\Abstractions\Itmo.Dev.Asap.Github.Application.Octokit\Itmo.Dev.Asap.Github.Application.Octokit.csproj" />
+      <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Github.Application.Abstractions\Itmo.Dev.Asap.Github.Application.Abstractions.csproj" />
       <ProjectReference Include="..\..\Application\Itmo.Dev.Asap.Github.Application.Contracts\Itmo.Dev.Asap.Github.Application.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="GitHubJwt" />
+        <PackageReference Include="MediatR" />
         <PackageReference Include="Newtonsoft.Json" />
         <PackageReference Include="Octokit" />
         <PackageReference Include="Octokit.Webhooks.AspNetCore" />

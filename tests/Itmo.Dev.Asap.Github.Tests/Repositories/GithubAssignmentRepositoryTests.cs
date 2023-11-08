@@ -1,9 +1,8 @@
 using Dapper;
 using FluentAssertions;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
+using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
 using Itmo.Dev.Asap.Github.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.Assignments;
-using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 using Itmo.Dev.Asap.Github.Tests.Extensions;
 using Itmo.Dev.Asap.Github.Tests.Fixtures;
 using Itmo.Dev.Asap.Github.Tests.Models;
@@ -15,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using Xunit;
 using Xunit.Abstractions;
+using GithubAssignmentQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubAssignmentQuery;
 
 namespace Itmo.Dev.Asap.Github.Tests.Repositories;
 
@@ -55,8 +55,7 @@ public class GithubAssignmentRepositoryTests : TestBase, IAsyncLifetime
 
         GithubAssignmentModel[] assignments = _fixture.Connection.Query<GithubAssignmentModel>(sql).ToArray();
 
-        GithubAssignmentModel assignmentModel = assignments.Should().ContainSingle().Subject;
-        assignmentModel.Should().NotBeEquivalentTo(assignment);
+        assignments.Should().ContainSingle().Which.Should().BeEquivalentTo(assignment);
     }
 
     [Fact]

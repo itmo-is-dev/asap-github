@@ -1,12 +1,13 @@
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
-using Itmo.Dev.Asap.Github.Domain.Users;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
+using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Npgsql;
 using System.Runtime.CompilerServices;
+using GithubSubjectCourseQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubSubjectCourseQuery;
+using GithubSubjectCourseStudentQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubSubjectCourseStudentQuery;
 
 namespace Itmo.Dev.Asap.Github.DataAccess.Repositories;
 
@@ -108,10 +109,10 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubSubjectCourse(
-                id: reader.GetGuid(subjectCourseId),
-                organizationId: reader.GetInt64(organization),
-                templateRepositoryId: reader.GetInt64(templateRepository),
-                mentorTeamId: reader.GetInt64(mentorTeam));
+                Id: reader.GetGuid(subjectCourseId),
+                OrganizationId: reader.GetInt64(organization),
+                TemplateRepositoryId: reader.GetInt64(templateRepository),
+                MentorTeamId: reader.GetInt64(mentorTeam));
         }
     }
 
@@ -136,8 +137,8 @@ internal class GithubSubjectCourseRepository : IGithubSubjectCourseRepository
         while (await reader.ReadAsync(cancellationToken))
         {
             var user = new GithubUser(
-                id: reader.GetGuid(userId),
-                githubId: reader.GetInt64(userGithubId));
+                Id: reader.GetGuid(userId),
+                GithubId: reader.GetInt64(userGithubId));
 
             yield return new GithubSubjectCourseStudent(
                 SubjectCourseId: reader.GetGuid(subjectCourseId),

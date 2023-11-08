@@ -40,7 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Application\Itmo.Dev.Asap.Github.Application.Handlers\Itmo.Dev.Asap.Github.Application.Handlers.csproj" />
+      <ProjectReference Include="..\..\src\Application\Itmo.Dev.Asap.Github.Application\Itmo.Dev.Asap.Github.Application.csproj" />
       <ProjectReference Include="..\..\src\Infrastructure\Itmo.Dev.Asap.Github.DataAccess\Itmo.Dev.Asap.Github.DataAccess.csproj" />
     </ItemGroup>
 

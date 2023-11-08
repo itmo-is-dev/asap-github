@@ -1,6 +1,6 @@
 using Itmo.Dev.Asap.Core.Users;
-using Itmo.Dev.Asap.Github.Application.Core.Services;
-using Itmo.Dev.Asap.Github.Application.Dto.Users;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 

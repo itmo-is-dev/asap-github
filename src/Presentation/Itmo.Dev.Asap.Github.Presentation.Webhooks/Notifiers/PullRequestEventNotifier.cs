@@ -1,4 +1,4 @@
-using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 using Microsoft.Extensions.Logging;
 using Octokit.Webhooks;
 

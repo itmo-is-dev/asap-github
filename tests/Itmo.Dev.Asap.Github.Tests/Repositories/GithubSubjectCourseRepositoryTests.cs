@@ -1,8 +1,7 @@
 using Dapper;
 using FluentAssertions;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
+using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
 using Itmo.Dev.Asap.Github.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
 using Itmo.Dev.Asap.Github.Tests.Extensions;
 using Itmo.Dev.Asap.Github.Tests.Fixtures;
 using Itmo.Dev.Asap.Github.Tests.Models;
@@ -13,6 +12,8 @@ using Itmo.Dev.Platform.Testing.Mocks;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using Xunit;
+using GithubSubjectCourseQuery =
+    Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubSubjectCourseQuery;
 
 namespace Itmo.Dev.Asap.Github.Tests.Repositories;
 
@@ -53,8 +54,7 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
 
         GithubSubjectCourseModel[] subjectCourses = _fixture.Connection.Query<GithubSubjectCourseModel>(sql).ToArray();
 
-        GithubSubjectCourseModel subjectCourseModel = subjectCourses.Should().ContainSingle().Subject;
-        subjectCourseModel.Should().NotBeEquivalentTo(subjectCourse);
+        subjectCourses.Should().ContainSingle().Which.Should().BeEquivalentTo(subjectCourse);
     }
 
     [Fact]
@@ -71,7 +71,10 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
         repository.Add(subjectCourse);
         await unit.CommitAsync(IsolationLevel.ReadCommitted, default);
 
-        subjectCourse.MentorTeamId = Faker.Random.Long(1000, 2000);
+        subjectCourse = subjectCourse with
+        {
+            MentorTeamId = Faker.Random.Long(1000, 2000),
+        };
 
         // Act
         repository.Update(subjectCourse);
@@ -89,8 +92,7 @@ public class GithubSubjectCourseRepositoryTests : TestBase, IAsyncLifetime
 
         GithubSubjectCourseModel[] subjectCourses = _fixture.Connection.Query<GithubSubjectCourseModel>(sql).ToArray();
 
-        GithubSubjectCourseModel subjectCourseModel = subjectCourses.Should().ContainSingle().Subject;
-        subjectCourseModel.Should().NotBeEquivalentTo(subjectCourse);
+        subjectCourses.Should().ContainSingle().Which.Should().BeEquivalentTo(subjectCourse);
     }
 
     [Fact]

@@ -1,5 +1,5 @@
-using Itmo.Dev.Asap.Github.Application.DataAccess;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using System.Data;
 

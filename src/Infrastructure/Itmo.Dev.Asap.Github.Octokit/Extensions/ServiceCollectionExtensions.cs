@@ -1,8 +1,8 @@
 using FluentSerialization;
 using FluentSerialization.Extensions.NewtonsoftJson;
 using GitHubJwt;
-using Itmo.Dev.Asap.Github.Application.Octokit.Clients;
-using Itmo.Dev.Asap.Github.Application.Octokit.Services;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Clients;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Github.Octokit.Clients;
 using Itmo.Dev.Asap.Github.Octokit.Configuration;

@@ -1,14 +1,14 @@
 using FluentAssertions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Contracts.Users.Commands;
-using Itmo.Dev.Asap.Github.Application.DataAccess;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.Handlers.Users;
-using Itmo.Dev.Asap.Github.Application.Octokit.Models;
-using Itmo.Dev.Asap.Github.Application.Octokit.Services;
-using Itmo.Dev.Asap.Github.Domain.Users;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
+using Itmo.Dev.Asap.Github.Application.Users;
 using Itmo.Dev.Platform.Testing;
 using Moq;
 using Xunit;
+using GithubUserQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubUserQuery;
 
 namespace Itmo.Dev.Asap.Github.Tests.Handlers;
 
@@ -47,7 +47,7 @@ public class UpdateGithubUsernameHandlerTests : TestBase
         response.Should().BeOfType<UpdateGithubUsernames.Response.Success>();
 
         persistenceContext.Verify(
-            x => x.Users.Update(user),
+            x => x.Users.Update(It.Is<GithubUser>(u => u.Id == user.Id && u.GithubId != user.GithubId)),
             Times.Once);
     }
 

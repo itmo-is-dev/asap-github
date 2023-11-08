@@ -1,13 +1,12 @@
-﻿using Itmo.Dev.Asap.Github.Application.Contracts.Assignments.Notifications;
-using Itmo.Dev.Asap.Github.Application.DataAccess;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.Dto.Assignments;
-using Itmo.Dev.Asap.Github.Application.Handlers.Assignments;
-using Itmo.Dev.Asap.Github.Domain.Assignments;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
+using Itmo.Dev.Asap.Github.Application.Assignments;
+using Itmo.Dev.Asap.Github.Application.Contracts.Assignments.Notifications;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
 using Itmo.Dev.Platform.Testing;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
+using GithubAssignmentQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubAssignmentQuery;
 
 namespace Itmo.Dev.Asap.Github.Tests.Handlers;
 
@@ -18,18 +17,16 @@ public class GithubAssignmentCreatedHandlerTest : TestBase
     [Fact]
     public async void AddDuplicateAssignment_ShouldUpdate()
     {
-        var assignmentDto = new AssignmentDto(
+        var assignment = new GithubAssignment(
             Faker.Random.Guid(),
             Faker.Random.Guid(),
-            "amogus",
             "amogus");
 
-        var notification = new AssignmentCreated.Notification(assignmentDto);
-        var githubAssignment = new GithubAssignment(Guid.NewGuid(), Guid.NewGuid(), assignmentDto.ShortName);
+        var notification = new AssignmentCreated.Notification(assignment);
 
         _persistenceContext
             .Setup(context => context.Assignments.QueryAsync(It.IsAny<GithubAssignmentQuery>(), CancellationToken.None))
-            .Returns(() => new List<GithubAssignment> { githubAssignment }.ToAsyncEnumerable());
+            .Returns(() => new List<GithubAssignment> { assignment }.ToAsyncEnumerable());
 
         _persistenceContext
             .Setup(context => context.Assignments.Update(It.IsAny<GithubAssignment>()))

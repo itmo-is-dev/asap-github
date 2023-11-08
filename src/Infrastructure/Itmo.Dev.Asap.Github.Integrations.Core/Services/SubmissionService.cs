@@ -1,7 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Itmo.Dev.Asap.Core.Submissions;
-using Itmo.Dev.Asap.Github.Application.Core.Services.Submissions;
-using Itmo.Dev.Asap.Github.Application.Dto.Submissions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.Submissions;
+using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
