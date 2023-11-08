@@ -13,7 +13,7 @@ public class SubmissionCommandParser : ISubmissionCommandParser
 
     public SubmissionCommandParser()
     {
-        _commandTypes = new AssemblyScanner(typeof(IAssemblyMarker))
+        _commandTypes = new AssemblyScanner(typeof(ISubmissionCommand))
             .ScanForTypesThat()
             .AreAssignableTo<ISubmissionCommand>()
             .AreNotInterfaces()
