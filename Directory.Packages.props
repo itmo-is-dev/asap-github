@@ -17,6 +17,7 @@
     <PackageVersion Include="Itmo.Dev.Platform.Logging" Version="1.0.45" />
     <PackageVersion Include="Itmo.Dev.Platform.YandexCloud" Version="1.0.45" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
     <PackageVersion Include="Npgsql" Version="7.0.4" />
@@ -25,7 +26,7 @@
     <PackageVersion Include="Scrutor" Version="4.2.2" />
     <PackageVersion Include="Sentry.AspNetCore" Version="3.33.0" />
     <PackageVersion Include="Sentry.Serilog" Version="3.33.0" />
-    <PackageVersion Include="SourceKit.Generators.Builder" Version="1.0.4" />
+    <PackageVersion Include="SourceKit.Generators.Builder" Version="1.1.21" />
     <PackageVersion Include="System.Runtime.Caching" Version="7.0.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="3.3.0" />
   </ItemGroup>

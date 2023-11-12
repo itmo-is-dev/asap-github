@@ -1,16 +1,15 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Common.Tools;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Itmo.Dev.Asap.Github.Octokit.Services;
 
 internal class CachedGithubRepositoryService : IGithubRepositoryService
 {
-    private readonly IGithubMemoryCache _cache;
+    private readonly IGithubCache _cache;
     private readonly IGithubRepositoryService _service;
 
-    public CachedGithubRepositoryService(IGithubMemoryCache cache, IGithubRepositoryService service)
+    public CachedGithubRepositoryService(IGithubCache cache, IGithubRepositoryService service)
     {
         _cache = cache;
         _service = service;
@@ -22,8 +21,9 @@ internal class CachedGithubRepositoryService : IGithubRepositoryService
         CancellationToken cancellationToken)
     {
         return _cache.GetOrCreateAsync(
-            (nameof(CachedGithubRepositoryService), nameof(FindByIdAsync), organizationId, repositoryId),
-            _ => _service.FindByIdAsync(organizationId, repositoryId, cancellationToken));
+            $"{nameof(CachedGithubRepositoryService)}-{nameof(FindByIdAsync)}-{organizationId}-{repositoryId}",
+            cancellationToken,
+            c => _service.FindByIdAsync(organizationId, repositoryId, c));
     }
 
     public Task AddTeamPermissionAsync(
