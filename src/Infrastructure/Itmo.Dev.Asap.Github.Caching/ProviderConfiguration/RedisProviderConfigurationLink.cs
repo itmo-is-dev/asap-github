@@ -1,4 +1,5 @@
 using FluentChaining;
+using Itmo.Dev.Asap.Github.Caching.Models;
 using Itmo.Dev.Asap.Github.Caching.Tools;
 using Itmo.Dev.Asap.Github.Common.Tools;
 using Microsoft.Extensions.Configuration;
@@ -16,23 +17,30 @@ public class RedisProviderConfigurationLink : ILink<ConfigurationCommand>
     {
         const string key = "Infrastructure:Cache:Provider:Redis";
         const string enabledKey = $"{key}:Enabled";
-        const string configurationKey = $"{key}:Configuration";
 
         bool isEnabled = request.Configuration.GetSection(enabledKey).Get<bool>();
 
         if (isEnabled is false)
             return next.Invoke(request, context);
 
-        ConfigurationOptions? redisConfig = request.Configuration.GetSection(key).Get<ConfigurationOptions>();
+        RedisConfiguration? redisConfig = request.Configuration.GetSection(key).Get<RedisConfiguration>();
 
         if (redisConfig is null)
             return next.Invoke(request, context);
 
         request.Collection.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = request.Configuration.GetSection(configurationKey).Value;
-            Console.WriteLine(options.Configuration);
-            options.ConfigurationOptions = redisConfig;
+            options.ConfigurationOptions = new ConfigurationOptions
+            {
+                ServiceName = redisConfig.ServiceName,
+                ClientName = redisConfig.ClientName,
+                Password = redisConfig.Password,
+            };
+
+            foreach (string endpoint in redisConfig.Endpoints)
+            {
+                options.ConfigurationOptions.EndPoints.Add(endpoint);
+            }
         });
 
         request.Collection.AddSingleton<IGithubCache, GithubRedisCache>();
