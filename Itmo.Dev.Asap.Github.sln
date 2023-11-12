@@ -53,6 +53,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Applic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Application.Models", "src\Application\Itmo.Dev.Asap.Github.Application.Models\Itmo.Dev.Asap.Github.Application.Models.csproj", "{873B9A4B-C058-473F-BBEF-6EC0BF5223A8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{2489190B-4D5F-4FCD-A17E-BB9229C11A17}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\purge-allure-history.yml = .github\workflows\purge-allure-history.yml
+		.github\workflows\dotnet-build.yml = .github\workflows\dotnet-build.yml
+		.github\workflows\deploy.yml = .github\workflows\deploy.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +84,7 @@ Global
 		{7964F3C9-83A9-480A-97B0-0ADACC61E8F0} = {7B163A32-2150-4F67-827A-6E28A324CE71}
 		{45128D18-C149-4DCE-93C0-EB403ACA30AE} = {38BFC385-8F96-41A8-B131-7613C35F57D4}
 		{873B9A4B-C058-473F-BBEF-6EC0BF5223A8} = {38BFC385-8F96-41A8-B131-7613C35F57D4}
+		{2489190B-4D5F-4FCD-A17E-BB9229C11A17} = {F3565B39-CE4A-4E1A-A074-69C74972080F}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2A81A201-0ED3-4BBA-BC9B-571D1DEFC3B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
