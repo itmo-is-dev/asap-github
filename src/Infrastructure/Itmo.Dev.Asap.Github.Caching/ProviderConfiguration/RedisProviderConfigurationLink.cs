@@ -31,8 +31,10 @@ public class RedisProviderConfigurationLink : ILink<ConfigurationCommand>
         request.Collection.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = request.Configuration.GetSection(configurationKey).Value;
+            Console.WriteLine(options.Configuration);
             options.ConfigurationOptions = redisConfig;
         });
+
         request.Collection.AddSingleton<IGithubCache, GithubRedisCache>();
 
         return Unit.Value;
