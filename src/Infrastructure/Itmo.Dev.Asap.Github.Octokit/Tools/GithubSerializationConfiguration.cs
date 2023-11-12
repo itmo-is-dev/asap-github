@@ -1,5 +1,5 @@
 using FluentSerialization;
-using Itmo.Dev.Asap.Github.Application.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Octokit.Models;
 
 namespace Itmo.Dev.Asap.Github.Octokit.Tools;

@@ -1,6 +1,6 @@
-using Itmo.Dev.Asap.Github.Application.Octokit.Clients;
-using Itmo.Dev.Asap.Github.Application.Octokit.Models;
-using Itmo.Dev.Asap.Github.Application.Octokit.Services;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Clients;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Octokit.Clients;
 using Itmo.Dev.Asap.Github.Octokit.Configuration;
 using Microsoft.Extensions.Logging;

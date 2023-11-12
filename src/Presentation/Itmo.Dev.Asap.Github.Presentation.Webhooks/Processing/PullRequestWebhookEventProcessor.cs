@@ -1,7 +1,7 @@
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Extensions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents;
-using Itmo.Dev.Asap.Github.Application.Dto.PullRequests;
-using Itmo.Dev.Asap.Github.Application.Octokit.Extensions;
-using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
+using Itmo.Dev.Asap.Github.Application.Models.PullRequests;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Octokit.Webhooks.Events;

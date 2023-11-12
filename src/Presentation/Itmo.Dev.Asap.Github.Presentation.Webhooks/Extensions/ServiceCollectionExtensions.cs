@@ -1,5 +1,4 @@
-using Itmo.Dev.Asap.Github.Application.Octokit.Notifications;
-using Itmo.Dev.Asap.Github.Commands.Extensions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Presentation.Webhooks.Configuration;
 using Itmo.Dev.Asap.Github.Presentation.Webhooks.Notifiers;
 using Itmo.Dev.Asap.Github.Presentation.Webhooks.Processing;
@@ -25,7 +24,6 @@ public static class ServiceCollectionExtensions
         collection.AddScoped<WebhookEventProcessor, AsapWebhookEventProcessor>();
 
         collection.AddScoped<IActionNotifier, ActionNotifier>();
-        collection.AddPresentationCommands();
 
         return collection;
     }

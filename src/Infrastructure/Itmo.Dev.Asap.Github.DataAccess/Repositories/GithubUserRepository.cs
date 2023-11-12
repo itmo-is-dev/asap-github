@@ -1,11 +1,11 @@
-using Itmo.Dev.Asap.Github.Application.DataAccess.Queries;
-using Itmo.Dev.Asap.Github.Application.DataAccess.Repositories;
-using Itmo.Dev.Asap.Github.Domain.Users;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Platform.Postgres.Connection;
 using Itmo.Dev.Platform.Postgres.Extensions;
 using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Npgsql;
 using System.Runtime.CompilerServices;
+using GithubUserQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubUserQuery;
 
 namespace Itmo.Dev.Asap.Github.DataAccess.Repositories;
 

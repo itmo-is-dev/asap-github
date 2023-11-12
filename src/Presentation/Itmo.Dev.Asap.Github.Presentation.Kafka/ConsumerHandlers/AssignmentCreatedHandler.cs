@@ -1,5 +1,6 @@
 using Itmo.Dev.Asap.Github.Application.Contracts.Assignments.Notifications;
-using Itmo.Dev.Asap.Github.Presentation.Kafka.Mapping;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
+using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Kafka;
 using Itmo.Dev.Platform.Kafka.Consumer;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
@@ -23,11 +24,19 @@ public class AssignmentCreatedHandler : IKafkaMessageHandler<AssignmentCreatedKe
     {
         IEnumerable<AssignmentCreated.Notification> notifications = messages
             .GetLatestByKey()
-            .Select(x => new AssignmentCreated.Notification(x.Value.MapTo()));
+            .Select(x => new AssignmentCreated.Notification(Map(x.Value)));
 
         foreach (AssignmentCreated.Notification notification in notifications)
         {
             await _mediator.Publish(notification, cancellationToken);
         }
+    }
+
+    private static GithubAssignment Map(AssignmentCreatedValue value)
+    {
+        return new GithubAssignment(
+            value.Id.ToGuid(),
+            value.SubjectCourseId.ToGuid(),
+            value.ShortName);
     }
 }

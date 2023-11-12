@@ -1,8 +1,6 @@
 #pragma warning disable CA1506
 
 using Itmo.Dev.Asap.Github.Application.Extensions;
-using Itmo.Dev.Asap.Github.Application.Handlers.Extensions;
-using Itmo.Dev.Asap.Github.Application.Mapping.Extensions;
 using Itmo.Dev.Asap.Github.Caching.Extensions;
 using Itmo.Dev.Asap.Github.Common.Extensions;
 using Itmo.Dev.Asap.Github.DataAccess.Extensions;
@@ -25,9 +23,7 @@ builder.Host.AddPlatformSerilog(builder.Configuration);
 builder.Services
     .AddCommon()
     .AddApplication()
-    .AddApplicationHandlers()
-    .AddMapping()
-    .AddGithubCaching()
+    .AddGithubCaching(builder.Configuration)
     .AddDataAccess()
     .AddOctokitIntegration(builder.Configuration)
     .AddCoreIntegration()

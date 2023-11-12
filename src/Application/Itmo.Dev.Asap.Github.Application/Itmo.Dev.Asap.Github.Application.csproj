@@ -1,18 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    
+
     <ItemGroup>
-        <PackageReference Include="MediatR" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="FluentScanning"/>
+        <PackageReference Include="Itmo.Dev.Platform.Common"/>
+        <PackageReference Include="MediatR"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+        <PackageReference Include="System.Linq.Async"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+        <PackageReference Include="CommandLineParser"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Abstractions\Itmo.Dev.Asap.Github.Application.Core\Itmo.Dev.Asap.Github.Application.Core.csproj" />
-        <ProjectReference Include="..\Abstractions\Itmo.Dev.Asap.Github.Application.DataAccess\Itmo.Dev.Asap.Github.Application.DataAccess.csproj" />
-        <ProjectReference Include="..\Abstractions\Itmo.Dev.Asap.Github.Application.Octokit\Itmo.Dev.Asap.Github.Application.Octokit.csproj" />
-        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Contracts\Itmo.Dev.Asap.Github.Application.Contracts.csproj" />
-        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Specifications\Itmo.Dev.Asap.Github.Application.Specifications.csproj" />
-        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Commands\Itmo.Dev.Asap.Github.Commands.csproj" />
+        <ProjectReference Include="..\..\Itmo.Dev.Asap.Github.Common\Itmo.Dev.Asap.Github.Common.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Abstractions\Itmo.Dev.Asap.Github.Application.Abstractions.csproj"/>
+        <ProjectReference Include="..\Itmo.Dev.Asap.Github.Application.Contracts\Itmo.Dev.Asap.Github.Application.Contracts.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Itmo.Dev.Asap.Github.Tests"/>
     </ItemGroup>
 
 </Project>

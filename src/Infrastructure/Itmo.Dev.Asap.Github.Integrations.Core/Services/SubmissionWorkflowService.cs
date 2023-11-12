@@ -1,6 +1,6 @@
 using Itmo.Dev.Asap.Core.SubmissionWorkflow;
-using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow;
-using Itmo.Dev.Asap.Github.Application.Core.Services.SubmissionWorkflow.Results;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubmissionWorkflow;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubmissionWorkflow.Results;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 

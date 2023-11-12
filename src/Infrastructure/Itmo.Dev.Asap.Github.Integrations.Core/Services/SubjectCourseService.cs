@@ -1,6 +1,6 @@
 using Itmo.Dev.Asap.Core.SubjectCourses;
-using Itmo.Dev.Asap.Github.Application.Core.Models;
-using Itmo.Dev.Asap.Github.Application.Core.Services.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Services;

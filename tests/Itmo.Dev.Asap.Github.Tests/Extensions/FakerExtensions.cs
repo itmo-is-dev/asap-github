@@ -1,7 +1,7 @@
 using Bogus;
-using Itmo.Dev.Asap.Github.Domain.Assignments;
-using Itmo.Dev.Asap.Github.Domain.SubjectCourses;
-using Itmo.Dev.Asap.Github.Domain.Users;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
+using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Tests.Models;
 
 namespace Itmo.Dev.Asap.Github.Tests.Extensions;

@@ -1,5 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Notifications;
-using Itmo.Dev.Asap.Github.Presentation.Kafka.Mapping;
+using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Kafka;
 using Itmo.Dev.Platform.Kafka.Consumer;
 using Itmo.Dev.Platform.Kafka.Consumer.Models;
@@ -23,11 +23,20 @@ public class SubjectCourseCreatedHandler : IKafkaMessageHandler<SubjectCourseCre
     {
         IEnumerable<SubjectCourseCreated.Notification> notifications = messages
             .GetLatestByKey()
-            .Select(x => x.Value.MapTo());
+            .Select(x => Map(x.Value));
 
         foreach (SubjectCourseCreated.Notification notification in notifications)
         {
             await _mediator.Publish(notification, cancellationToken);
         }
+    }
+
+    private static SubjectCourseCreated.Notification Map(SubjectCourseCreatedValue value)
+    {
+        var subjectCourse = new SubjectCourseCreated.SubjectCourse(
+            value.SubjectCourse.Id.ToGuid(),
+            value.SubjectCourse.Title);
+
+        return new SubjectCourseCreated.Notification(value.CorrelationId, subjectCourse);
     }
 }
