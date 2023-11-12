@@ -16,6 +16,7 @@ public class RedisProviderConfigurationLink : ILink<ConfigurationCommand>
     {
         const string key = "Infrastructure:Cache:Provider:Redis";
         const string enabledKey = $"{key}:Enabled";
+        const string configurationKey = $"{key}:Configuration";
 
         bool isEnabled = request.Configuration.GetSection(enabledKey).Get<bool>();
 
@@ -27,7 +28,11 @@ public class RedisProviderConfigurationLink : ILink<ConfigurationCommand>
         if (redisConfig is null)
             return next.Invoke(request, context);
 
-        request.Collection.AddStackExchangeRedisCache(options => options.ConfigurationOptions = redisConfig);
+        request.Collection.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = request.Configuration.GetSection(configurationKey).Value;
+            options.ConfigurationOptions = redisConfig;
+        });
         request.Collection.AddSingleton<IGithubCache, GithubRedisCache>();
 
         return Unit.Value;
