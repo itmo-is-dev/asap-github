@@ -23,7 +23,7 @@ builder.Host.AddPlatformSerilog(builder.Configuration);
 builder.Services
     .AddCommon()
     .AddApplication()
-    .AddGithubCaching()
+    .AddGithubCaching(builder.Configuration)
     .AddDataAccess()
     .AddOctokitIntegration(builder.Configuration)
     .AddCoreIntegration()
