@@ -35,6 +35,7 @@ public class RedisProviderConfigurationLink : ILink<ConfigurationCommand>
                 ServiceName = redisConfig.ServiceName,
                 ClientName = redisConfig.ClientName,
                 Password = redisConfig.Password,
+                AllowAdmin = true,
             };
 
             foreach (string endpoint in redisConfig.Endpoints)
