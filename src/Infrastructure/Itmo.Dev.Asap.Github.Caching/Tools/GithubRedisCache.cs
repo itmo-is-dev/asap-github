@@ -9,16 +9,16 @@ namespace Itmo.Dev.Asap.Github.Caching.Tools;
 public class GithubRedisCache : IGithubCache
 {
     private readonly IDistributedCache _cache;
-    private readonly JsonSerializerSettings _serializerSettings;
     private readonly GithubCacheConfiguration _configuration;
+    private readonly JsonSerializer _serializer;
 
     public GithubRedisCache(
         IDistributedCache cache,
-        JsonSerializerSettings serializerSettings,
-        IOptions<GithubCacheConfiguration> configuration)
+        IOptions<GithubCacheConfiguration> configuration,
+        JsonSerializer serializer)
     {
         _cache = cache;
-        _serializerSettings = serializerSettings;
+        _serializer = serializer;
         _configuration = configuration.Value;
     }
 
@@ -37,8 +37,7 @@ public class GithubRedisCache : IGithubCache
             using var streamReader = new StreamReader(stream);
             await using var jsonReader = new JsonTextReader(streamReader);
 
-            var serializer = JsonSerializer.Create(_serializerSettings);
-            T? value = serializer.Deserialize<T>(jsonReader);
+            T? value = _serializer.Deserialize<T>(jsonReader);
 
             if (value is not null)
                 return value;
@@ -51,8 +50,7 @@ public class GithubRedisCache : IGithubCache
             await using var streamWriter = new StreamWriter(stream);
             await using var jsonWriter = new JsonTextWriter(streamWriter);
 
-            var serializer = JsonSerializer.Create(_serializerSettings);
-            serializer.Serialize(jsonWriter, value);
+            _serializer.Serialize(jsonWriter, value);
 
             absoluteExpirationRelativeToNow ??= _configuration.EntryAbsoluteExpiration;
             slidingExpiration ??= _configuration.EntrySlidingExpiration;
