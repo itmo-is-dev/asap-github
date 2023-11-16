@@ -139,7 +139,8 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
                 submission.SubmissionDate,
                 _pullRequest.OrganizationId,
                 _pullRequest.RepositoryId,
-                _pullRequest.PullRequestId);
+                _pullRequest.PullRequestId,
+                _pullRequest.CommitHash);
 
             _context.Submissions.Add(githubSubmission);
             await _context.CommitAsync(default);

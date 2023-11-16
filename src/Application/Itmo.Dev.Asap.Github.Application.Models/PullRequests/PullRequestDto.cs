@@ -9,7 +9,8 @@ public record PullRequestDto(
     long RepositoryId,
     string RepositoryName,
     string BranchName,
-    long PullRequestId)
+    long PullRequestId,
+    string CommitHash)
 {
     public override string ToString()
     {

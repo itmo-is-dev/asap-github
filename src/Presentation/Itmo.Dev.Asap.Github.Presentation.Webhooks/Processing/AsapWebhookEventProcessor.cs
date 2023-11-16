@@ -158,7 +158,8 @@ public class AsapWebhookEventProcessor : WebhookEventProcessor
             RepositoryId: evt.Repository!.Id,
             RepositoryName: evt.Repository!.Name,
             BranchName: evt.PullRequest.Head.Ref,
-            PullRequestId: evt.PullRequest.Number);
+            PullRequestId: evt.PullRequest.Number,
+            CommitHash: evt.PullRequest.Head.Sha);
     }
 
     private PullRequestDto CreateDescriptor(PullRequestEvent evt)
@@ -172,7 +173,8 @@ public class AsapWebhookEventProcessor : WebhookEventProcessor
             RepositoryId: evt.Repository!.Id,
             RepositoryName: evt.Repository!.Name,
             BranchName: evt.PullRequest.Head.Ref,
-            PullRequestId: evt.PullRequest.Number);
+            PullRequestId: evt.PullRequest.Number,
+            CommitHash: evt.PullRequest.Head.Sha);
     }
 
     private async Task<PullRequestDto> GetPullRequestDescriptor(IssueCommentEvent evt)
@@ -192,6 +194,7 @@ public class AsapWebhookEventProcessor : WebhookEventProcessor
             RepositoryId: evt.Repository!.Id,
             RepositoryName: evt.Repository!.Name,
             BranchName: pullRequest.Head.Ref,
-            PullRequestId: pullRequest.Number);
+            PullRequestId: pullRequest.Number,
+            CommitHash: pullRequest.Head.Sha);
     }
 }

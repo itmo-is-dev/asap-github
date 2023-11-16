@@ -7,4 +7,5 @@ public record GithubSubmission(
     DateTimeOffset CreatedAt,
     long OrganizationId,
     long RepositoryId,
-    long PullRequestId);
+    long PullRequestId,
+    string CommitHash);

@@ -76,7 +76,8 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
                 success.SubmissionRate.SubmissionDate,
                 request.PullRequest.OrganizationId,
                 request.PullRequest.RepositoryId,
-                request.PullRequest.PullRequestId);
+                request.PullRequest.PullRequestId,
+                request.PullRequest.CommitHash);
 
             _context.Submissions.Add(submission);
             await _context.CommitAsync(default);
