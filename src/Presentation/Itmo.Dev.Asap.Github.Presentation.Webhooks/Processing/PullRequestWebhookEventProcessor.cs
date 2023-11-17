@@ -53,6 +53,19 @@ public class PullRequestWebhookEventProcessor
                         await _notifier.SendCommentToPullRequest(message);
                     }
 
+                    if (response is PullRequestUpdated.Response.AssignmentNotFound assignmentNotFound)
+                    {
+                        (string branchName, string subjectCourseTitle, string assignments) = assignmentNotFound;
+
+                        string message = $"""
+                        Assignment with branch name '{branchName}' for subject course '{subjectCourseTitle}' was not found. 
+                        Ensure that branch name is correct.
+                        Available assignments: {assignments}
+                        """;
+
+                        await _notifier.SendCommentToPullRequest(message);
+                    }
+
                     break;
                 }
 

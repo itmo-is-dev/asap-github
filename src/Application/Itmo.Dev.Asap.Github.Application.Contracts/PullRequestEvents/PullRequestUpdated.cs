@@ -14,5 +14,10 @@ internal static class PullRequestUpdated
         public sealed record Success : Response;
 
         public sealed record StudentNotFound : Response;
+
+        public sealed record AssignmentNotFound(
+            string BranchName,
+            string SubjectCourseTitle,
+            string SubjectCourseAssignments) : Response;
     }
 }
