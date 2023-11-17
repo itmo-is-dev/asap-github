@@ -51,7 +51,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
         {
             string message = await GetSubjectCourseAssignmentsString(request.PullRequest, cancellationToken);
 
-            throw EntityNotFoundException.AssignmentWasNotFound(
+            return new Response.AssignmentNotFound(
                 request.PullRequest.BranchName,
                 request.PullRequest.OrganizationName,
                 message);
