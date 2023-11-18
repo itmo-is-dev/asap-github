@@ -86,6 +86,7 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         int organization = reader.GetOrdinal("submission_organization_id");
         int repository = reader.GetOrdinal("submission_repository_id");
         int pullRequest = reader.GetOrdinal("submission_pull_request_id");
+        int commitHash = reader.GetOrdinal("submission_commit_hash");
 
         while (await reader.ReadAsync(cancellationToken))
         {
@@ -96,7 +97,8 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
                 CreatedAt: reader.GetDateTime(createdAt),
                 OrganizationId: reader.GetInt64(organization),
                 RepositoryId: reader.GetInt64(repository),
-                PullRequestId: reader.GetInt64(pullRequest));
+                PullRequestId: reader.GetInt64(pullRequest),
+                CommitHash: reader.GetNullableString(commitHash));
         }
     }
 
@@ -124,6 +126,21 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             .AddParameter("organization_id", submission.OrganizationId)
             .AddParameter("repository_id", submission.RepositoryId)
             .AddParameter("pull_request_id", submission.PullRequestId);
+
+        _unitOfWork.Enqueue(command);
+    }
+
+    public void UpdateCommitHash(Guid submissionId, string commitHash)
+    {
+        const string sql = """
+        update submissions 
+        set submission_commit_hash = :hash
+        where submission_id = :id;
+        """;
+
+        using NpgsqlCommand command = new NpgsqlCommand(sql)
+            .AddParameter("id", submissionId)
+            .AddParameter("hash", commitHash);
 
         _unitOfWork.Enqueue(command);
     }
