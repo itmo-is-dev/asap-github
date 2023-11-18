@@ -8,4 +8,4 @@ public record GithubSubmission(
     long OrganizationId,
     long RepositoryId,
     long PullRequestId,
-    string CommitHash);
+    string? CommitHash);

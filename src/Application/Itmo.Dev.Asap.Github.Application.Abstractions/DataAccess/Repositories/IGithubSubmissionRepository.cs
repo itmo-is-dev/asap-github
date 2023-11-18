@@ -8,4 +8,6 @@ public interface IGithubSubmissionRepository
     IAsyncEnumerable<GithubSubmission> QueryAsync(GithubSubmissionQuery query, CancellationToken cancellationToken);
 
     void Add(GithubSubmission submission);
+
+    void UpdateCommitHash(Guid submissionId, string? commitHash);
 }

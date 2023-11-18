@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageVersion Update="Itmo.Dev.Platform.Yandexcloud" Version="1.0.54" />
+      <PackageVersion Update="Itmo.Dev.Platform.Yandexcloud" Version="1.0.60" />
     </ItemGroup>
 
 </Project>

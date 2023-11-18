@@ -91,6 +91,9 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
         }
         else
         {
+            _context.Submissions.UpdateCommitHash(success.SubmissionRate.Id, request.PullRequest.CommitHash);
+            await _context.CommitAsync(default);
+
             await _notifier.NotifySubmissionUpdate(success.SubmissionRate);
         }
 
