@@ -9,5 +9,5 @@ public interface IGithubSubmissionRepository
 
     void Add(GithubSubmission submission);
 
-    void UpdateCommitHash(Guid submissionId, string? commitHash);
+    void UpdateCommitHash(Guid submissionId, string commitHash);
 }

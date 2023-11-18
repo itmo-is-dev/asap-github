@@ -130,7 +130,7 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         _unitOfWork.Enqueue(command);
     }
 
-    public void UpdateCommitHash(Guid submissionId, string? commitHash)
+    public void UpdateCommitHash(Guid submissionId, string commitHash)
     {
         const string sql = """
         update submissions 
