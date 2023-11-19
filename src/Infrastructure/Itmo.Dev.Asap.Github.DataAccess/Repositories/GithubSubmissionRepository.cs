@@ -33,7 +33,8 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
                s.submission_created_at, 
                s.submission_organization_id,
                s.submission_repository_id, 
-               s.submission_pull_request_id
+               s.submission_pull_request_id,
+               s.submission_commit_hash
         from submissions as s
         join assignments as a using (assignment_id)
         where 
@@ -86,6 +87,7 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         int organization = reader.GetOrdinal("submission_organization_id");
         int repository = reader.GetOrdinal("submission_repository_id");
         int pullRequest = reader.GetOrdinal("submission_pull_request_id");
+        int commitHash = reader.GetOrdinal("submission_commit_hash");
 
         while (await reader.ReadAsync(cancellationToken))
         {
@@ -96,7 +98,8 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
                 CreatedAt: reader.GetDateTime(createdAt),
                 OrganizationId: reader.GetInt64(organization),
                 RepositoryId: reader.GetInt64(repository),
-                PullRequestId: reader.GetInt64(pullRequest));
+                PullRequestId: reader.GetInt64(pullRequest),
+                CommitHash: reader.GetNullableString(commitHash));
         }
     }
 
@@ -111,9 +114,17 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             submission_created_at,
             submission_organization_id, 
             submission_repository_id,
-            submission_pull_request_id
+            submission_pull_request_id,
+            submission_commit_hash
         )
-        values (:id, :assignment_id, :user_id, :created_at, :organization_id, :repository_id, :pull_request_id)
+        values (:id,
+                :assignment_id,
+                :user_id,
+                :created_at,
+                :organization_id,
+                :repository_id,
+                :pull_request_id,
+                :commit_hash)
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
@@ -123,7 +134,23 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             .AddParameter("created_at", submission.CreatedAt)
             .AddParameter("organization_id", submission.OrganizationId)
             .AddParameter("repository_id", submission.RepositoryId)
-            .AddParameter("pull_request_id", submission.PullRequestId);
+            .AddParameter("pull_request_id", submission.PullRequestId)
+            .AddParameter("commit_hash", submission.CommitHash);
+
+        _unitOfWork.Enqueue(command);
+    }
+
+    public void UpdateCommitHash(Guid submissionId, string commitHash)
+    {
+        const string sql = """
+        update submissions 
+        set submission_commit_hash = :commit_hash
+        where submission_id = :id;
+        """;
+
+        using NpgsqlCommand command = new NpgsqlCommand(sql)
+            .AddParameter("id", submissionId)
+            .AddParameter("commit_hash", commitHash);
 
         _unitOfWork.Enqueue(command);
     }
