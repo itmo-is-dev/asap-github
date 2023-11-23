@@ -1,4 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
 using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Platform.Postgres.Connection;
@@ -7,7 +8,6 @@ using Itmo.Dev.Platform.Postgres.UnitOfWork;
 using Npgsql;
 using System.Runtime.CompilerServices;
 using System.Text;
-using GithubSubmissionQuery = Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries.GithubSubmissionQuery;
 
 namespace Itmo.Dev.Asap.Github.DataAccess.Repositories;
 
@@ -80,26 +80,100 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
 
         await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
 
+        await foreach (GithubSubmission submission in ReadSubmissionsAsync(reader, cancellationToken))
+        {
+            yield return submission;
+        }
+    }
+
+    public async IAsyncEnumerable<GithubSubmission> QueryFirstSubmissionsAsync(
+        FirstGithubSubmissionQuery query,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        const string sql = """
+        with data as 
+        (
+            select *
+            from submissions
+            where 
+                (:skip_user_id_filter or user_id >= :user_id) 
+                and (:skip_assignment_id_filter or assignment_id > :assignment_id)
+            order by (user_id, assignment_id)
+        )
+        select nth_value(submission_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_id,
+               nth_value(assignment_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as assignment_id,
+               nth_value(user_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as user_id,
+               nth_value(submission_created_at, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_created_at,
+               nth_value(submission_organization_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_organization_id,
+               nth_value(submission_repository_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_repository_id,
+               nth_value(submission_pull_request_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_pull_request_id,
+               nth_value(submission_commit_hash, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_commit_hash
+        from data
+        limit :limit;
+        """;
+
+        NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
+
+        await using NpgsqlCommand command = new NpgsqlCommand(sql, connection)
+            .AddParameter("skip_user_id_filter", query.UserId is null)
+            .AddParameter("skip_assignment_id_filter", query.AssignmentId is null)
+            .AddParameter("user_id", query.UserId ?? Guid.Empty)
+            .AddParameter("assignment_id", query.AssignmentId ?? Guid.Empty)
+            .AddParameter("limit", query.PageSize);
+
+        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        await foreach (GithubSubmission submission in ReadSubmissionsAsync(reader, cancellationToken))
+        {
+            yield return submission;
+        }
+    }
+
+    public async IAsyncEnumerable<GithubSubmissionData> QueryDataAsync(
+        GithubSubmissionDataQuery query,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        const string sql = """
+        select submission_id, 
+               user_id, 
+               assignment_id, 
+               submission_data_task_id, 
+               submission_data_file_link
+        from submission_data
+        where 
+            submission_data_task_id = :task_id
+            and (:should_not_filter_user_id or user_id >= :user_id)
+            and (:should_not_filter_assignment_id or assignment_id > :assignment_id)
+        order by user_id, assignment_id
+        limit :limit
+        """;
+
+        NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
+
+        await using NpgsqlCommand command = new NpgsqlCommand(sql, connection)
+            .AddParameter("task_id", query.TaskId)
+            .AddParameter("should_not_filter_user_id", query.PageToken is null)
+            .AddParameter("should_not_filter_assignment_id", query.PageToken is null)
+            .AddParameter("user_id", query.PageToken?.UserId ?? Guid.Empty)
+            .AddParameter("assignment_id", query.PageToken?.AssignmentId ?? Guid.Empty)
+            .AddParameter("limit", query.PageSize);
+
+        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+
         int submissionId = reader.GetOrdinal("submission_id");
-        int assignmentId = reader.GetOrdinal("assignment_id");
         int userId = reader.GetOrdinal("user_id");
-        int createdAt = reader.GetOrdinal("submission_created_at");
-        int organization = reader.GetOrdinal("submission_organization_id");
-        int repository = reader.GetOrdinal("submission_repository_id");
-        int pullRequest = reader.GetOrdinal("submission_pull_request_id");
-        int commitHash = reader.GetOrdinal("submission_commit_hash");
+        int assignmentId = reader.GetOrdinal("assignment_id");
+        int taskId = reader.GetOrdinal("submission_data_task_id");
+        int fileLink = reader.GetOrdinal("submission_data_file_link");
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            yield return new GithubSubmission(
-                Id: reader.GetGuid(submissionId),
-                AssignmentId: reader.GetGuid(assignmentId),
+            yield return new GithubSubmissionData(
+                SubmissionId: reader.GetGuid(submissionId),
                 UserId: reader.GetGuid(userId),
-                CreatedAt: reader.GetDateTime(createdAt),
-                OrganizationId: reader.GetInt64(organization),
-                RepositoryId: reader.GetInt64(repository),
-                PullRequestId: reader.GetInt64(pullRequest),
-                CommitHash: reader.GetNullableString(commitHash));
+                AssignmentId: reader.GetGuid(assignmentId),
+                TaskId: reader.GetInt64(taskId),
+                FileLink: reader.GetString(fileLink));
         }
     }
 
@@ -140,6 +214,26 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         _unitOfWork.Enqueue(command);
     }
 
+    public void AddData(GithubSubmissionData submissionData)
+    {
+        const string sql = """
+        insert into submission_data(submission_id, user_id, assignment_id, submission_data_task_id, submission_data_file_link) 
+        values (:submission_id, :user_id, :assignment_id, :task_id, :link)
+        on conflict on constraint submission_data_pk
+        do update set submission_id = excluded.submission_id,
+                      submission_data_file_link = excluded.submission_data_file_link;
+        """;
+
+        using NpgsqlCommand command = new NpgsqlCommand(sql)
+            .AddParameter("submission_id", submissionData.SubmissionId)
+            .AddParameter("user_id", submissionData.UserId)
+            .AddParameter("assignment_id", submissionData.AssignmentId)
+            .AddParameter("task_id", submissionData.TaskId)
+            .AddParameter("link", submissionData.FileLink);
+
+        _unitOfWork.Enqueue(command);
+    }
+
     public void UpdateCommitHash(Guid submissionId, string commitHash)
     {
         const string sql = """
@@ -153,5 +247,32 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
             .AddParameter("commit_hash", commitHash);
 
         _unitOfWork.Enqueue(command);
+    }
+
+    private static async IAsyncEnumerable<GithubSubmission> ReadSubmissionsAsync(
+        NpgsqlDataReader reader,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        int submissionId = reader.GetOrdinal("submission_id");
+        int assignmentId = reader.GetOrdinal("assignment_id");
+        int userId = reader.GetOrdinal("user_id");
+        int createdAt = reader.GetOrdinal("submission_created_at");
+        int organization = reader.GetOrdinal("submission_organization_id");
+        int repository = reader.GetOrdinal("submission_repository_id");
+        int pullRequest = reader.GetOrdinal("submission_pull_request_id");
+        int commitHash = reader.GetOrdinal("submission_commit_hash");
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            yield return new GithubSubmission(
+                Id: reader.GetGuid(submissionId),
+                AssignmentId: reader.GetGuid(assignmentId),
+                UserId: reader.GetGuid(userId),
+                CreatedAt: reader.GetDateTime(createdAt),
+                OrganizationId: reader.GetInt64(organization),
+                RepositoryId: reader.GetInt64(repository),
+                PullRequestId: reader.GetInt64(pullRequest),
+                CommitHash: reader.GetNullableString(commitHash));
+        }
     }
 }

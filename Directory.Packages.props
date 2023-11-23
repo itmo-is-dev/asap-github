@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AutoBogus" Version="2.13.1" />
+    <PackageVersion Include="AWSSDK.S3" Version="3.7.301" />
     <PackageVersion Include="Dapper" Version="2.0.143" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.55.0" />
     <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.55.0" />
@@ -16,10 +17,12 @@
     <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.65" />
     <PackageVersion Include="Itmo.Dev.Platform.Logging" Version="1.0.65" />
     <PackageVersion Include="Itmo.Dev.Platform.YandexCloud" Version="1.0.65" />
+    <PackageVersion Include="Itmo.Dev.Platform.BackgroundTasks" Version="1.0.65" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
     <PackageVersion Include="Npgsql" Version="7.0.4" />
     <PackageVersion Include="Respawn" Version="6.1.0" />
     <PackageVersion Include="ronimizy.FluentSerialization" Version="1.2.0" />

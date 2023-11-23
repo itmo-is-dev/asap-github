@@ -105,6 +105,8 @@ public static class ServiceCollectionExtensions
             .Decorate<IGithubOrganizationService, CachedGithubOrganizationService>()
             .AddScoped<IGithubRepositoryService, GithubRepositoryService>()
             .Decorate<IGithubRepositoryService, CachedGithubRepositoryService>()
-            .AddScoped<IGithubSearchService, GithubSearchService>();
+            .AddScoped<IGithubSearchService, GithubSearchService>()
+            .AddScoped<IGithubSubmissionLocatorService, GithubSubmissionLocatorService>()
+            .AddScoped<IGithubContentService, GithubContentService>();
     }
 }

@@ -7,7 +7,17 @@ public interface IGithubSubmissionRepository
 {
     IAsyncEnumerable<GithubSubmission> QueryAsync(GithubSubmissionQuery query, CancellationToken cancellationToken);
 
+    IAsyncEnumerable<GithubSubmission> QueryFirstSubmissionsAsync(
+        FirstGithubSubmissionQuery query,
+        CancellationToken cancellationToken);
+
+    IAsyncEnumerable<GithubSubmissionData> QueryDataAsync(
+        GithubSubmissionDataQuery query,
+        CancellationToken cancellationToken);
+
     void Add(GithubSubmission submission);
+
+    void AddData(GithubSubmissionData submissionData);
 
     void UpdateCommitHash(Guid submissionId, string commitHash);
 }

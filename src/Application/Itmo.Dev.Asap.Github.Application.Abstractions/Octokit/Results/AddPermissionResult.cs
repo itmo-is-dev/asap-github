@@ -1,4 +1,4 @@
-namespace Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
+namespace Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 
 public enum AddPermissionResult
 {

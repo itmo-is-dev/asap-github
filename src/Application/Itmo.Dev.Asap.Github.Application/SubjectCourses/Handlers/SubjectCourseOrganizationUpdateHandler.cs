@@ -2,6 +2,7 @@ using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Commands;
 using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;

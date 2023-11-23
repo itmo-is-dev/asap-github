@@ -1,4 +1,5 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 
 namespace Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 
