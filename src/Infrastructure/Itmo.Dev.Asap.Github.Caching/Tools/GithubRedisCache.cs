@@ -1,6 +1,7 @@
 using Itmo.Dev.Asap.Github.Caching.Models;
 using Itmo.Dev.Asap.Github.Common.Tools;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -11,14 +12,17 @@ public class GithubRedisCache : IGithubCache
     private readonly IDistributedCache _cache;
     private readonly GithubCacheConfiguration _configuration;
     private readonly JsonSerializer _serializer;
+    private readonly ILogger<GithubRedisCache> _logger;
 
     public GithubRedisCache(
         IDistributedCache cache,
         IOptions<GithubCacheConfiguration> configuration,
-        JsonSerializer serializer)
+        JsonSerializer serializer,
+        ILogger<GithubRedisCache> logger)
     {
         _cache = cache;
         _serializer = serializer;
+        _logger = logger;
         _configuration = configuration.Value;
     }
 
@@ -37,10 +41,17 @@ public class GithubRedisCache : IGithubCache
             using var streamReader = new StreamReader(stream);
             await using var jsonReader = new JsonTextReader(streamReader);
 
-            T? value = _serializer.Deserialize<T>(jsonReader);
+            try
+            {
+                T? value = _serializer.Deserialize<T>(jsonReader);
 
-            if (value is not null)
-                return value;
+                if (value is not null)
+                    return value;
+            }
+            catch (JsonSerializationException e)
+            {
+                _logger.LogError(e, "Failed to deserialize cached response");
+            }
         }
 
         {
@@ -48,9 +59,11 @@ public class GithubRedisCache : IGithubCache
 
             using var stream = new MemoryStream();
             await using var streamWriter = new StreamWriter(stream);
-            await using var jsonWriter = new JsonTextWriter(streamWriter);
 
-            _serializer.Serialize(jsonWriter, value);
+            await using (var jsonWriter = new JsonTextWriter(streamWriter))
+            {
+                _serializer.Serialize(jsonWriter, value);
+            }
 
             absoluteExpirationRelativeToNow ??= _configuration.EntryAbsoluteExpiration;
             slidingExpiration ??= _configuration.EntrySlidingExpiration;
