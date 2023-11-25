@@ -14,11 +14,11 @@ namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 internal class PullRequestApprovedHandler : IRequestHandler<Command>
 {
     private const string SubmissionCompletedMessage =
-        """
-        submission is alredy completed,
-        pull request approve will be ignored 
-        (if submission is rated, pull request can be safely merged)
-        """;
+    """
+    submission is alredy completed,
+    pull request approve will be ignored 
+    (if submission is rated, pull request can be safely merged)
+    """;
 
     private readonly ISubmissionWorkflowService _submissionWorkflowService;
     private readonly IPullRequestEventNotifier _notifier;
