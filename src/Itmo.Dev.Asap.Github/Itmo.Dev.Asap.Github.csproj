@@ -28,6 +28,7 @@
       <PackageReference Include="Itmo.Dev.Platform.Logging" />
       <PackageReference Include="Itmo.Dev.Platform.Yandexcloud" />
       <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+      <PackageReference Include="prometheus-net.AspNetCore.Grpc" />
       <PackageReference Include="Serilog.Sinks.Console" />
       <PackageReference Include="Serilog.Sinks.File" />
       <PackageReference Include="Swashbuckle.AspNetCore" />

@@ -4,6 +4,7 @@
         <PackageReference Include="Grpc.AspNetCore"/>
         <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
         <PackageReference Include="MediatR"/>
+        <PackageReference Include="prometheus-net.AspNetCore" />
         <PackageReference Include="System.Linq.Async"/>
     </ItemGroup>
 

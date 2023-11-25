@@ -24,6 +24,8 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
     <PackageVersion Include="Npgsql" Version="7.0.4" />
+    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.1.0" />
+    <PackageVersion Include="prometheus-net.AspNetCore.Grpc" Version="8.1.0" />
     <PackageVersion Include="Respawn" Version="6.1.0" />
     <PackageVersion Include="ronimizy.FluentSerialization" Version="1.2.0" />
     <PackageVersion Include="Scrutor" Version="4.2.2" />
