@@ -11,13 +11,13 @@
     <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.55.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.55.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.56.2" />
-    <PackageVersion Include="Itmo.Dev.Platform.Common" Version="1.1.66" />
-    <PackageVersion Include="Itmo.Dev.Platform.Kafka" Version="1.0.66" />
-    <PackageVersion Include="Itmo.Dev.Platform.Postgres" Version="1.1.66" />
-    <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.66" />
-    <PackageVersion Include="Itmo.Dev.Platform.Logging" Version="1.0.66" />
-    <PackageVersion Include="Itmo.Dev.Platform.YandexCloud" Version="1.0.66" />
-    <PackageVersion Include="Itmo.Dev.Platform.BackgroundTasks" Version="1.0.66" />
+    <PackageVersion Include="Itmo.Dev.Platform.Common" Version="1.1.67" />
+    <PackageVersion Include="Itmo.Dev.Platform.Kafka" Version="1.0.67" />
+    <PackageVersion Include="Itmo.Dev.Platform.Postgres" Version="1.1.67" />
+    <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.67" />
+    <PackageVersion Include="Itmo.Dev.Platform.Logging" Version="1.0.67" />
+    <PackageVersion Include="Itmo.Dev.Platform.YandexCloud" Version="1.0.67" />
+    <PackageVersion Include="Itmo.Dev.Platform.BackgroundTasks" Version="1.0.67" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
