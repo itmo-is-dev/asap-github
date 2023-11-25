@@ -38,6 +38,7 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
             Head = branchName,
             SortDirection = SortDirection.Descending,
             SortProperty = PullRequestSort.Created,
+            State = ItemStateFilter.All,
         };
 
         var apiOptions = new ApiOptions { PageSize = 1 };
