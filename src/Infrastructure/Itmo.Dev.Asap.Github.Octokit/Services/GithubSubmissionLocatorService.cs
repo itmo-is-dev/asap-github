@@ -61,7 +61,7 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
                     branchName,
                     pullRequest.Number);
 
-                return null;
+                continue;
             }
 
             IReadOnlyList<PullRequestCommit> commits = await client.Repository.PullRequest
