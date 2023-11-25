@@ -42,24 +42,58 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
             State = ItemStateFilter.All,
         };
 
-        var apiOptions = new ApiOptions { PageSize = 1 };
-
-        IReadOnlyList<PullRequest> pullRequests = await client.Repository.PullRequest
-            .GetAllForRepository(organization.Name, repository.Name, pullRequestRequest, apiOptions);
-
-        if (pullRequests is [])
+        var apiOptions = new ApiOptions
         {
-            _logger.LogWarning(
-                "[{Organization}/{Repository} - {Branch}] failed to find pull request",
-                organization.Name,
+            PageSize = 1,
+            StartPage = 1,
+        };
+
+        IReadOnlyList<PullRequest> pullRequests;
+
+        do
+        {
+            pullRequests = await client.Repository.PullRequest
+                .GetAllForRepository(organization.Name, repository.Name, pullRequestRequest, apiOptions);
+
+            if (pullRequests is [])
+            {
+                _logger.LogWarning(
+                    "[{Organization}/{Repository} - {Branch}] failed to find pull request",
+                    organization.Name,
+                    repository,
+                    branchName);
+
+                return null;
+            }
+
+            int pullRequestNumber = pullRequests[0].Number;
+
+            string? sha = await FindCommitAsync(
+                organization,
                 repository,
-                branchName);
+                branchName,
+                mentors,
+                client,
+                pullRequestNumber);
 
-            return null;
+            if (sha is not null)
+                return sha;
+
+            apiOptions.StartPage++;
         }
+        while (pullRequests is not []);
 
-        int pullRequestNumber = pullRequests[0].Number;
+        return null;
+    }
 
+    private async Task<string?> FindCommitAsync(
+        GithubOrganizationModel organization,
+        GithubRepositoryModel repository,
+        string branchName,
+        IReadOnlyCollection<long> mentors,
+        IGitHubClient client,
+        int pullRequestNumber)
+    {
         IReadOnlyList<PullRequestReview> reviewComments = await client.PullRequest.Review
             .GetAll(repository.Id, pullRequestNumber);
 
