@@ -21,8 +21,9 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
 
     public async Task<string?> FindSubmissionCommitHash(
         GithubOrganizationModel organization,
-        string repository,
+        GithubRepositoryModel repository,
         string branchName,
+        IReadOnlyCollection<long> mentors,
         CancellationToken cancellationToken)
     {
         IGitHubClient client = await _clientProvider.GetOrganizationClientAsync(organization.Id, cancellationToken);
@@ -44,7 +45,7 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
         var apiOptions = new ApiOptions { PageSize = 1 };
 
         IReadOnlyList<PullRequest> pullRequests = await client.Repository.PullRequest
-            .GetAllForRepository(organization.Name, repository, pullRequestRequest, apiOptions);
+            .GetAllForRepository(organization.Name, repository.Name, pullRequestRequest, apiOptions);
 
         if (pullRequests is [])
         {
@@ -59,12 +60,12 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
 
         int pullRequestNumber = pullRequests[0].Number;
 
-        IReadOnlyList<PullRequestReviewComment> reviewComments = await client.Repository.PullRequest.ReviewComment
-            .GetAll(organization.Name, repository, pullRequestNumber);
+        IReadOnlyList<PullRequestReview> reviewComments = await client.PullRequest.Review
+            .GetAll(repository.Id, pullRequestNumber);
 
-        PullRequestReviewComment? firstReview = reviewComments.MinBy(x => x.CreatedAt);
+        PullRequestReview? review = reviewComments.FirstOrDefault(x => mentors.Contains(x.User.Id));
 
-        if (firstReview is null)
+        if (review is null)
         {
             _logger.LogWarning(
                 "[{Organization}/{Repository} - {Branch}] failed to find review comment",
@@ -76,10 +77,10 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
         }
 
         IReadOnlyList<PullRequestCommit> commits = await client.Repository.PullRequest
-            .Commits(organization.Name, repository, pullRequestNumber);
+            .Commits(organization.Name, repository.Name, pullRequestNumber);
 
         PullRequestCommit? commit = commits
-            .Where(x => x.Commit.Author.Date <= firstReview.CreatedAt)
+            .Where(x => x.Commit.Author.Date <= review.SubmittedAt)
             .MaxBy(x => x.Commit.Author.Date);
 
         if (commit is null)

@@ -1,5 +1,6 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
@@ -30,6 +31,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
     private readonly IGithubContentService _contentService;
     private readonly IStorageService _storageService;
     private readonly IGithubSubmissionLocatorService _submissionLocatorService;
+    private readonly ISubjectCourseService _subjectCourseService;
 
     public SubjectCourseDumpTask(
         IPersistenceContext context,
@@ -38,7 +40,8 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         IGithubRepositoryService repositoryService,
         IGithubContentService contentService,
         IStorageService storageService,
-        IGithubSubmissionLocatorService submissionLocatorService)
+        IGithubSubmissionLocatorService submissionLocatorService,
+        ISubjectCourseService subjectCourseService)
     {
         _context = context;
         _organizationService = organizationService;
@@ -46,6 +49,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         _contentService = contentService;
         _storageService = storageService;
         _submissionLocatorService = submissionLocatorService;
+        _subjectCourseService = subjectCourseService;
         _options = options.Value;
     }
 
@@ -70,6 +74,14 @@ public class SubjectCourseDumpTask : IBackgroundTask<
             return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Failure(error);
         }
 
+        IEnumerable<Guid> mentorIds = await _subjectCourseService
+            .GetSubjectCourseMentors(subjectCourseId, cancellationToken);
+
+        HashSet<long> mentors = await _context.Users
+            .QueryAsync(GithubUserQuery.Build(x => x.WithIds(mentorIds)), cancellationToken)
+            .Select(x => x.GithubId)
+            .ToHashSetAsync(cancellationToken);
+
         do
         {
             SubjectCourseDumpError? error = await DumpPageAsync(
@@ -77,6 +89,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
                 subjectCourse,
                 subjectCourseOrganization,
                 executionMetadata,
+                mentors,
                 cancellationToken);
 
             if (error is not null)
@@ -93,6 +106,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         GithubSubjectCourse subjectCourse,
         GithubOrganizationModel organization,
         SubjectCourseDumpExecutionMetadata executionMetadata,
+        HashSet<long> mentorIds,
         CancellationToken cancellationToken)
     {
         var submissionsQuery = FirstGithubSubmissionQuery.Build(x => x
@@ -133,6 +147,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
                 organization,
                 repository,
                 assignment,
+                mentorIds,
                 cancellationToken);
 
             if (hash is null)
@@ -167,6 +182,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         GithubOrganizationModel organization,
         GithubRepositoryModel repository,
         GithubAssignment assignment,
+        HashSet<long> mentorIds,
         CancellationToken cancellationToken)
     {
         string? hash = submission.CommitHash;
@@ -176,8 +192,9 @@ public class SubjectCourseDumpTask : IBackgroundTask<
 
         hash = await _submissionLocatorService.FindSubmissionCommitHash(
             organization,
-            repository.Name,
+            repository,
             assignment.BranchName,
+            mentorIds,
             cancellationToken);
 
         if (hash is not null)

@@ -1,6 +1,7 @@
 using Itmo.Dev.Asap.Core.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
+using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Services;
@@ -47,5 +48,13 @@ public class SubjectCourseService : ISubjectCourseService
             .ToArray();
 
         return new GetSubjectCourseStudentsResponse(students, response.PageToken);
+    }
+
+    public async Task<IEnumerable<Guid>> GetSubjectCourseMentors(Guid subjectCourseId, CancellationToken cancellationToken)
+    {
+        var request = new GetMentorsRequest { SubjectCourseId = subjectCourseId.ToString() };
+        GetMentorsResponse response = await _client.GetMentorsAsync(request, cancellationToken: cancellationToken);
+
+        return response.MentorIds.Select(x => x.ToGuid());
     }
 }

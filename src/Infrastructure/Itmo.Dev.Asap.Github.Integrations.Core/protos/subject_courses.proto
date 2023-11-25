@@ -18,9 +18,11 @@ service SubjectCourseService {
   rpc GetAssignments(GetAssignmentsRequest) returns (GetAssignmentsResponse);
   rpc GetGroups(GetGroupsRequest) returns (GetGroupsResponse);
   rpc GetStudentGroupQueue(GetStudentGroupQueueRequest) returns (GetStudentGroupQueueResponse);
+  rpc ForceSyncStudentGroupQueue(ForceSyncStudentGroupQueueRequest) returns (google.protobuf.Empty);
   rpc AddDeadline(AddDeadlineRequest) returns (google.protobuf.Empty);
   rpc ForceSyncPoints(ForceSyncPointsRequest) returns (google.protobuf.Empty);
   rpc UpdateMentors(UpdateMentorsRequest) returns (UpdateMentorsResponse);
+  rpc GetMentors(GetMentorsRequest) returns (GetMentorsResponse);
 }
 
 message GetByIdRequest {
@@ -87,6 +89,11 @@ message GetStudentGroupQueueResponse {
   GroupSubmissionQueue queue = 1;
 }
 
+message ForceSyncStudentGroupQueueRequest {
+  string subject_course_id = 1;
+  string student_group_id = 2;
+}
+
 message AddDeadlineRequest {
   string subject_course_id = 1;
   google.protobuf.Duration span_before_activation = 2;
@@ -103,4 +110,12 @@ message UpdateMentorsRequest {
 }
 
 message UpdateMentorsResponse {
+}
+
+message GetMentorsRequest {
+  string subject_course_id = 1;
+}
+
+message GetMentorsResponse {
+  repeated string mentor_ids = 1;
 }

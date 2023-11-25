@@ -6,7 +6,8 @@ public interface IGithubSubmissionLocatorService
 {
     Task<string?> FindSubmissionCommitHash(
         GithubOrganizationModel organization,
-        string repository,
+        GithubRepositoryModel repository,
         string branchName,
+        IReadOnlyCollection<long> mentors,
         CancellationToken cancellationToken);
 }
