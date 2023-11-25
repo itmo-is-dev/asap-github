@@ -219,7 +219,7 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         const string sql = """
         insert into submission_data(submission_id, user_id, assignment_id, submission_data_task_id, submission_data_file_link) 
         values (:submission_id, :user_id, :assignment_id, :task_id, :link)
-        on conflict on constraint submission_data_pk
+        on conflict on constraint submission_data_pkey
         do update set submission_id = excluded.submission_id,
                       submission_data_file_link = excluded.submission_data_file_link;
         """;
