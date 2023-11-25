@@ -11,6 +11,8 @@
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Integrations.Core\Itmo.Dev.Asap.Github.Integrations.Core.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.DataAccess\Itmo.Dev.Asap.Github.DataAccess.csproj" />
       <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Github.Octokit\Itmo.Dev.Asap.Github.Octokit.csproj" />
+      <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Infrastructure.S3Storage\Itmo.Dev.Asap.Infrastructure.S3Storage.csproj" />
+      <ProjectReference Include="..\Infrastructure\Itmo.Dev.Asap.Infrastructure.Locking\Itmo.Dev.Asap.Infrastructure.Locking.csproj" />
       <ProjectReference Include="..\Presentation\Itmo.Dev.Asap.Github.Presentation.Grpc\Itmo.Dev.Asap.Github.Presentation.Grpc.csproj" />
       <ProjectReference Include="..\Presentation\Itmo.Dev.Asap.Github.Presentation.Kafka\Itmo.Dev.Asap.Github.Presentation.Kafka.csproj" />
       <ProjectReference Include="..\Presentation\Itmo.Dev.Asap.Github.Presentation.Webhooks\Itmo.Dev.Asap.Github.Presentation.Webhooks.csproj" />

@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <PackageReference Include="FluentScanning"/>
+        <PackageReference Include="Itmo.Dev.Platform.BackgroundTasks" />
         <PackageReference Include="Itmo.Dev.Platform.Common"/>
         <PackageReference Include="MediatR"/>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
