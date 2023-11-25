@@ -13,6 +13,7 @@ using Itmo.Dev.Asap.Github.Common.Exceptions;
 using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
 
@@ -32,6 +33,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
     private readonly IStorageService _storageService;
     private readonly IGithubSubmissionLocatorService _submissionLocatorService;
     private readonly ISubjectCourseService _subjectCourseService;
+    private readonly ILogger<SubjectCourseDumpTask> _logger;
 
     public SubjectCourseDumpTask(
         IPersistenceContext context,
@@ -41,7 +43,8 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         IGithubContentService contentService,
         IStorageService storageService,
         IGithubSubmissionLocatorService submissionLocatorService,
-        ISubjectCourseService subjectCourseService)
+        ISubjectCourseService subjectCourseService,
+        ILogger<SubjectCourseDumpTask> logger)
     {
         _context = context;
         _organizationService = organizationService;
@@ -50,6 +53,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         _storageService = storageService;
         _submissionLocatorService = submissionLocatorService;
         _subjectCourseService = subjectCourseService;
+        _logger = logger;
         _options = options.Value;
     }
 
@@ -152,8 +156,8 @@ public class SubjectCourseDumpTask : IBackgroundTask<
 
             if (hash is null)
             {
-                return new SubjectCourseDumpError(
-                    $"Could not find hash for {organization.Name}/{repository.Name} ({assignment.BranchName})");
+                _logger.LogInformation("Failed to find hash for submission = {SubmissionId}", submission.Id);
+                continue;
             }
 
             SubjectCourseDumpError? error = await CreateSubmissionDataAsync(

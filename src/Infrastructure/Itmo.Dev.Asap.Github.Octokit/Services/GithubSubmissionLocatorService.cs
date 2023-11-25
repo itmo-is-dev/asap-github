@@ -42,90 +42,47 @@ internal class GithubSubmissionLocatorService : IGithubSubmissionLocatorService
             State = ItemStateFilter.All,
         };
 
-        var apiOptions = new ApiOptions
+        IReadOnlyList<PullRequest> pullRequests = await client.Repository.PullRequest
+            .GetAllForRepository(organization.Name, repository.Name, pullRequestRequest);
+
+        foreach (PullRequest pullRequest in pullRequests)
         {
-            PageSize = 1,
-            StartPage = 1,
-        };
+            IReadOnlyList<PullRequestReview> reviewComments = await client.PullRequest.Review
+                .GetAll(repository.Id, pullRequest.Number);
 
-        IReadOnlyList<PullRequest> pullRequests;
+            PullRequestReview? review = reviewComments.FirstOrDefault(x => mentors.Contains(x.User.Id));
 
-        do
-        {
-            pullRequests = await client.Repository.PullRequest
-                .GetAllForRepository(organization.Name, repository.Name, pullRequestRequest, apiOptions);
-
-            if (pullRequests is [])
+            if (review is null)
             {
                 _logger.LogWarning(
-                    "[{Organization}/{Repository} - {Branch}] failed to find pull request",
+                    "[{Organization}/{Repository} - {Branch}] failed to find review comment in {PullRequest}",
                     organization.Name,
                     repository,
-                    branchName);
+                    branchName,
+                    pullRequest.Number);
 
                 return null;
             }
 
-            int pullRequestNumber = pullRequests[0].Number;
+            IReadOnlyList<PullRequestCommit> commits = await client.Repository.PullRequest
+                .Commits(organization.Name, repository.Name, pullRequest.Number);
 
-            string? sha = await FindCommitAsync(
-                organization,
-                repository,
-                branchName,
-                mentors,
-                client,
-                pullRequestNumber);
+            PullRequestCommit? commit = commits
+                .Where(x => x.Commit.Author.Date <= review.SubmittedAt)
+                .MaxBy(x => x.Commit.Author.Date);
 
-            if (sha is not null)
-                return sha;
+            if (commit is null)
+            {
+                _logger.LogWarning(
+                    "[{Organization}/{Repository} - {Branch}] failed to find commit hash",
+                    organization.Name,
+                    repository,
+                    branchName);
+            }
 
-            apiOptions.StartPage++;
+            return commit?.Sha;
         }
-        while (pullRequests is not []);
 
         return null;
-    }
-
-    private async Task<string?> FindCommitAsync(
-        GithubOrganizationModel organization,
-        GithubRepositoryModel repository,
-        string branchName,
-        IReadOnlyCollection<long> mentors,
-        IGitHubClient client,
-        int pullRequestNumber)
-    {
-        IReadOnlyList<PullRequestReview> reviewComments = await client.PullRequest.Review
-            .GetAll(repository.Id, pullRequestNumber);
-
-        PullRequestReview? review = reviewComments.FirstOrDefault(x => mentors.Contains(x.User.Id));
-
-        if (review is null)
-        {
-            _logger.LogWarning(
-                "[{Organization}/{Repository} - {Branch}] failed to find review comment",
-                organization.Name,
-                repository,
-                branchName);
-
-            return null;
-        }
-
-        IReadOnlyList<PullRequestCommit> commits = await client.Repository.PullRequest
-            .Commits(organization.Name, repository.Name, pullRequestNumber);
-
-        PullRequestCommit? commit = commits
-            .Where(x => x.Commit.Author.Date <= review.SubmittedAt)
-            .MaxBy(x => x.Commit.Author.Date);
-
-        if (commit is null)
-        {
-            _logger.LogWarning(
-                "[{Organization}/{Repository} - {Branch}] failed to find commit hash",
-                organization.Name,
-                repository,
-                branchName);
-        }
-
-        return commit?.Sha;
     }
 }
