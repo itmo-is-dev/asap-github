@@ -68,4 +68,6 @@ app.UsePlatformSentryTracing(builder.Configuration);
 app.UseGrpcPresentation();
 app.UseWebhooksPresentation();
 
+app.MapMetrics();
+
 await app.RunAsync();
