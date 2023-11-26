@@ -1,6 +1,8 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess;
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
@@ -34,6 +36,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
     private readonly IGithubSubmissionLocatorService _submissionLocatorService;
     private readonly ISubjectCourseService _subjectCourseService;
     private readonly ILogger<SubjectCourseDumpTask> _logger;
+    private readonly ISubmissionService _submissionService;
 
     public SubjectCourseDumpTask(
         IPersistenceContext context,
@@ -44,7 +47,8 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         IStorageService storageService,
         IGithubSubmissionLocatorService submissionLocatorService,
         ISubjectCourseService subjectCourseService,
-        ILogger<SubjectCourseDumpTask> logger)
+        ILogger<SubjectCourseDumpTask> logger,
+        ISubmissionService submissionService)
     {
         _context = context;
         _organizationService = organizationService;
@@ -54,6 +58,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         _submissionLocatorService = submissionLocatorService;
         _subjectCourseService = subjectCourseService;
         _logger = logger;
+        _submissionService = submissionService;
         _options = options.Value;
     }
 
@@ -88,18 +93,33 @@ public class SubjectCourseDumpTask : IBackgroundTask<
 
         do
         {
+            QueryFirstSubmissionsResponse submissionResponse = await _submissionService.QueryFirstCompletedSubmissions(
+                subjectCourseId,
+                _options.PageSize,
+                executionMetadata.SubmissionPageToken,
+                cancellationToken);
+
+            IEnumerable<Guid> submissionIds = submissionResponse.Submissions
+                .Select(x => x.SubmissionId);
+
+            GithubSubmission[] submissions = await _context.Submissions
+                .QueryAsync(GithubSubmissionQuery.Build(x => x.WithIds(submissionIds)), cancellationToken)
+                .ToArrayAsync(cancellationToken);
+
             SubjectCourseDumpError? error = await DumpPageAsync(
                 executionContext.Id,
                 subjectCourse,
                 subjectCourseOrganization,
-                executionMetadata,
+                submissions,
                 mentors,
                 cancellationToken);
 
             if (error is not null)
                 return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Failure(error);
+
+            executionMetadata.SubmissionPageToken = submissionResponse.PageToken;
         }
-        while (executionMetadata.Key is not null);
+        while (executionMetadata.SubmissionPageToken is not null);
 
         return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Success(
             EmptyExecutionResult.Value);
@@ -109,19 +129,10 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         BackgroundTaskId backgroundTaskId,
         GithubSubjectCourse subjectCourse,
         GithubOrganizationModel organization,
-        SubjectCourseDumpExecutionMetadata executionMetadata,
+        IReadOnlyCollection<GithubSubmission> submissions,
         HashSet<long> mentorIds,
         CancellationToken cancellationToken)
     {
-        var submissionsQuery = FirstGithubSubmissionQuery.Build(x => x
-            .WithUserId(executionMetadata.Key?.StudentId)
-            .WithAssignmentId(executionMetadata.Key?.AssignmentId)
-            .WithPageSize(_options.PageSize));
-
-        GithubSubmission[] submissions = await _context.Submissions
-            .QueryFirstSubmissionsAsync(submissionsQuery, cancellationToken)
-            .ToArrayAsync(cancellationToken);
-
         var assignmentsQuery = GithubAssignmentQuery.Build(builder => builder
             .WithIds(submissions.Select(x => x.AssignmentId)));
 
@@ -173,10 +184,6 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         }
 
         await _context.CommitAsync(cancellationToken);
-
-        executionMetadata.Key = submissions.Length.Equals(_options.PageSize)
-            ? MapToKey(submissions[^1])
-            : null;
 
         return null;
     }
@@ -273,13 +280,5 @@ public class SubjectCourseDumpTask : IBackgroundTask<
             if (repository is not null)
                 yield return (student.User.Id, repository);
         }
-    }
-
-// Static members should precede non static members
-#pragma warning disable SA1204
-
-    private static SubjectCourseDumpExecutionMetadata.StudentAssignmentKey MapToKey(GithubSubmission submission)
-    {
-        return new SubjectCourseDumpExecutionMetadata.StudentAssignmentKey(submission.UserId, submission.AssignmentId);
     }
 }

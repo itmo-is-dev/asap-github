@@ -86,49 +86,6 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         }
     }
 
-    public async IAsyncEnumerable<GithubSubmission> QueryFirstSubmissionsAsync(
-        FirstGithubSubmissionQuery query,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        const string sql = """
-        with data as 
-        (
-            select *
-            from submissions
-            where 
-                (:skip_user_id_filter or user_id >= :user_id) 
-                and (:skip_assignment_id_filter or assignment_id > :assignment_id)
-            order by (user_id, assignment_id)
-        )
-        select nth_value(submission_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_id,
-               nth_value(assignment_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as assignment_id,
-               nth_value(user_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as user_id,
-               nth_value(submission_created_at, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_created_at,
-               nth_value(submission_organization_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_organization_id,
-               nth_value(submission_repository_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_repository_id,
-               nth_value(submission_pull_request_id, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_pull_request_id,
-               nth_value(submission_commit_hash, 1) over (partition by (user_id, assignment_id) order by submission_created_at) as submission_commit_hash
-        from data
-        limit :limit;
-        """;
-
-        NpgsqlConnection connection = await _connectionProvider.GetConnectionAsync(cancellationToken);
-
-        await using NpgsqlCommand command = new NpgsqlCommand(sql, connection)
-            .AddParameter("skip_user_id_filter", query.UserId is null)
-            .AddParameter("skip_assignment_id_filter", query.AssignmentId is null)
-            .AddParameter("user_id", query.UserId ?? Guid.Empty)
-            .AddParameter("assignment_id", query.AssignmentId ?? Guid.Empty)
-            .AddParameter("limit", query.PageSize);
-
-        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-
-        await foreach (GithubSubmission submission in ReadSubmissionsAsync(reader, cancellationToken))
-        {
-            yield return submission;
-        }
-    }
-
     public async IAsyncEnumerable<GithubSubmissionData> QueryDataAsync(
         GithubSubmissionDataQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken)

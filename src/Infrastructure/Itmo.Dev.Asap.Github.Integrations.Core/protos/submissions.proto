@@ -16,6 +16,7 @@ service SubmissionService {
   rpc MarkReviewed(MarkReviewedRequest) returns (MarkReviewedResponse);
   rpc Rate(RateRequest) returns (RateResponse);
   rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc QueryFirstCompletedSubmission(QueryFirstCompletedSubmissionRequest) returns (QueryFirstCompletedSubmissionResponse);
 }
 
 message ActivateRequest {
@@ -144,5 +145,22 @@ message UpdateResponse {
   oneof result {
     SubmissionRate submission = 1;
     string error_message = 2;
+  }
+}
+
+message QueryFirstCompletedSubmissionRequest {
+  string subject_course_id = 1;
+  int32 page_size = 2;
+  google.protobuf.StringValue page_token = 3;
+}
+
+message QueryFirstCompletedSubmissionResponse {
+  repeated FirstSubmission submission = 1;
+  google.protobuf.StringValue page_token = 2;
+
+  message FirstSubmission {
+    string submission_id = 1;
+    string user_id = 2;
+    string assignment_id = 3;
   }
 }

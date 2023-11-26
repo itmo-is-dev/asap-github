@@ -1,8 +1,10 @@
 using Google.Protobuf.WellKnownTypes;
 using Itmo.Dev.Asap.Core.Submissions;
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
+using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Github.Integrations.Core.Mapping;
 
 namespace Itmo.Dev.Asap.Github.Integrations.Core.Services;
@@ -222,5 +224,28 @@ public class SubmissionService : ISubmissionService
             _ or UpdateResponse.ResultOneofCase.None
                 => new UpdateSubmissionResult.Failure("Failed to update submission"),
         };
+    }
+
+    public async Task<QueryFirstSubmissionsResponse> QueryFirstCompletedSubmissions(
+        Guid subjectCourseId,
+        int pageSize,
+        string? pageToken,
+        CancellationToken cancellationToken)
+    {
+        var request = new QueryFirstCompletedSubmissionRequest
+        {
+            SubjectCourseId = subjectCourseId.ToString(),
+            PageSize = pageSize,
+            PageToken = pageToken,
+        };
+
+        QueryFirstCompletedSubmissionResponse response = await _client.QueryFirstCompletedSubmissionAsync(
+            request,
+            cancellationToken: cancellationToken);
+
+        IEnumerable<FirstSubmissionDto> submissions = response.Submission
+            .Select(x => new FirstSubmissionDto(x.SubmissionId.ToGuid(), x.UserId.ToGuid(), x.AssignmentId.ToGuid()));
+
+        return new QueryFirstSubmissionsResponse(submissions, response.PageToken);
     }
 }
