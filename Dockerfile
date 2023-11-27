@@ -5,9 +5,6 @@ COPY ./*.sln .
 COPY ./*.props ./
 COPY ./.editorconfig .
 
-ARG GITHUB_TOKEN
-ARG GITHUB_USERNAME
-RUN dotnet nuget update source github --username $GITHUB_USERNAME --password $GITHUB_TOKEN --store-password-in-clear-text
 RUN dotnet restore "src/Itmo.Dev.Asap.Github/Itmo.Dev.Asap.Github.csproj"
 
 FROM build AS publish
