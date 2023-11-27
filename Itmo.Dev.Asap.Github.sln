@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{F3565B
 		.gitignore = .gitignore
 		.editorconfig = .editorconfig
 		Directory.Packages.props = Directory.Packages.props
-		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{38BFC385-8F96-41A8-B131-7613C35F57D4}"
@@ -35,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{12C7AE
 	ProjectSection(SolutionItems) = preProject
 		docker\docker-compose.yaml = docker\docker-compose.yaml
 		docker\.env = docker\.env
+		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Presentation.Grpc", "src\Presentation\Itmo.Dev.Asap.Github.Presentation.Grpc\Itmo.Dev.Asap.Github.Presentation.Grpc.csproj", "{F8278B67-A47D-40F3-8CB0-817C5358B87D}"

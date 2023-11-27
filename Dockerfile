@@ -3,7 +3,6 @@ WORKDIR /source
 COPY ./src ./src
 COPY ./*.sln .
 COPY ./*.props ./
-COPY ./nuget.config .
 COPY ./.editorconfig .
 
 ARG GITHUB_TOKEN
