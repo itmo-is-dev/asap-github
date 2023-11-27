@@ -72,7 +72,7 @@ jobs:
           no-cache: true
   
   deploy:
-    needs: [ environment-set, docker-image-upload ]
+    needs: [ environment-set, docker-build-and-upload ]
     runs-on: [ self-hosted, Linux, X64, "${{ needs.environment-set.outputs.runner-label }}" ]
     environment: ${{ needs.environment-set.outputs.environment-key }}
     steps:
