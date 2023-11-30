@@ -44,6 +44,8 @@ public static class ServiceCollectionExtensions
                 "SubmissionData",
                 configuration.GetSection($"{producerKey}:SubmissionData")));
 
+        collection.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
+
         return collection;
     }
 }
