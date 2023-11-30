@@ -4,22 +4,22 @@ using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.Submissions;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
-using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
-using Itmo.Dev.Asap.Github.Application.Abstractions.Storage;
-using Itmo.Dev.Asap.Github.Application.Models.Assignments;
+using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Notifications;
 using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Github.Application.Specifications;
+using Itmo.Dev.Asap.Github.Application.SubjectCourses.Dumps.Models;
+using Itmo.Dev.Asap.Github.Application.SubjectCourses.Dumps.Services;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
-using Itmo.Dev.Platform.BackgroundTasks.Models;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks;
 using Itmo.Dev.Platform.BackgroundTasks.Tasks.Results;
-using Microsoft.Extensions.Logging;
+using MediatR;
 using Microsoft.Extensions.Options;
-using System.Runtime.CompilerServices;
 
 namespace Itmo.Dev.Asap.Github.Application.SubjectCourses.Dumps;
+
+#pragma warning disable CA1506
 
 public class SubjectCourseDumpTask : IBackgroundTask<
     SubjectCourseDumpMetadata,
@@ -30,35 +30,26 @@ public class SubjectCourseDumpTask : IBackgroundTask<
     private readonly IPersistenceContext _context;
     private readonly SubjectCourseDumpOptions _options;
     private readonly IGithubOrganizationService _organizationService;
-    private readonly IGithubRepositoryService _repositoryService;
-    private readonly IGithubContentService _contentService;
-    private readonly IStorageService _storageService;
-    private readonly IGithubSubmissionLocatorService _submissionLocatorService;
     private readonly ISubjectCourseService _subjectCourseService;
-    private readonly ILogger<SubjectCourseDumpTask> _logger;
     private readonly ISubmissionService _submissionService;
+    private readonly IPublisher _publisher;
+    private readonly SubmissionDumpPageHandler _dumpPageHandler;
 
     public SubjectCourseDumpTask(
         IPersistenceContext context,
         IOptions<SubjectCourseDumpOptions> options,
         IGithubOrganizationService organizationService,
-        IGithubRepositoryService repositoryService,
-        IGithubContentService contentService,
-        IStorageService storageService,
-        IGithubSubmissionLocatorService submissionLocatorService,
         ISubjectCourseService subjectCourseService,
-        ILogger<SubjectCourseDumpTask> logger,
-        ISubmissionService submissionService)
+        ISubmissionService submissionService,
+        IPublisher publisher,
+        SubmissionDumpPageHandler dumpPageHandler)
     {
         _context = context;
         _organizationService = organizationService;
-        _repositoryService = repositoryService;
-        _contentService = contentService;
-        _storageService = storageService;
-        _submissionLocatorService = submissionLocatorService;
         _subjectCourseService = subjectCourseService;
-        _logger = logger;
         _submissionService = submissionService;
+        _publisher = publisher;
+        _dumpPageHandler = dumpPageHandler;
         _options = options.Value;
     }
 
@@ -99,14 +90,13 @@ public class SubjectCourseDumpTask : IBackgroundTask<
                 executionMetadata.SubmissionPageToken,
                 cancellationToken);
 
-            IEnumerable<Guid> submissionIds = submissionResponse.Submissions
-                .Select(x => x.SubmissionId);
+            IEnumerable<Guid> submissionIds = submissionResponse.Submissions.Select(x => x.SubmissionId);
 
             GithubSubmission[] submissions = await _context.Submissions
                 .QueryAsync(GithubSubmissionQuery.Build(x => x.WithIds(submissionIds)), cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
-            SubjectCourseDumpError? error = await DumpPageAsync(
+            DumpPageResult result = await _dumpPageHandler.DumpPageAsync(
                 executionContext.Id,
                 subjectCourse,
                 subjectCourseOrganization,
@@ -114,171 +104,28 @@ public class SubjectCourseDumpTask : IBackgroundTask<
                 mentors,
                 cancellationToken);
 
-            if (error is not null)
-                return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Failure(error);
+            if (result is DumpPageResult.Failure failure)
+            {
+                return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>
+                    .Failure(failure.Error);
+            }
+
+            if (result is not DumpPageResult.Success success)
+                throw new UnexpectedOperationResultException();
+
+            _context.Submissions.AddData(success.Data);
+            await _context.CommitAsync(cancellationToken);
+
+            var notification = new SubmissionDataAdded.Notification(success.Data);
+            await _publisher.Publish(notification, default);
 
             executionMetadata.SubmissionPageToken = submissionResponse.PageToken;
         }
         while (executionMetadata.SubmissionPageToken is not null);
 
-        return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Success(
-            EmptyExecutionResult.Value);
-    }
+        await _publisher.Publish(new SubmissionDataCollectionFinished.Notification(executionContext.Id.Value), default);
 
-    private async Task<SubjectCourseDumpError?> DumpPageAsync(
-        BackgroundTaskId backgroundTaskId,
-        GithubSubjectCourse subjectCourse,
-        GithubOrganizationModel organization,
-        IReadOnlyCollection<GithubSubmission> submissions,
-        HashSet<long> mentorIds,
-        CancellationToken cancellationToken)
-    {
-        var assignmentsQuery = GithubAssignmentQuery.Build(builder => builder
-            .WithIds(submissions.Select(x => x.AssignmentId)));
-
-        Dictionary<Guid, GithubAssignment> assignments = await _context.Assignments
-            .QueryAsync(assignmentsQuery, cancellationToken)
-            .ToDictionaryAsync(assignment => assignment.Id, cancellationToken);
-
-        Dictionary<Guid, GithubRepositoryModel> repositories = await GetStudentRepositories(
-                subjectCourse,
-                userIds: submissions.Select(x => x.UserId),
-                cancellationToken)
-            .ToDictionaryAsync(
-                keySelector: tuple => tuple.UserId,
-                elementSelector: tuple => tuple.Repository,
-                cancellationToken);
-
-        if (repositories.Count != submissions.Select(x => x.UserId).Distinct().Count())
-            return new SubjectCourseDumpError("Could not find some repositories");
-
-        foreach (GithubSubmission submission in submissions)
-        {
-            GithubRepositoryModel repository = repositories[submission.UserId];
-            GithubAssignment assignment = assignments[submission.AssignmentId];
-
-            string? hash = await FindOrUpdateCommitHashAsync(
-                submission,
-                organization,
-                repository,
-                assignment,
-                mentorIds,
-                cancellationToken);
-
-            if (hash is null)
-            {
-                _logger.LogInformation("Failed to find hash for submission = {SubmissionId}", submission.Id);
-                continue;
-            }
-
-            SubjectCourseDumpError? error = await CreateSubmissionDataAsync(
-                backgroundTaskId,
-                organization,
-                repository,
-                submission,
-                hash,
-                cancellationToken);
-
-            if (error is not null)
-                return error;
-        }
-
-        await _context.CommitAsync(cancellationToken);
-
-        return null;
-    }
-
-    private async Task<string?> FindOrUpdateCommitHashAsync(
-        GithubSubmission submission,
-        GithubOrganizationModel organization,
-        GithubRepositoryModel repository,
-        GithubAssignment assignment,
-        HashSet<long> mentorIds,
-        CancellationToken cancellationToken)
-    {
-        string? hash = submission.CommitHash;
-
-        if (hash is not null)
-            return hash;
-
-        hash = await _submissionLocatorService.FindSubmissionCommitHash(
-            organization,
-            repository,
-            assignment.BranchName,
-            mentorIds,
-            cancellationToken);
-
-        if (hash is not null)
-            _context.Submissions.UpdateCommitHash(submission.Id, hash);
-
-        return hash;
-    }
-
-    private async Task<SubjectCourseDumpError?> CreateSubmissionDataAsync(
-        BackgroundTaskId backgroundTaskId,
-        GithubOrganizationModel organization,
-        GithubRepositoryModel repository,
-        GithubSubmission submission,
-        string hash,
-        CancellationToken cancellationToken)
-    {
-        GetRepositoryContentResult contentResult = await _contentService.GetRepositoryContentAsync(
-            organization.Id,
-            repository.Id,
-            hash,
-            cancellationToken);
-
-        if (contentResult is GetRepositoryContentResult.NotFound)
-        {
-            return new SubjectCourseDumpError(
-                $"Repository data for {organization.Name}/{repository.Name} ({submission.CommitHash}) not found");
-        }
-
-        if (contentResult is GetRepositoryContentResult.UnexpectedError unexpectedError)
-        {
-            return new SubjectCourseDumpError(
-                $"Encountered unexpected error while fetching content for {organization.Name}/{repository.Name} ({submission.CommitHash}): {unexpectedError.Message}");
-        }
-
-        if (contentResult is not GetRepositoryContentResult.Success success)
-            throw new UnexpectedOperationResultException { Value = contentResult };
-
-        await using Stream content = success.Content;
-        StoredData storedData = await _storageService.StoreAsync(_options.BucketName, content, cancellationToken);
-
-        var submissionData = new GithubSubmissionData(
-            submission.Id,
-            submission.UserId,
-            submission.AssignmentId,
-            backgroundTaskId.Value,
-            storedData.Link);
-
-        _context.Submissions.AddData(submissionData);
-
-        return null;
-    }
-
-    private async IAsyncEnumerable<(Guid UserId, GithubRepositoryModel Repository)> GetStudentRepositories(
-        GithubSubjectCourse subjectCourse,
-        IEnumerable<Guid> userIds,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var query = GithubSubjectCourseStudentQuery.Build(x => x
-            .WithSubjectCourseId(subjectCourse.Id)
-            .WithUserIds(userIds));
-
-        IAsyncEnumerable<GithubSubjectCourseStudent> students = _context.SubjectCourses
-            .QueryStudentsAsync(query, cancellationToken);
-
-        await foreach (GithubSubjectCourseStudent student in students)
-        {
-            GithubRepositoryModel? repository = await _repositoryService.FindByIdAsync(
-                subjectCourse.OrganizationId,
-                student.RepositoryId,
-                cancellationToken);
-
-            if (repository is not null)
-                yield return (student.User.Id, repository);
-        }
+        EmptyExecutionResult value = EmptyExecutionResult.Value;
+        return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Success(value);
     }
 }

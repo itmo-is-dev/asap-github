@@ -11,7 +11,6 @@ service GithubSubjectCourseService {
   rpc UpdateMentorTeam(UpdateMentorTeamRequest) returns (google.protobuf.Empty);
   rpc FindByIds(FindByIdsRequest) returns (FindByIdsResponse);
   rpc StartContentDump(StartContentDumpRequest) returns (StartContentDumpResponse);
-  rpc GetContentDumpResult(GetContentDumpResultRequest) returns (GetContentDumpResultResponse);
 }
 
 message ProvisionSubjectCourseRequest {
@@ -53,35 +52,5 @@ message StartContentDumpResponse {
   }
 
   message SubjectCourseNotFound {
-  }
-}
-
-message GetContentDumpResultRequest {
-  int64 task_id = 1;
-  int32 page_size = 2;
-  google.protobuf.StringValue page_token = 3;;
-}
-
-message GetContentDumpResultResponse {
-  oneof result {
-    Success success = 1;
-    Failure failure = 2;
-    TaskNotCompleted task_not_completed = 3;
-    TaskNotFound task_not_found = 4;
-  }
-
-  message Success {
-    repeated GithubSubmissionData data = 1;
-    google.protobuf.StringValue page_token = 2;
-  }
-
-  message Failure {
-    string message = 1;
-  }
-
-  message TaskNotCompleted {
-  }
-
-  message TaskNotFound {
   }
 }

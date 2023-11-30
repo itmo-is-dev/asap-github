@@ -171,22 +171,22 @@ internal class GithubSubmissionRepository : IGithubSubmissionRepository
         _unitOfWork.Enqueue(command);
     }
 
-    public void AddData(GithubSubmissionData submissionData)
+    public void AddData(IReadOnlyCollection<GithubSubmissionData> data)
     {
         const string sql = """
         insert into submission_data(submission_id, user_id, assignment_id, submission_data_task_id, submission_data_file_link) 
-        values (:submission_id, :user_id, :assignment_id, :task_id, :link)
+        select * from unnest(:submission_ids, :user_ids, :assignment_ids, :task_ids, :links)
         on conflict on constraint submission_data_pkey
         do update set submission_id = excluded.submission_id,
                       submission_data_file_link = excluded.submission_data_file_link;
         """;
 
         using NpgsqlCommand command = new NpgsqlCommand(sql)
-            .AddParameter("submission_id", submissionData.SubmissionId)
-            .AddParameter("user_id", submissionData.UserId)
-            .AddParameter("assignment_id", submissionData.AssignmentId)
-            .AddParameter("task_id", submissionData.TaskId)
-            .AddParameter("link", submissionData.FileLink);
+            .AddParameter("submission_ids", data.Select(x => x.SubmissionId).ToArray())
+            .AddParameter("user_ids", data.Select(x => x.UserId).ToArray())
+            .AddParameter("assignment_ids", data.Select(x => x.AssignmentId).ToArray())
+            .AddParameter("task_ids", data.Select(x => x.TaskId).ToArray())
+            .AddParameter("links", data.Select(x => x.FileLink).ToArray());
 
         _unitOfWork.Enqueue(command);
     }

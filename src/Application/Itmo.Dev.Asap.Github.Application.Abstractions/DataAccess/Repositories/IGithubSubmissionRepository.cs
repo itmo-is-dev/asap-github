@@ -13,7 +13,7 @@ public interface IGithubSubmissionRepository
 
     void Add(GithubSubmission submission);
 
-    void AddData(GithubSubmissionData submissionData);
+    void AddData(IReadOnlyCollection<GithubSubmissionData> data);
 
     void UpdateCommitHash(Guid submissionId, string commitHash);
 }
