@@ -42,7 +42,8 @@ public static class ServiceCollectionExtensions
             .SerializeValueWithProto()
             .UseNamedOptionsConfiguration(
                 "SubmissionData",
-                configuration.GetSection($"{producerKey}:SubmissionData")));
+                configuration.GetSection($"{producerKey}:SubmissionData"),
+                c => c.WithHost(host)));
 
         collection.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
 
