@@ -15,6 +15,12 @@ public static class ServiceCollectionExtensions
             return JsonSerializer.Create(options.Value.Settings);
         });
 
+        collection.AddSingleton(p =>
+        {
+            IOptions<GithubSerializerOptions> options = p.GetRequiredService<IOptions<GithubSerializerOptions>>();
+            return options.Value.Settings;
+        });
+
         return collection;
     }
 }

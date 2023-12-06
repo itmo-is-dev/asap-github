@@ -1,3 +1,4 @@
+using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Models;
 using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 
 namespace Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.Submissions;
@@ -51,5 +52,11 @@ public interface ISubmissionService
         DateOnly? dateTime,
         double? ratingPercent,
         double? extraPoints,
+        CancellationToken cancellationToken);
+
+    Task<QueryFirstSubmissionsResponse> QueryFirstCompletedSubmissions(
+        Guid subjectCourseId,
+        int pageSize,
+        string? pageToken,
         CancellationToken cancellationToken);
 }

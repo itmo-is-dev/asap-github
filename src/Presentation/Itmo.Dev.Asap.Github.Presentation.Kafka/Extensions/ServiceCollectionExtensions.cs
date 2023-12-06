@@ -13,8 +13,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection collection,
         IConfiguration configuration)
     {
-        const string assignmentKey = "Presentation:Kafka:Consumers:AssignmentCreated";
-        const string subjectCourseKey = "Presentation:Kafka:Consumers:SubjectCourseCreated";
+        const string consumerKey = "Presentation:Kafka:Consumers";
+        const string producerKey = "Presentation:Kafka:Producers";
 
         string host = configuration.GetSection("Presentation:Kafka:Host").Get<string>() ?? string.Empty;
         string group = Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty;
@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
             .DeserializeValueWithProto()
             .UseNamedOptionsConfiguration(
                 "AssignmentCreated",
-                configuration.GetSection(assignmentKey),
+                configuration.GetSection($"{consumerKey}:AssignmentCreated"),
                 c => c.WithHost(host).WithGroup(group)));
 
         collection.AddKafkaConsumer<SubjectCourseCreatedKey, SubjectCourseCreatedValue>(selector => selector
@@ -34,8 +34,18 @@ public static class ServiceCollectionExtensions
             .DeserializeValueWithProto()
             .UseNamedOptionsConfiguration(
                 "SubjectCourseCreated",
-                configuration.GetSection(subjectCourseKey),
+                configuration.GetSection($"{consumerKey}:SubjectCourseCreated"),
                 c => c.WithHost(host).WithGroup(group)));
+
+        collection.AddKafkaProducer<SubmissionDataKey, SubmissionDataValue>(selector => selector
+            .SerializeKeyWithProto()
+            .SerializeValueWithProto()
+            .UseNamedOptionsConfiguration(
+                "SubmissionData",
+                configuration.GetSection($"{producerKey}:SubmissionData"),
+                c => c.WithHost(host)));
+
+        collection.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
 
         return collection;
     }

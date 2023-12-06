@@ -3,6 +3,8 @@ using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Parsers;
 using Itmo.Dev.Asap.Github.Application.Enrichment;
 using Itmo.Dev.Asap.Github.Application.Invites;
 using Itmo.Dev.Asap.Github.Application.SubjectCourses;
+using Itmo.Dev.Asap.Github.Application.SubjectCourses.Dumps;
+using Itmo.Dev.Asap.Github.Application.SubjectCourses.Dumps.Services;
 using Itmo.Dev.Asap.Github.Application.SubjectCourses.Options;
 using Itmo.Dev.Asap.Github.Application.Submissions.Commands;
 using Itmo.Dev.Platform.Common.Extensions;
@@ -29,6 +31,10 @@ public static class ServiceCollectionExtensions
             .AddOptions<SubjectCourseOrganizationUpdateOptions>()
             .BindConfiguration("Application:SubjectCourseOrganizationUpdate");
 
+        collection
+            .AddOptions<SubjectCourseDumpOptions>()
+            .BindConfiguration("Application:SubjectCourseDump");
+
         collection.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
 
         collection.AddHostedService<StaleProvisionedSubjectCourseEraser>();
@@ -38,8 +44,18 @@ public static class ServiceCollectionExtensions
 
         collection.TryAddSingleton<ISubmissionCommandParser, SubmissionCommandParser>();
 
+        collection.AddSubjectCourseContentDump();
+
         collection.AddUtcDateTimeProvider();
 
         return collection;
+    }
+
+    private static void AddSubjectCourseContentDump(this IServiceCollection collection)
+    {
+        collection.AddScoped<StudentRepositoryProvider>();
+        collection.AddScoped<SubmissionDataFactory>();
+        collection.AddScoped<SubmissionDumpPageHandler>();
+        collection.AddScoped<SubmissionHashProvider>();
     }
 }

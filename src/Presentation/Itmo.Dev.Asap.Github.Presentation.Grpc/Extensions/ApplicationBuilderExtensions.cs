@@ -13,6 +13,7 @@ public static class ApplicationBuilderExtensions
             x.MapGrpcService<GithubSubjectCourseController>();
             x.MapGrpcService<GithubUserController>();
             x.MapGrpcService<GithubSearchController>();
+
             x.MapGrpcReflectionService();
         });
 

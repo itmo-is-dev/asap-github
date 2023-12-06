@@ -10,4 +10,6 @@ public interface ISubjectCourseService
     Task<GetSubjectCourseStudentsResponse> GetSubjectCourseStudents(
         GetSubjectCourseStudentsRequest request,
         CancellationToken cancellationToken);
+
+    Task<IEnumerable<Guid>> GetSubjectCourseMentors(Guid subjectCourseId, CancellationToken cancellationToken);
 }

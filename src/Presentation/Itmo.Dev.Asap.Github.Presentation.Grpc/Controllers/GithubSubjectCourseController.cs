@@ -2,6 +2,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Commands;
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Queries;
+using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Github.Presentation.Grpc.Mapping;
 using Itmo.Dev.Asap.Github.SubjectCourses;
 using MediatR;
@@ -82,5 +83,33 @@ public class GithubSubjectCourseController : GithubSubjectCourseService.GithubSu
         FindSubjectCoursesByIds.Response response = await _mediator.Send(query, context.CancellationToken);
 
         return response.MapFrom();
+    }
+
+    public override async Task<StartContentDumpResponse> StartContentDump(
+        StartContentDumpRequest request,
+        ServerCallContext context)
+    {
+        var command = new StartSubjectCourseContentDump.Command(request.SubjectCourseId.ToGuid());
+        StartSubjectCourseContentDump.Response response = await _mediator.Send(command, context.CancellationToken);
+
+        return response switch
+        {
+            StartSubjectCourseContentDump.Response.Success success => new StartContentDumpResponse
+            {
+                Success = new StartContentDumpResponse.Types.Success { TaskId = success.TaskId },
+            },
+
+            StartSubjectCourseContentDump.Response.AlreadyRunning => new StartContentDumpResponse
+            {
+                AlreadyRunning = new StartContentDumpResponse.Types.AlreadyRunning(),
+            },
+
+            StartSubjectCourseContentDump.Response.SubjectCourseNotFound => new StartContentDumpResponse
+            {
+                SubjectCourseNotFound = new StartContentDumpResponse.Types.SubjectCourseNotFound(),
+            },
+
+            _ => throw new RpcException(new Status(StatusCode.Internal, "Operation finished unexpectedly")),
+        };
     }
 }

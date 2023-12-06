@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{F3565B
 		.gitignore = .gitignore
 		.editorconfig = .editorconfig
 		Directory.Packages.props = Directory.Packages.props
-		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{38BFC385-8F96-41A8-B131-7613C35F57D4}"
@@ -35,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{12C7AE
 	ProjectSection(SolutionItems) = preProject
 		docker\docker-compose.yaml = docker\docker-compose.yaml
 		docker\.env = docker\.env
+		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Github.Presentation.Grpc", "src\Presentation\Itmo.Dev.Asap.Github.Presentation.Grpc\Itmo.Dev.Asap.Github.Presentation.Grpc.csproj", "{F8278B67-A47D-40F3-8CB0-817C5358B87D}"
@@ -59,6 +59,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\dotnet-build.yml = .github\workflows\dotnet-build.yml
 		.github\workflows\deploy.yml = .github\workflows\deploy.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Infrastructure.S3Storage", "src\Infrastructure\Itmo.Dev.Asap.Infrastructure.S3Storage\Itmo.Dev.Asap.Infrastructure.S3Storage.csproj", "{272A5D13-9239-42A8-86E1-21063562BD94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itmo.Dev.Asap.Infrastructure.Locking", "src\Infrastructure\Itmo.Dev.Asap.Infrastructure.Locking\Itmo.Dev.Asap.Infrastructure.Locking.csproj", "{6C231E02-EFEA-494A-83F5-AEEFBE44A6C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +89,8 @@ Global
 		{45128D18-C149-4DCE-93C0-EB403ACA30AE} = {38BFC385-8F96-41A8-B131-7613C35F57D4}
 		{873B9A4B-C058-473F-BBEF-6EC0BF5223A8} = {38BFC385-8F96-41A8-B131-7613C35F57D4}
 		{2489190B-4D5F-4FCD-A17E-BB9229C11A17} = {F3565B39-CE4A-4E1A-A074-69C74972080F}
+		{272A5D13-9239-42A8-86E1-21063562BD94} = {AA2858F9-2EA3-4D40-9ADB-107F7768879C}
+		{6C231E02-EFEA-494A-83F5-AEEFBE44A6C5} = {AA2858F9-2EA3-4D40-9ADB-107F7768879C}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2A81A201-0ED3-4BBA-BC9B-571D1DEFC3B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -143,5 +149,13 @@ Global
 		{873B9A4B-C058-473F-BBEF-6EC0BF5223A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{873B9A4B-C058-473F-BBEF-6EC0BF5223A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{873B9A4B-C058-473F-BBEF-6EC0BF5223A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{272A5D13-9239-42A8-86E1-21063562BD94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{272A5D13-9239-42A8-86E1-21063562BD94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{272A5D13-9239-42A8-86E1-21063562BD94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{272A5D13-9239-42A8-86E1-21063562BD94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C231E02-EFEA-494A-83F5-AEEFBE44A6C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C231E02-EFEA-494A-83F5-AEEFBE44A6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C231E02-EFEA-494A-83F5-AEEFBE44A6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C231E02-EFEA-494A-83F5-AEEFBE44A6C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

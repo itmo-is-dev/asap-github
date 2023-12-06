@@ -10,3 +10,10 @@ services:
     ports:
       - "8021:5432"
     restart: unless-stopped
+    
+  asap-redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '8023:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass asap-github-local-redis
