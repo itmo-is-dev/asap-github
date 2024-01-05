@@ -11,7 +11,7 @@ using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRe
 
 namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 
-internal class PullRequestReopenedHandler : IRequestHandler<Command>
+internal class PullRequestReopenedHandler : IRequestHandler<Command, Response>
 {
     private readonly ISubmissionWorkflowService _asapSubmissionWorkflowService;
     private readonly IPullRequestEventNotifier _notifier;
@@ -27,13 +27,23 @@ internal class PullRequestReopenedHandler : IRequestHandler<Command>
         _context = context;
     }
 
-    public async Task Handle(Command request, CancellationToken cancellationToken)
+    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users
-            .GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+        GithubUser? issuer = await _context.Users
+            .FindByGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
-        GithubSubmission submission = await _context.Submissions
-            .GetSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
+        if (issuer is null)
+        {
+            return new Response.IssuerNotFound();
+        }
+
+        GithubSubmission? submission = await _context.Submissions
+            .FindSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
+
+        if (submission is null)
+        {
+            return new Response.SubmissionNotFound();
+        }
 
         SubmissionReactivatedResult result = await _asapSubmissionWorkflowService.SubmissionReactivatedAsync(
             issuer.Id,
@@ -51,5 +61,6 @@ internal class PullRequestReopenedHandler : IRequestHandler<Command>
         };
 
         await _notifier.SendCommentToPullRequest(message);
+        return new Response.Success();
     }
 }
