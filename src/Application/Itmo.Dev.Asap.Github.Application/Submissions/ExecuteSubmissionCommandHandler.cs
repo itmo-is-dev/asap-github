@@ -66,11 +66,10 @@ internal class ExecuteSubmissionCommandHandler : IRequestHandler<Command>
         {
             string commandName = request.SubmissionCommand.Name;
             string title = $"Error occured while processing {commandName} command";
-            string message = $"{title} \n{failure.Message}";
 
-            _logger.LogWarning("{Title}: {Message}", title, message);
+            _logger.LogWarning("{Title}: {Message}", title, failure.ErrorMessage.ToString());
 
-            await _notifier.SendCommentToPullRequest(message);
+            await failure.ErrorMessage.WriteMessage(_notifier);
             await _notifier.ReactToUserComment(false);
 
             return;

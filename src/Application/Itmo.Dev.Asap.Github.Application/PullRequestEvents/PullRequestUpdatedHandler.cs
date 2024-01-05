@@ -11,8 +11,6 @@ using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Application.Specifications;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
-using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
-using Itmo.Dev.Asap.Github.Common.Extensions;
 using MediatR;
 using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRequestUpdated;
 
@@ -36,7 +34,11 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
 
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+        GithubUser? issuer = await _context.Users
+            .FindByGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+
+        if (issuer is null)
+            return new Response.IssuerNotFound();
 
         GithubSubjectCourseStudent? student = await _context.SubjectCourses
             .FindSubjectCourseStudentByRepositoryId(request.PullRequest.RepositoryId, cancellationToken);
@@ -109,9 +111,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (subjectCourse is null)
-        {
-            throw EntityNotFoundException.SubjectCourse().TaggedWithNotFound();
-        }
+            return "Subject course is not found";
 
         List<GithubAssignment> assignments = await _context.Assignments
             .QueryAsync(GithubAssignmentQuery.Build(x => x.WithSubjectCourseId(subjectCourse.Id)), cancellationToken)

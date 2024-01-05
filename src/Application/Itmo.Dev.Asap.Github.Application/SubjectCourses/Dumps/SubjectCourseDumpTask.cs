@@ -62,8 +62,14 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         Guid subjectCourseId = executionContext.Metadata.SubjectCourseId;
         SubjectCourseDumpExecutionMetadata executionMetadata = executionContext.ExecutionMetadata;
 
-        GithubSubjectCourse subjectCourse = await _context.SubjectCourses
+        GithubSubjectCourse? subjectCourse = await _context.SubjectCourses
             .GetByIdAsync(subjectCourseId, cancellationToken);
+
+        if (subjectCourse is null)
+        {
+            var error = new SubjectCourseDumpError("Subject course is not found");
+            return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Failure(error);
+        }
 
         GithubOrganizationModel? subjectCourseOrganization = await _organizationService
             .FindByIdAsync(subjectCourse.OrganizationId, cancellationToken);

@@ -19,5 +19,7 @@ internal static class PullRequestUpdated
             string BranchName,
             string SubjectCourseTitle,
             string SubjectCourseAssignments) : Response;
+
+        public sealed record IssuerNotFound : Response;
     }
 }

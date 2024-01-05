@@ -7,5 +7,6 @@ public static class FindUserById
 {
     public record Query(Guid Id) : IRequest<Response>;
 
+#pragma warning disable CA1724
     public record Response(EnrichedGithubUser? User);
 }

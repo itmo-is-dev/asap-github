@@ -7,5 +7,6 @@ public static class FindSubjectCoursesByIds
 {
     public record Query(IEnumerable<Guid> SubjectCourseIds) : IRequest<Response>;
 
+#pragma warning disable CA1724
     public record Response(IReadOnlyCollection<EnrichedGithubSubjectCourse> SubjectCourses);
 }

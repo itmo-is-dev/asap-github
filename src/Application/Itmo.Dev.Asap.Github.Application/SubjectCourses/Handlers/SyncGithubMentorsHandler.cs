@@ -4,20 +4,18 @@ using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
-using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Commands;
 using Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Notifications;
 using Itmo.Dev.Asap.Github.Application.Models.SubjectCourses;
 using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Application.Specifications;
-using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
-using Itmo.Dev.Asap.Github.Common.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using static Itmo.Dev.Asap.Github.Application.Contracts.SubjectCourses.Commands.SyncGithubMentors;
 
 namespace Itmo.Dev.Asap.Github.Application.SubjectCourses.Handlers;
 
 internal class SyncGithubMentorsHandler :
-    IRequestHandler<SyncGithubMentors.Command>,
+    IRequestHandler<Command, Response>,
     INotificationHandler<SubjectCourseMentorTeamUpdated.Notification>
 {
     private readonly ILogger<SyncGithubMentorsHandler> _logger;
@@ -43,26 +41,28 @@ internal class SyncGithubMentorsHandler :
         _context = context;
     }
 
-    public async Task Handle(SyncGithubMentors.Command request, CancellationToken cancellationToken)
+    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
         GithubSubjectCourse? subjectCourse = await _context.SubjectCourses
             .ForOrganization(request.OrganizationId, cancellationToken)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (subjectCourse is null)
-            throw EntityNotFoundException.SubjectCourse($"with organization id = {request.OrganizationId}");
+            return new Response.SubjectCourseNotFound();
 
         await UpdateMentorsAsync(subjectCourse, cancellationToken);
+        return new Response.Success();
     }
 
     public async Task Handle(
         SubjectCourseMentorTeamUpdated.Notification notification,
         CancellationToken cancellationToken)
     {
-        GithubSubjectCourse association = await _context.SubjectCourses
+        GithubSubjectCourse? association = await _context.SubjectCourses
             .GetByIdAsync(notification.SubjectCourseId, cancellationToken);
 
-        await UpdateMentorsAsync(association, cancellationToken);
+        if (association is not null)
+            await UpdateMentorsAsync(association, cancellationToken);
     }
 
     private async Task UpdateMentorsAsync(
@@ -98,7 +98,7 @@ internal class SyncGithubMentorsHandler :
                 GithubUserModel? githubUser = await _githubUserService.FindByIdAsync(model.Id, default);
 
                 if (githubUser is null)
-                    throw EntityNotFoundException.Create<string, GithubUser>(model.Username).TaggedWithNotFound();
+                    throw new InvalidOperationException($"Github user with id {model.Id} not found");
 
                 UserDto user = await _userService.CreateUserAsync(
                     model.Username,

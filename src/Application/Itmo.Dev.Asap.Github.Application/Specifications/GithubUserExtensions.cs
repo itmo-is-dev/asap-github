@@ -1,25 +1,21 @@
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Queries;
 using Itmo.Dev.Asap.Github.Application.Abstractions.DataAccess.Repositories;
 using Itmo.Dev.Asap.Github.Application.Models.Users;
-using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
-using Itmo.Dev.Asap.Github.Common.Extensions;
 
 namespace Itmo.Dev.Asap.Github.Application.Specifications;
 
 public static class GithubUserExtensions
 {
-    public static async Task<GithubUser> GetForGithubIdAsync(
+    public static async Task<GithubUser?> FindByGithubIdAsync(
         this IGithubUserRepository repository,
         long githubUserId,
         CancellationToken cancellationToken = default)
     {
         var query = GithubUserQuery.Build(x => x.WithGithubUserId(githubUserId));
 
-        GithubUser? user = await repository
+        return await repository
             .QueryAsync(query, cancellationToken)
             .FirstOrDefaultAsync(cancellationToken);
-
-        return user ?? throw EntityNotFoundException.User().TaggedWithNotFound();
     }
 
     public static async Task<GithubUser?> FindByIdAsync(
