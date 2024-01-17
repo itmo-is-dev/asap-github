@@ -11,9 +11,10 @@ public static class FakerExtensions
     public static GithubAssignment GithubAssignment(this Faker faker, Guid? subjectCourseId = null)
     {
         return new GithubAssignment(
-            faker.Random.Guid(),
-            subjectCourseId ?? faker.Random.Guid(),
-            $"lab-{faker.Random.Int(min: 0)}");
+            Id: faker.Random.Guid(),
+            SubjectCourseId: subjectCourseId ?? faker.Random.Guid(),
+            BranchName: $"lab-{faker.Random.Int(min: 0)}",
+            RepositoryPath: string.Empty);
     }
 
     public static GithubSubjectCourseModel GithubSubjectCourseModel(this Faker faker, Guid? id = null)

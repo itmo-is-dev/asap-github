@@ -55,7 +55,10 @@ public class GithubAssignmentRepositoryTests : TestBase, IAsyncLifetime
 
         GithubAssignmentModel[] assignments = _fixture.Connection.Query<GithubAssignmentModel>(sql).ToArray();
 
-        assignments.Should().ContainSingle().Which.Should().BeEquivalentTo(assignment);
+        assignments.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(assignment, opt => opt.Excluding(x => x.RepositoryPath));
     }
 
     [Fact]
