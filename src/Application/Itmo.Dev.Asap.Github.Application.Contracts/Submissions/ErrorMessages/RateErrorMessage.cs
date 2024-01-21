@@ -1,37 +1,39 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class RateErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class RateErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Rate command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string SubmissionNotFoundMessage = $"{Title} \n Submission was not found";
+    private const string UnexpectedMessage = $"{Title} \n Failed to rate submission";
+
+    private readonly string _message;
 
     private RateErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static RateErrorMessage IssuerNotFound()
+    public static RateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+
+    public static RateErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+
+    public static RateErrorMessage Unexpected => new(UnexpectedMessage);
+
+    public static RateErrorMessage WithMessage(string errorMessage)
     {
-        string message = $"{Title} \n Issuer was not found";
-        return new RateErrorMessage(message);
+        return new RateErrorMessage($"{Title} \n {errorMessage}");
     }
 
-    public static RateErrorMessage SubmissionNotFound()
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Submission was not found";
-        return new RateErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    public static RateErrorMessage WithMessage(string m)
+    public override string ToString()
     {
-        string message = $"{Title} \n {m}";
-        return new RateErrorMessage(message);
+        return _message;
     }
-
-    public static RateErrorMessage Unexpected()
-    {
-        string message = $"{Title} \n Failed to rate submission";
-        return new RateErrorMessage(message);
-    }
-
-    protected override string Message { get; }
 }

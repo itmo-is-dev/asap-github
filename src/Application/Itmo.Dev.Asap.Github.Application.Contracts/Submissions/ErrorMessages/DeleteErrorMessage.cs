@@ -1,31 +1,36 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class DeleteErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class DeleteErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Delete command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string SubmissionNotFoundMessage = $"{Title} \n Submission was not found";
+
+    private readonly string _message;
 
     private DeleteErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static DeleteErrorMessage IssuerNotFound()
-    {
-        string message = $"{Title} \n Issuer was not found";
-        return new DeleteErrorMessage(message);
-    }
+    public static DeleteErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
 
-    public static DeleteErrorMessage SubmissionNotFound()
-    {
-        string message = $"{Title} \n Submission was not found";
-        return new DeleteErrorMessage(message);
-    }
+    public static DeleteErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
 
     public static DeleteErrorMessage UnsuccessfulDeletion(string errorMessage)
     {
-        string message = $"{Title} \n {errorMessage}";
-        return new DeleteErrorMessage(message);
+        return new DeleteErrorMessage($"{Title} \n {errorMessage}");
     }
 
-    protected override string Message { get; }
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
+    {
+        await notifier.SendCommentToPullRequest(_message);
+    }
+
+    public override string ToString()
+    {
+        return _message;
+    }
 }

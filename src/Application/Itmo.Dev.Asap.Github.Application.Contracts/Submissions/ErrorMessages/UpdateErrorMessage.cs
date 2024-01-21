@@ -1,43 +1,42 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class UpdateErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class UpdateErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Update command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string AssignmentNotFoundMessage = $"{Title} \n Assignment was not found";
+    private const string StudentNotFoundMessage = $"{Title} \n Current repository is not attached to any student";
+    private const string UnexpectedMessage = $"{Title} \n Failed to rate submission";
+
+    private readonly string _message;
 
     private UpdateErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static UpdateErrorMessage IssuerNotFound()
+    public static UpdateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+
+    public static UpdateErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
+
+    public static UpdateErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+
+    public static UpdateErrorMessage Unexpected => new(UnexpectedMessage);
+
+    public static UpdateErrorMessage WithMessage(string errorMessage)
     {
-        string message = $"{Title} \n Issuer was not found";
-        return new UpdateErrorMessage(message);
+        return new UpdateErrorMessage($"{Title} \n {errorMessage}");
     }
 
-    public static UpdateErrorMessage AssignmentNotFound()
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Assignment was not found";
-        return new UpdateErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    public static UpdateErrorMessage StudentNotFound()
+    public override string ToString()
     {
-        string message = $"{Title} \n Current repository is not attached to any student";
-        return new UpdateErrorMessage(message);
+        return _message;
     }
-
-    public static UpdateErrorMessage WithMessage(string m)
-    {
-        string message = $"{Title} \n {m}";
-        return new UpdateErrorMessage(message);
-    }
-
-    public static UpdateErrorMessage Unexpected()
-    {
-        string message = $"{Title} \n Failed to rate submission";
-        return new UpdateErrorMessage(message);
-    }
-
-    protected override string Message { get; }
 }

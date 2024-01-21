@@ -1,25 +1,31 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class MarkReviewedErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class MarkReviewedErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Mark Reviewed command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string SubmissionNotFoundMessage = $"{Title} \n Submission was not found";
+
+    private readonly string _message;
 
     private MarkReviewedErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static MarkReviewedErrorMessage IssuerNotFound()
+    public static MarkReviewedErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+
+    public static MarkReviewedErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Issuer was not found";
-        return new MarkReviewedErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    public static MarkReviewedErrorMessage SubmissionNotFound()
+    public override string ToString()
     {
-        string message = $"{Title} \n Submission was not found";
-        return new MarkReviewedErrorMessage(message);
+        return _message;
     }
-
-    protected override string Message { get; }
 }

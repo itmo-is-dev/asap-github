@@ -1,43 +1,42 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class CreateSubmissionErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class CreateSubmissionErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Create Submission command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string AssignmentNotFoundMessage = $"{Title} \n Assignment was not found";
+    private const string StudentNotFoundMessage = $"{Title} \n Current repository is not attached to any student";
+    private const string UnexpectedMessage = $"{Title} \n Operation produces unexpected result";
+
+    private const string UnauthorizedMessage =
+        $"{Title} \n You are not authorized to create submission at this repository";
+
+    private readonly string _message;
 
     private CreateSubmissionErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static CreateSubmissionErrorMessage IssuerNotFound()
+    public static CreateSubmissionErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+
+    public static CreateSubmissionErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
+
+    public static CreateSubmissionErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+
+    public static CreateSubmissionErrorMessage Unauthorized => new(UnauthorizedMessage);
+
+    public static CreateSubmissionErrorMessage Unexpected => new(UnexpectedMessage);
+
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Issuer was not found";
-        return new CreateSubmissionErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    public static CreateSubmissionErrorMessage AssignmentNotFound()
+    public override string ToString()
     {
-        string message = $"{Title} \n Assignment was not found";
-        return new CreateSubmissionErrorMessage(message);
+        return _message;
     }
-
-    public static CreateSubmissionErrorMessage StudentNotFound()
-    {
-        string message = $"{Title} \n Current repository is not attached to any student";
-        return new CreateSubmissionErrorMessage(message);
-    }
-
-    public static CreateSubmissionErrorMessage Unauthorized()
-    {
-        string message = $"{Title} \n You are not authorized to create submission at this repository";
-        return new CreateSubmissionErrorMessage(message);
-    }
-
-    public static CreateSubmissionErrorMessage Unexpected()
-    {
-        string message = $"{Title} \n Operation produces unexpected result";
-        return new CreateSubmissionErrorMessage(message);
-    }
-
-    protected override string Message { get; }
 }

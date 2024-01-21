@@ -8,5 +8,5 @@ public record SubmissionCommandResult
 
     public sealed record Success : SubmissionCommandResult;
 
-    public sealed record Failure(ErrorMessage ErrorMessage) : SubmissionCommandResult;
+    public sealed record Failure(IErrorMessage ErrorMessage) : SubmissionCommandResult;
 }

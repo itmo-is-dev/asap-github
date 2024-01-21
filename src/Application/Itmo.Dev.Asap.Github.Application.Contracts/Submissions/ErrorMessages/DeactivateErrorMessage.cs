@@ -1,25 +1,31 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class DeactivateErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class DeactivateErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Deactivate command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string SubmissionNotFoundMessage = $"{Title} \n Submission was not found";
+
+    private readonly string _message;
 
     private DeactivateErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static DeactivateErrorMessage IssuerNotFound()
+    public static DeactivateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+
+    public static DeactivateErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Issuer was not found";
-        return new DeactivateErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    public static DeactivateErrorMessage SubmissionNotFound()
+    public override string ToString()
     {
-        string message = $"{Title} \n Submission was not found";
-        return new DeactivateErrorMessage(message);
+        return _message;
     }
-
-    protected override string Message { get; }
 }

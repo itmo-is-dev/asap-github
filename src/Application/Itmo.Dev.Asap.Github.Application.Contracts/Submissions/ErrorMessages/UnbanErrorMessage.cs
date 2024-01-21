@@ -1,49 +1,47 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class UnbanErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class UnbanErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Unban command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string AssignmentNotFoundMessage = $"{Title} \n Assignment was not found";
+    private const string StudentNotFoundMessage = $"{Title} \n Current repository is not attached to any student";
+    private const string UnexpectedMessage = $"{Title} \n Operation produces unexpected result";
+
+    private const string UnauthorizedMessage =
+        $"{Title} \n You are not authorized to create submission at this repository";
+
+    private readonly string _message;
 
     private UnbanErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static UnbanErrorMessage IssuerNotFound()
-    {
-        string message = $"{Title} \n Issuer was not found";
-        return new UnbanErrorMessage(message);
-    }
+    public static UnbanErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
 
-    public static UnbanErrorMessage AssignmentNotFound()
-    {
-        string message = $"{Title} \n Assignment was not found";
-        return new UnbanErrorMessage(message);
-    }
+    public static UnbanErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
 
-    public static UnbanErrorMessage StudentNotFound()
-    {
-        string message = $"{Title} \n Current repository is not attached to any student";
-        return new UnbanErrorMessage(message);
-    }
+    public static UnbanErrorMessage StudentNotFound => new(StudentNotFoundMessage);
 
-    public static UnbanErrorMessage Unauthorized()
-    {
-        string message = $"{Title} \n You are not authorized to create submission at this repository";
-        return new UnbanErrorMessage(message);
-    }
+    public static UnbanErrorMessage Unauthorized => new(UnauthorizedMessage);
+
+    public static UnbanErrorMessage Unexpected => new(UnexpectedMessage);
 
     public static UnbanErrorMessage InvalidMove(string sourceState)
     {
-        string message = $"{Title} \n Cannot unban submission in {sourceState} state";
-        return new UnbanErrorMessage(message);
+        return new UnbanErrorMessage($"{Title} \n Cannot unban submission in {sourceState} state");
     }
 
-    public static UnbanErrorMessage Unexpected()
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Operation produces unexpected result";
-        return new UnbanErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    protected override string Message { get; }
+    public override string ToString()
+    {
+        return _message;
+    }
 }

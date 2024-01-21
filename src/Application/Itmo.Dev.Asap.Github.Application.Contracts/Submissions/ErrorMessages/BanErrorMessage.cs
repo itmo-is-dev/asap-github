@@ -1,31 +1,32 @@
-﻿namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+﻿using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 
-public class BanErrorMessage : ErrorMessage
+namespace Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
+
+public class BanErrorMessage : IErrorMessage
 {
     private const string Title = "Error occured while processing Ban command";
+    private const string IssuerNotFoundMessage = $"{Title} \n Issuer was not found";
+    private const string AssignmentNotFoundMessage = $"{Title} \n Assignment was not found";
+    private const string StudentNotFoundMessage = $"{Title} \n Current repository is not attached to any student";
+
+    private readonly string _message;
 
     private BanErrorMessage(string message)
     {
-        Message = message;
+        _message = message;
     }
 
-    public static BanErrorMessage IssuerNotFound()
+    public static BanErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static BanErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
+    public static BanErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+
+    public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {
-        string message = $"{Title} \n Issuer was not found";
-        return new BanErrorMessage(message);
+        await notifier.SendCommentToPullRequest(_message);
     }
 
-    public static BanErrorMessage AssignmentNotFound()
+    public override string ToString()
     {
-        string message = $"{Title} \n Assignment was not found";
-        return new BanErrorMessage(message);
+        return _message;
     }
-
-    public static BanErrorMessage StudentNotFound()
-    {
-        string message = $"{Title} \n Current repository is not attached to any student";
-        return new BanErrorMessage(message);
-    }
-
-    protected override string Message { get; }
 }
