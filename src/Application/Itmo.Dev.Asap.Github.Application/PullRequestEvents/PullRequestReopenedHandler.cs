@@ -33,17 +33,13 @@ internal class PullRequestReopenedHandler : IRequestHandler<Command, Response>
             .FindByGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
         if (issuer is null)
-        {
             return new Response.IssuerNotFound();
-        }
 
         GithubSubmission? submission = await _context.Submissions
             .FindSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
 
         if (submission is null)
-        {
             return new Response.SubmissionNotFound();
-        }
 
         SubmissionReactivatedResult result = await _asapSubmissionWorkflowService.SubmissionReactivatedAsync(
             issuer.Id,
