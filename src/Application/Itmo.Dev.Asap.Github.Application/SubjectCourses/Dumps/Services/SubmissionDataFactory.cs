@@ -2,6 +2,7 @@ using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Models;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Results;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Services;
 using Itmo.Dev.Asap.Github.Application.Abstractions.Storage;
+using Itmo.Dev.Asap.Github.Application.Models.Assignments;
 using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Github.Application.SubjectCourses.Dumps.Models;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
@@ -28,6 +29,7 @@ public class SubmissionDataFactory
 
     public async Task<CreateSubmissionDataResult> CreateSubmissionDataAsync(
         BackgroundTaskId backgroundTaskId,
+        GithubAssignment assignment,
         GithubOrganizationModel organization,
         GithubRepositoryModel repository,
         GithubSubmission submission,
@@ -38,6 +40,7 @@ public class SubmissionDataFactory
             organization.Id,
             repository.Id,
             hash,
+            assignment.RepositoryPath,
             cancellationToken);
 
         if (contentResult is GetRepositoryContentResult.NotFound)

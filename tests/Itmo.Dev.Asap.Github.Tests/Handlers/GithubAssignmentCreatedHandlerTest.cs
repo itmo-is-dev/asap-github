@@ -18,9 +18,10 @@ public class GithubAssignmentCreatedHandlerTest : TestBase
     public async void AddDuplicateAssignment_ShouldUpdate()
     {
         var assignment = new GithubAssignment(
-            Faker.Random.Guid(),
-            Faker.Random.Guid(),
-            "amogus");
+            Id: Faker.Random.Guid(),
+            SubjectCourseId: Faker.Random.Guid(),
+            BranchName: "amogus",
+            RepositoryPath: string.Empty);
 
         var notification = new AssignmentCreated.Notification(assignment);
 

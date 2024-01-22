@@ -13,6 +13,13 @@ namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 
 internal class PullRequestApprovedHandler : IRequestHandler<Command, Response>
 {
+    private const string SubmissionCompletedMessage =
+    """
+    submission is alredy completed,
+    pull request approve will be ignored 
+    (if submission is rated, pull request can be safely merged)
+    """;
+
     private readonly ISubmissionWorkflowService _submissionWorkflowService;
     private readonly IPullRequestEventNotifier _notifier;
     private readonly IPersistenceContext _context;
@@ -41,15 +48,19 @@ internal class PullRequestApprovedHandler : IRequestHandler<Command, Response>
         if (submission is null)
             return new Response.SubmissionNotFound();
 
-        SubmissionApprovedResult result = await _submissionWorkflowService.SubmissionApprovedAsync(
-            issuer.Id,
-            submission.Id,
-            cancellationToken);
+        SubmissionApprovedResult result = await _submissionWorkflowService
+            .SubmissionApprovedAsync(
+                issuer.Id,
+                submission.Id,
+                cancellationToken);
 
         string message = result switch
         {
             SubmissionApprovedResult.Success success
                 => $"Submission reviewed successfully\n\n{success.SubmissionRate.ToDisplayString()}",
+
+            SubmissionApprovedResult.InvalidState { State: SubmissionState.Completed }
+                => SubmissionCompletedMessage,
 
             SubmissionApprovedResult.InvalidState invalidState
                 => new InvalidStateMessage("Pull request approved", invalidState.State),
