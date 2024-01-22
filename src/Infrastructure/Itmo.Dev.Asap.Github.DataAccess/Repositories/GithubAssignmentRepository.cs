@@ -25,7 +25,7 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string sql = """
-        select a.assignment_id, a.subject_course_id, a.assignment_branch_name 
+        select a.assignment_id, a.subject_course_id, a.assignment_branch_name, a.assignment_repository_path
         from assignments as a
         join subject_courses as sc using (subject_course_id)
         where 
@@ -49,13 +49,15 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
         int assignmentId = reader.GetOrdinal("assignment_id");
         int subjectCourseId = reader.GetOrdinal("subject_course_id");
         int assignmentBranchName = reader.GetOrdinal("assignment_branch_name");
+        int repositoryPath = reader.GetOrdinal("assignment_repository_path");
 
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new GithubAssignment(
                 Id: reader.GetGuid(assignmentId),
                 SubjectCourseId: reader.GetGuid(subjectCourseId),
-                BranchName: reader.GetString(assignmentBranchName));
+                BranchName: reader.GetString(assignmentBranchName),
+                RepositoryPath: reader.GetString(repositoryPath));
         }
     }
 
@@ -63,14 +65,15 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
     {
         const string sql = """
         insert into assignments
-        (assignment_id, subject_course_id, assignment_branch_name)
-        values (:assignment_id, :subject_course_id, :assignment_branch_name)
+        (assignment_id, subject_course_id, assignment_branch_name, assignment_repository_path)
+        values (:assignment_id, :subject_course_id, :assignment_branch_name, :repository_path)
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
             .AddParameter("assignment_id", assignment.Id)
             .AddParameter("subject_course_id", assignment.SubjectCourseId)
-            .AddParameter("assignment_branch_name", assignment.BranchName);
+            .AddParameter("assignment_branch_name", assignment.BranchName)
+            .AddParameter("repository_path", assignment.RepositoryPath);
 
         _unitOfWork.Enqueue(command);
     }
@@ -80,14 +83,16 @@ internal class GithubAssignmentRepository : IGithubAssignmentRepository
         const string sql = """
         update "assignments"
         set subject_course_id = :subject_course_id, 
-            assignment_branch_name = :assignment_branch_name
+            assignment_branch_name = :assignment_branch_name,
+            assignment_repository_path = :repository_path
         where assignment_id = :id
         """;
 
         NpgsqlCommand command = new NpgsqlCommand(sql)
             .AddParameter("assignment_id", assignment.Id)
             .AddParameter("subject_course_id", assignment.SubjectCourseId)
-            .AddParameter("assignment_branch_name", assignment.BranchName);
+            .AddParameter("assignment_branch_name", assignment.BranchName)
+            .AddParameter("repository_path", assignment.RepositoryPath);
 
         _unitOfWork.Enqueue(command);
     }

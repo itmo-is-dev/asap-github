@@ -8,5 +8,6 @@ public interface IGithubContentService
         long organizationId,
         long repositoryId,
         string hash,
+        string path,
         CancellationToken cancellationToken);
 }
