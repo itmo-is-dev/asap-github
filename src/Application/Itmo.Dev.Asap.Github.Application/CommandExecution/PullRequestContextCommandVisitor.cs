@@ -108,26 +108,20 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
             default,
             default);
 
-        switch (result)
+        return result switch
         {
-            case UnbanSubmissionResult.Success success:
-            {
-                string message = $"Submission {success.Submission.Code} successfully unbanned.";
-                await _eventNotifier.SendCommentToPullRequest(message);
+            UnbanSubmissionResult.Success success
+                => await HandleSuccessAsync(success),
 
-                return new SubmissionCommandResult.Success();
-            }
+            UnbanSubmissionResult.Unauthorized
+                => new SubmissionCommandResult.Failure(UnbanErrorMessage.Unauthorized),
 
-            case UnbanSubmissionResult.Unauthorized:
-                return new SubmissionCommandResult.Failure(
-                    UnbanErrorMessage.Unauthorized);
-            case UnbanSubmissionResult.InvalidMove invalidMove:
-                return new SubmissionCommandResult.Failure(
-                    UnbanErrorMessage.InvalidMove(invalidMove.SourceState.ToString()));
-            default:
-                return new SubmissionCommandResult.Failure(
-                    UnbanErrorMessage.Unexpected);
-        }
+            UnbanSubmissionResult.InvalidMove invalidMove
+                => new SubmissionCommandResult.Failure(UnbanErrorMessage
+                    .InvalidMove(invalidMove.SourceState.ToString())),
+
+            _ => new SubmissionCommandResult.Failure(UnbanErrorMessage.Unexpected),
+        };
     }
 
     public async Task<SubmissionCommandResult> VisitAsync(CreateSubmissionCommand command)
@@ -342,5 +336,13 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
         return result is UpdateSubmissionResult.Failure f
             ? new SubmissionCommandResult.Failure(UpdateErrorMessage.WithMessage(f.ErrorMessage))
             : new SubmissionCommandResult.Failure(UpdateErrorMessage.Unexpected);
+    }
+
+    private async Task<SubmissionCommandResult> HandleSuccessAsync(UnbanSubmissionResult.Success success)
+    {
+        string message = $"Submission {success.Submission.Code} successfully unbanned.";
+        await _eventNotifier.SendCommentToPullRequest(message);
+
+        return new SubmissionCommandResult.Success();
     }
 }
