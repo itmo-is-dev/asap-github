@@ -15,9 +15,9 @@ public class MarkReviewedErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static MarkReviewedErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly MarkReviewedErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static MarkReviewedErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+    public static readonly MarkReviewedErrorMessage SubmissionNotFound = new(SubmissionNotFoundMessage);
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

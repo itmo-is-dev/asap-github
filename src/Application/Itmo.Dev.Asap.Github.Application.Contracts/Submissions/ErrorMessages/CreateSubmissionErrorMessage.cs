@@ -20,15 +20,15 @@ public class CreateSubmissionErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static CreateSubmissionErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly CreateSubmissionErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static CreateSubmissionErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
+    public static readonly CreateSubmissionErrorMessage AssignmentNotFound = new(AssignmentNotFoundMessage);
 
-    public static CreateSubmissionErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+    public static readonly CreateSubmissionErrorMessage StudentNotFound = new(StudentNotFoundMessage);
 
-    public static CreateSubmissionErrorMessage Unauthorized => new(UnauthorizedMessage);
+    public static readonly CreateSubmissionErrorMessage Unauthorized = new(UnauthorizedMessage);
 
-    public static CreateSubmissionErrorMessage Unexpected => new(UnexpectedMessage);
+    public static readonly CreateSubmissionErrorMessage Unexpected = new(UnexpectedMessage);
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

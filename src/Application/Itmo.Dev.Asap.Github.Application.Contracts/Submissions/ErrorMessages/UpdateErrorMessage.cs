@@ -17,18 +17,16 @@ public class UpdateErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static UpdateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly UpdateErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static UpdateErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
+    public static readonly UpdateErrorMessage AssignmentNotFound = new(AssignmentNotFoundMessage);
 
-    public static UpdateErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+    public static readonly UpdateErrorMessage StudentNotFound = new(StudentNotFoundMessage);
 
-    public static UpdateErrorMessage Unexpected => new(UnexpectedMessage);
+    public static readonly UpdateErrorMessage Unexpected = new(UnexpectedMessage);
 
     public static UpdateErrorMessage WithMessage(string errorMessage)
-    {
-        return new UpdateErrorMessage($"{Title} \n {errorMessage}");
-    }
+        => new($"{Title} \n {errorMessage}");
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

@@ -89,9 +89,9 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
             await _context.CommitAsync(default);
 
             string message = $"""
-                              Submission created.
-                              {success.SubmissionRate.ToDisplayString()}
-                              """;
+                Submission created.
+                {success.SubmissionRate.ToDisplayString()}
+                """;
 
             await _notifier.SendCommentToPullRequest(message);
         }

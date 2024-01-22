@@ -15,14 +15,12 @@ public class DeleteErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static DeleteErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly DeleteErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static DeleteErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+    public static readonly DeleteErrorMessage SubmissionNotFound = new(SubmissionNotFoundMessage);
 
     public static DeleteErrorMessage UnsuccessfulDeletion(string errorMessage)
-    {
-        return new DeleteErrorMessage($"{Title} \n {errorMessage}");
-    }
+        => new($"{Title} \n {errorMessage}");
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

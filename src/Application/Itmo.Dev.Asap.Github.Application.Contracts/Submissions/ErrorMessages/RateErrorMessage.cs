@@ -16,16 +16,14 @@ public class RateErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static RateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly RateErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static RateErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+    public static readonly RateErrorMessage SubmissionNotFound = new(SubmissionNotFoundMessage);
 
-    public static RateErrorMessage Unexpected => new(UnexpectedMessage);
+    public static readonly RateErrorMessage Unexpected = new(UnexpectedMessage);
 
     public static RateErrorMessage WithMessage(string errorMessage)
-    {
-        return new RateErrorMessage($"{Title} \n {errorMessage}");
-    }
+        => new($"{Title} \n {errorMessage}");
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

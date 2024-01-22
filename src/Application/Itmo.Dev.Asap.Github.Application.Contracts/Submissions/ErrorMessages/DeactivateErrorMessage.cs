@@ -15,9 +15,9 @@ public class DeactivateErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static DeactivateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly DeactivateErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static DeactivateErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+    public static readonly DeactivateErrorMessage SubmissionNotFound = new(SubmissionNotFoundMessage);
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

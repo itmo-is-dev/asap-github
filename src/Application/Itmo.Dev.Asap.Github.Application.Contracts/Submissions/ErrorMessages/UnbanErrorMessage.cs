@@ -20,20 +20,18 @@ public class UnbanErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static UnbanErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly UnbanErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static UnbanErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
+    public static readonly UnbanErrorMessage AssignmentNotFound = new(AssignmentNotFoundMessage);
 
-    public static UnbanErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+    public static readonly UnbanErrorMessage StudentNotFound = new(StudentNotFoundMessage);
 
-    public static UnbanErrorMessage Unauthorized => new(UnauthorizedMessage);
+    public static readonly UnbanErrorMessage Unauthorized = new(UnauthorizedMessage);
 
-    public static UnbanErrorMessage Unexpected => new(UnexpectedMessage);
+    public static readonly UnbanErrorMessage Unexpected = new(UnexpectedMessage);
 
     public static UnbanErrorMessage InvalidMove(string sourceState)
-    {
-        return new UnbanErrorMessage($"{Title} \n Cannot unban submission in {sourceState} state");
-    }
+        => new($"{Title} \n Cannot unban submission in {sourceState} state");
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

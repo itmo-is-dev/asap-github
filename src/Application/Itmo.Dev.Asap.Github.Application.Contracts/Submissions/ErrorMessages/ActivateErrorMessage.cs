@@ -15,9 +15,9 @@ public class ActivateErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static ActivateErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
+    public static readonly ActivateErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
 
-    public static ActivateErrorMessage SubmissionNotFound => new(SubmissionNotFoundMessage);
+    public static readonly ActivateErrorMessage SubmissionNotFound = new(SubmissionNotFoundMessage);
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

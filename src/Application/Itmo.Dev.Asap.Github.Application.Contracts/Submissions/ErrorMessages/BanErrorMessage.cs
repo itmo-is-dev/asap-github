@@ -16,9 +16,11 @@ public class BanErrorMessage : IErrorMessage
         _message = message;
     }
 
-    public static BanErrorMessage IssuerNotFound => new(IssuerNotFoundMessage);
-    public static BanErrorMessage AssignmentNotFound => new(AssignmentNotFoundMessage);
-    public static BanErrorMessage StudentNotFound => new(StudentNotFoundMessage);
+    public static readonly BanErrorMessage IssuerNotFound = new(IssuerNotFoundMessage);
+
+    public static readonly BanErrorMessage AssignmentNotFound = new(AssignmentNotFoundMessage);
+
+    public static readonly BanErrorMessage StudentNotFound = new(StudentNotFoundMessage);
 
     public async Task WriteMessage(IPullRequestCommentEventNotifier notifier)
     {

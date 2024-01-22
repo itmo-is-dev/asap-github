@@ -167,9 +167,9 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
             await _context.CommitAsync(default);
 
             string message = $"""
-                              Submission created.
-                              {submission.ToDisplayString()}
-                              """;
+                Submission created.
+                {submission.ToDisplayString()}
+                """;
 
             await _eventNotifier.SendCommentToPullRequest(message);
 
@@ -279,9 +279,9 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
         if (result is RateSubmissionResult.Success s)
         {
             string message = $"""
-                              Submission rated.
-                              {s.Submission.ToDisplayString()}
-                              """;
+                Submission rated.
+                {s.Submission.ToDisplayString()}
+                """;
 
             await _eventNotifier.SendCommentToPullRequest(message);
 
@@ -324,9 +324,9 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
         if (result is UpdateSubmissionResult.Success s)
         {
             string message = $"""
-                              Submission rated.
-                              {s.Submission.ToDisplayString()}
-                              """;
+                Submission rated.
+                {s.Submission.ToDisplayString()}
+                """;
 
             await _eventNotifier.SendCommentToPullRequest(message);
 
