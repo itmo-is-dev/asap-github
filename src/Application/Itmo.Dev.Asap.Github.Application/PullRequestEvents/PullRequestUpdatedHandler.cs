@@ -12,17 +12,20 @@ using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Application.Specifications;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRequestUpdated;
 
 namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 
 internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
 {
+    private readonly ILogger<PullRequestUpdatedHandler> _logger;
     private readonly ISubmissionWorkflowService _submissionWorkflowService;
     private readonly IPullRequestEventNotifier _notifier;
     private readonly IPersistenceContext _context;
 
     public PullRequestUpdatedHandler(
+        ILogger<PullRequestUpdatedHandler> logger,
         ISubmissionWorkflowService submissionWorkflowService,
         IPullRequestEventNotifier notifier,
         IPersistenceContext context)
@@ -30,6 +33,7 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
         _submissionWorkflowService = submissionWorkflowService;
         _notifier = notifier;
         _context = context;
+        _logger = logger;
     }
 
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -85,9 +89,9 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
             await _context.CommitAsync(default);
 
             string message = $"""
-            Submission created.
-            {success.SubmissionRate.ToDisplayString()}
-            """;
+                              Submission created.
+                              {success.SubmissionRate.ToDisplayString()}
+                              """;
 
             await _notifier.SendCommentToPullRequest(message);
         }
@@ -111,7 +115,10 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (subjectCourse is null)
-            return "Subject course is not found";
+        {
+            _logger.LogWarning("Subject course is not found");
+            return string.Empty;
+        }
 
         List<GithubAssignment> assignments = await _context.Assignments
             .QueryAsync(GithubAssignmentQuery.Build(x => x.WithSubjectCourseId(subjectCourse.Id)), cancellationToken)

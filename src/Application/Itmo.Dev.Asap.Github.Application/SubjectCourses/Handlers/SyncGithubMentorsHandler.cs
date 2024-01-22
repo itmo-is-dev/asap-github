@@ -62,7 +62,15 @@ internal class SyncGithubMentorsHandler :
             .GetByIdAsync(notification.SubjectCourseId, cancellationToken);
 
         if (association is not null)
+        {
             await UpdateMentorsAsync(association, cancellationToken);
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Association not found. SubjectCourseId {SubjectCourseId}",
+                notification.SubjectCourseId);
+        }
     }
 
     private async Task UpdateMentorsAsync(
@@ -98,7 +106,7 @@ internal class SyncGithubMentorsHandler :
                 GithubUserModel? githubUser = await _githubUserService.FindByIdAsync(model.Id, default);
 
                 if (githubUser is null)
-                    throw new InvalidOperationException($"Github user with id {model.Id} not found");
+                    throw new InvalidOperationException($"Github user {model.Username} with id {model.Id} not found");
 
                 UserDto user = await _userService.CreateUserAsync(
                     model.Username,
