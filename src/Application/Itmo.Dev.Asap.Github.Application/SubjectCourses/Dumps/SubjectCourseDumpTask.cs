@@ -68,7 +68,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         if (subjectCourse is null)
         {
             var error = new SubjectCourseDumpError("Subject course is not found");
-            return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Failure(error);
+            return BackgroundTaskExecutionResult.Failure.ForEmptyResult().WithError(error);
         }
 
         GithubOrganizationModel? subjectCourseOrganization = await _organizationService
@@ -77,7 +77,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
         if (subjectCourseOrganization is null)
         {
             var error = new SubjectCourseDumpError("Organization for subject course is not found");
-            return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Failure(error);
+            return BackgroundTaskExecutionResult.Failure.ForEmptyResult().WithError(error);
         }
 
         IEnumerable<Guid> mentorIds = await _subjectCourseService
@@ -112,8 +112,7 @@ public class SubjectCourseDumpTask : IBackgroundTask<
 
             if (result is DumpPageResult.Failure failure)
             {
-                return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>
-                    .Failure(failure.Error);
+                return BackgroundTaskExecutionResult.Failure.ForEmptyResult().WithError(failure.Error);
             }
 
             if (result is not DumpPageResult.Success success)
@@ -131,7 +130,6 @@ public class SubjectCourseDumpTask : IBackgroundTask<
 
         await _publisher.Publish(new SubmissionDataCollectionFinished.Notification(executionContext.Id.Value), default);
 
-        EmptyExecutionResult value = EmptyExecutionResult.Value;
-        return new BackgroundTaskExecutionResult<EmptyExecutionResult, SubjectCourseDumpError>.Success(value);
+        return BackgroundTaskExecutionResult.Success.WithEmptyResult().ForError<SubjectCourseDumpError>();
     }
 }
