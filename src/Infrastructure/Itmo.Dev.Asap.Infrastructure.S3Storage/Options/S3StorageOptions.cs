@@ -12,6 +12,8 @@ public class S3StorageOptions : IValidatableObject
 
     public Uri ServiceUrl { get; set; } = null!;
 
+    public TimeSpan LinkTimeToLive { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (IsEnabled is false)
