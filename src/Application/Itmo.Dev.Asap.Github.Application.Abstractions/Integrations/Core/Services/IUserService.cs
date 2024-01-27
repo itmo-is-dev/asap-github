@@ -10,5 +10,5 @@ public interface IUserService
         string lastName,
         CancellationToken cancellationToken);
 
-    Task<UserDto> GetByIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<UserDto?> FindByIdAsync(Guid userId, CancellationToken cancellationToken);
 }

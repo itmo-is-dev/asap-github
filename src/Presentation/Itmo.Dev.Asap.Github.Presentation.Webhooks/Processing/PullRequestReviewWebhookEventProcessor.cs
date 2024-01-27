@@ -87,7 +87,7 @@ public class PullRequestReviewWebhookEventProcessor
 
     private async Task ProcessApprovedAsync(PullRequestDto pullRequest, string? reviewBody, long commentId)
     {
-        IRequest command = new PullRequestApproved.Command(pullRequest);
+        var command = new PullRequestApproved.Command(pullRequest);
         await _mediator.Send(command);
 
         if (reviewBody?.FirstOrDefault() is not '/')
@@ -99,7 +99,7 @@ public class PullRequestReviewWebhookEventProcessor
 
     private async Task ProcessRequestedChangesAsync(PullRequestDto pullRequest, string? reviewBody, long commentId)
     {
-        IRequest command = new PullRequestChangesRequested.Command(pullRequest);
+        var command = new PullRequestChangesRequested.Command(pullRequest);
         await _mediator.Send(command);
 
         if (reviewBody?.FirstOrDefault() is not '/')

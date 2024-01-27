@@ -86,6 +86,7 @@ public class SubmissionDumpPageHandler
 
             CreateSubmissionDataResult result = await _submissionDataFactory.CreateSubmissionDataAsync(
                 backgroundTaskId,
+                assignment,
                 organization,
                 repository,
                 submission,

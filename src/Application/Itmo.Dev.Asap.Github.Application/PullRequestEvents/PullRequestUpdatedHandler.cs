@@ -11,20 +11,21 @@ using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Github.Application.Models.Users;
 using Itmo.Dev.Asap.Github.Application.Specifications;
 using Itmo.Dev.Asap.Github.Common.Exceptions;
-using Itmo.Dev.Asap.Github.Common.Exceptions.Entities;
-using Itmo.Dev.Asap.Github.Common.Extensions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRequestUpdated;
 
 namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 
 internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
 {
+    private readonly ILogger<PullRequestUpdatedHandler> _logger;
     private readonly ISubmissionWorkflowService _submissionWorkflowService;
     private readonly IPullRequestEventNotifier _notifier;
     private readonly IPersistenceContext _context;
 
     public PullRequestUpdatedHandler(
+        ILogger<PullRequestUpdatedHandler> logger,
         ISubmissionWorkflowService submissionWorkflowService,
         IPullRequestEventNotifier notifier,
         IPersistenceContext context)
@@ -32,11 +33,16 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
         _submissionWorkflowService = submissionWorkflowService;
         _notifier = notifier;
         _context = context;
+        _logger = logger;
     }
 
     public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+        GithubUser? issuer = await _context.Users
+            .FindByGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+
+        if (issuer is null)
+            return new Response.IssuerNotFound();
 
         GithubSubjectCourseStudent? student = await _context.SubjectCourses
             .FindSubjectCourseStudentByRepositoryId(request.PullRequest.RepositoryId, cancellationToken);
@@ -83,9 +89,9 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
             await _context.CommitAsync(default);
 
             string message = $"""
-            Submission created.
-            {success.SubmissionRate.ToDisplayString()}
-            """;
+                Submission created.
+                {success.SubmissionRate.ToDisplayString()}
+                """;
 
             await _notifier.SendCommentToPullRequest(message);
         }
@@ -110,7 +116,8 @@ internal class PullRequestUpdatedHandler : IRequestHandler<Command, Response>
 
         if (subjectCourse is null)
         {
-            throw EntityNotFoundException.SubjectCourse().TaggedWithNotFound();
+            _logger.LogWarning("Subject course is not found");
+            return string.Empty;
         }
 
         List<GithubAssignment> assignments = await _context.Assignments

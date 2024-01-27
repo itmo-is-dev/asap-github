@@ -23,7 +23,7 @@ public static class PullRequestEventNotifierExtensions
     {
         string message = exception switch
         {
-            HttpTaggedException e => e.Wrapped.Message,
+            AsapGithubException e => e.Message,
             _ => "An internal error occurred while processing command. Contact support for details.",
         };
 

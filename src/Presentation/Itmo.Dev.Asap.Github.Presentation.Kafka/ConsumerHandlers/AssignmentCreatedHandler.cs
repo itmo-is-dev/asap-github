@@ -37,6 +37,7 @@ public class AssignmentCreatedHandler : IKafkaMessageHandler<AssignmentCreatedKe
         return new GithubAssignment(
             value.Id.ToGuid(),
             value.SubjectCourseId.ToGuid(),
-            value.ShortName);
+            value.ShortName,
+            RepositoryPath: string.Empty);
     }
 }
