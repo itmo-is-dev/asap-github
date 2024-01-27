@@ -11,7 +11,7 @@ using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRe
 
 namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 
-internal class PullRequestApprovedHandler : IRequestHandler<Command>
+internal class PullRequestApprovedHandler : IRequestHandler<Command, Response>
 {
     private const string SubmissionCompletedMessage =
     """
@@ -34,13 +34,19 @@ internal class PullRequestApprovedHandler : IRequestHandler<Command>
         _context = context;
     }
 
-    public async Task Handle(Command request, CancellationToken cancellationToken)
+    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users
-            .GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+        GithubUser? issuer = await _context.Users
+            .FindByGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
-        GithubSubmission submission = await _context.Submissions
-            .GetSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
+        if (issuer is null)
+            return new Response.IssuerNotFound();
+
+        GithubSubmission? submission = await _context.Submissions
+            .FindSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
+
+        if (submission is null)
+            return new Response.SubmissionNotFound();
 
         SubmissionApprovedResult result = await _submissionWorkflowService
             .SubmissionApprovedAsync(
@@ -57,11 +63,12 @@ internal class PullRequestApprovedHandler : IRequestHandler<Command>
                 => SubmissionCompletedMessage,
 
             SubmissionApprovedResult.InvalidState invalidState
-                => new InvalidStateMessage("Pull request approve", invalidState.State),
+                => new InvalidStateMessage("Pull request approved", invalidState.State),
 
             _ => throw new UnexpectedOperationResultException(),
         };
 
         await _notifier.SendCommentToPullRequest(message);
+        return new Response.Success();
     }
 }

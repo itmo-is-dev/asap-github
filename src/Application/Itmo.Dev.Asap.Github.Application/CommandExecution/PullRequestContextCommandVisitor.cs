@@ -3,6 +3,7 @@ using Itmo.Dev.Asap.Github.Application.Abstractions.Integrations.Core.Services.S
 using Itmo.Dev.Asap.Github.Application.Abstractions.Octokit.Notifications;
 using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Commands;
 using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.CommandVisitors;
+using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.ErrorMessages;
 using Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Models;
 using Itmo.Dev.Asap.Github.Application.Models.Assignments;
 using Itmo.Dev.Asap.Github.Application.Models.PullRequests;
@@ -34,8 +35,14 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(ActivateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(ActivateErrorMessage.IssuerNotFound);
+
+        GithubSubmission? submission = await _context.Submissions.FindSubmissionForPullRequestAsync(_pullRequest);
+
+        if (submission is null)
+            return new SubmissionCommandResult.Failure(ActivateErrorMessage.SubmissionNotFound);
 
         await _submissionService.ActivateSubmissionAsync(issuer.Id, submission.Id, default);
 
@@ -47,14 +54,21 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(BanCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(BanErrorMessage.IssuerNotFound);
+
+        GithubAssignment? assignment = await _context.Assignments.FindAssignmentForPullRequestAsync(_pullRequest);
+
+        if (assignment is null)
+            return new SubmissionCommandResult.Failure(BanErrorMessage.AssignmentNotFound);
 
         GithubSubjectCourseStudent? student = await _context.SubjectCourses
             .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
 
         if (student is null)
-            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
+            return new SubmissionCommandResult.Failure(BanErrorMessage.StudentNotFound);
 
         SubmissionDto submission = await _submissionService.BanSubmissionAsync(
             issuer.Id,
@@ -71,14 +85,21 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(UnbanCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(UnbanErrorMessage.IssuerNotFound);
+
+        GithubAssignment? assignment = await _context.Assignments.FindAssignmentForPullRequestAsync(_pullRequest);
+
+        if (assignment is null)
+            return new SubmissionCommandResult.Failure(UnbanErrorMessage.AssignmentNotFound);
 
         GithubSubjectCourseStudent? student = await _context.SubjectCourses
             .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
 
         if (student is null)
-            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
+            return new SubmissionCommandResult.Failure(UnbanErrorMessage.StudentNotFound);
 
         UnbanSubmissionResult result = await _submissionService.UnbanSubmissionAsync(
             issuer.Id,
@@ -87,39 +108,39 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
             default,
             default);
 
-        if (result is UnbanSubmissionResult.Success success)
+        return result switch
         {
-            string message = $"Submission {success.Submission.Code} successfully unbanned.";
-            await _eventNotifier.SendCommentToPullRequest(message);
+            UnbanSubmissionResult.Success success
+                => await HandleSuccessAsync(success),
 
-            return new SubmissionCommandResult.Success();
-        }
+            UnbanSubmissionResult.Unauthorized
+                => new SubmissionCommandResult.Failure(UnbanErrorMessage.Unauthorized),
 
-        if (result is UnbanSubmissionResult.Unauthorized)
-        {
-            string message = "You are not authorized to create submission at this repository";
-            return new SubmissionCommandResult.Failure(message);
-        }
+            UnbanSubmissionResult.InvalidMove invalidMove
+                => new SubmissionCommandResult.Failure(UnbanErrorMessage
+                    .InvalidMove(invalidMove.SourceState.ToString())),
 
-        if (result is UnbanSubmissionResult.InvalidMove invalidMove)
-        {
-            string message = $"Cannot unban submission in {invalidMove.SourceState} state";
-            return new SubmissionCommandResult.Failure(message);
-        }
-
-        return new SubmissionCommandResult.Failure("Operation produces unexpected result");
+            _ => new SubmissionCommandResult.Failure(UnbanErrorMessage.Unexpected),
+        };
     }
 
     public async Task<SubmissionCommandResult> VisitAsync(CreateSubmissionCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(CreateSubmissionErrorMessage.IssuerNotFound);
+
+        GithubAssignment? assignment = await _context.Assignments.FindAssignmentForPullRequestAsync(_pullRequest);
+
+        if (assignment is null)
+            return new SubmissionCommandResult.Failure(CreateSubmissionErrorMessage.AssignmentNotFound);
 
         GithubSubjectCourseStudent? student = await _context.SubjectCourses
             .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
 
         if (student is null)
-            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
+            return new SubmissionCommandResult.Failure(CreateSubmissionErrorMessage.StudentNotFound);
 
         CreateSubmissionResult result = await _submissionService.CreateSubmissionAsync(
             issuer.Id,
@@ -156,18 +177,21 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
         }
 
         if (result is CreateSubmissionResult.Unauthorized)
-        {
-            string message = "You are not authorized to create submission at this repository";
-            return new SubmissionCommandResult.Failure(message);
-        }
+            return new SubmissionCommandResult.Failure(CreateSubmissionErrorMessage.Unauthorized);
 
-        return new SubmissionCommandResult.Failure("Operation produces unexpected result");
+        return new SubmissionCommandResult.Failure(CreateSubmissionErrorMessage.Unexpected);
     }
 
     public async Task<SubmissionCommandResult> VisitAsync(DeactivateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(DeactivateErrorMessage.IssuerNotFound);
+
+        GithubSubmission? submission = await _context.Submissions.FindSubmissionForPullRequestAsync(_pullRequest);
+
+        if (submission is null)
+            return new SubmissionCommandResult.Failure(DeactivateErrorMessage.SubmissionNotFound);
 
         await _submissionService.DeactivateSubmissionAsync(issuer.Id, submission.Id, default);
 
@@ -179,8 +203,14 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(DeleteCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(DeleteErrorMessage.IssuerNotFound);
+
+        GithubSubmission? submission = await _context.Submissions.FindSubmissionForPullRequestAsync(_pullRequest);
+
+        if (submission is null)
+            return new SubmissionCommandResult.Failure(DeleteErrorMessage.SubmissionNotFound);
 
         try
         {
@@ -196,7 +226,7 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
         }
         catch (Exception e)
         {
-            return new SubmissionCommandResult.Failure(e.Message);
+            return new SubmissionCommandResult.Failure(DeleteErrorMessage.UnsuccessfulDeletion(e.Message));
         }
     }
 
@@ -208,8 +238,14 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(MarkReviewedCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(MarkReviewedErrorMessage.IssuerNotFound);
+
+        GithubSubmission? submission = await _context.Submissions.FindSubmissionForPullRequestAsync(_pullRequest);
+
+        if (submission is null)
+            return new SubmissionCommandResult.Failure(MarkReviewedErrorMessage.SubmissionNotFound);
 
         await _submissionService.MarkSubmissionAsReviewedAsync(
             issuer.Id,
@@ -224,8 +260,14 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
 
     public async Task<SubmissionCommandResult> VisitAsync(RateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubSubmission submission = await _context.Submissions.GetSubmissionForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(RateErrorMessage.IssuerNotFound);
+
+        GithubSubmission? submission = await _context.Submissions.FindSubmissionForPullRequestAsync(_pullRequest);
+
+        if (submission is null)
+            return new SubmissionCommandResult.Failure(RateErrorMessage.SubmissionNotFound);
 
         RateSubmissionResult result = await _submissionService.RateSubmissionAsync(
             issuer.Id,
@@ -246,26 +288,32 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
             return new SubmissionCommandResult.Success();
         }
 
-        if (result is RateSubmissionResult.Failure f)
-            return new SubmissionCommandResult.Failure(f.Message);
-
-        return new SubmissionCommandResult.Failure("Failed to rate submission");
+        return result is RateSubmissionResult.Failure f
+            ? new SubmissionCommandResult.Failure(RateErrorMessage.WithMessage(f.Message))
+            : (SubmissionCommandResult)new SubmissionCommandResult.Failure(RateErrorMessage.Unexpected);
     }
 
     public async Task<SubmissionCommandResult> VisitAsync(UpdateCommand command)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(_pullRequest.SenderId);
-        GithubAssignment assignment = await _context.Assignments.GetAssignmentForPullRequestAsync(_pullRequest);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(_pullRequest.SenderId);
 
-        GithubSubjectCourseStudent? user = await _context.SubjectCourses
+        if (issuer is null)
+            return new SubmissionCommandResult.Failure(UpdateErrorMessage.IssuerNotFound);
+
+        GithubAssignment? assignment = await _context.Assignments.FindAssignmentForPullRequestAsync(_pullRequest);
+
+        if (assignment is null)
+            return new SubmissionCommandResult.Failure(UpdateErrorMessage.AssignmentNotFound);
+
+        GithubSubjectCourseStudent? student = await _context.SubjectCourses
             .FindSubjectCourseStudentByRepositoryId(_pullRequest.RepositoryId, default);
 
-        if (user is null)
-            return new SubmissionCommandResult.Failure("Current repository is not attached to any student");
+        if (student is null)
+            return new SubmissionCommandResult.Failure(UpdateErrorMessage.StudentNotFound);
 
         UpdateSubmissionResult result = await _submissionService.UpdateSubmissionAsync(
             issuer.Id,
-            user.User.Id,
+            student.User.Id,
             assignment.Id,
             command.SubmissionCode,
             command.GetDate(),
@@ -286,7 +334,15 @@ public class PullRequestContextCommandVisitor : ISubmissionCommandVisitor
         }
 
         return result is UpdateSubmissionResult.Failure f
-            ? new SubmissionCommandResult.Failure(f.ErrorMessage)
-            : new SubmissionCommandResult.Failure("Failed to update submission");
+            ? new SubmissionCommandResult.Failure(UpdateErrorMessage.WithMessage(f.ErrorMessage))
+            : new SubmissionCommandResult.Failure(UpdateErrorMessage.Unexpected);
+    }
+
+    private async Task<SubmissionCommandResult> HandleSuccessAsync(UnbanSubmissionResult.Success success)
+    {
+        string message = $"Submission {success.Submission.Code} successfully unbanned.";
+        await _eventNotifier.SendCommentToPullRequest(message);
+
+        return new SubmissionCommandResult.Success();
     }
 }

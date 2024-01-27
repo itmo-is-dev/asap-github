@@ -12,7 +12,7 @@ using static Itmo.Dev.Asap.Github.Application.Contracts.PullRequestEvents.PullRe
 
 namespace Itmo.Dev.Asap.Github.Application.PullRequestEvents;
 
-internal class PullRequestClosedHandler : IRequestHandler<Command>
+internal class PullRequestClosedHandler : IRequestHandler<Command, Response>
 {
     private const string MergeOperation = "Merging pull request";
     private const string CloseOperation = "Closing pull request";
@@ -34,12 +34,18 @@ internal class PullRequestClosedHandler : IRequestHandler<Command>
         _context = context;
     }
 
-    public async Task Handle(Command request, CancellationToken cancellationToken)
+    public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
     {
-        GithubUser issuer = await _context.Users.GetForGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
+        GithubUser? issuer = await _context.Users.FindByGithubIdAsync(request.PullRequest.SenderId, cancellationToken);
 
-        GithubSubmission submission = await _context.Submissions
-            .GetSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
+        if (issuer is null)
+            return new Response.IssuerNotFound();
+
+        GithubSubmission? submission = await _context.Submissions
+            .FindSubmissionForPullRequestAsync(request.PullRequest, cancellationToken);
+
+        if (submission is null)
+            return new Response.SubmissionNotFound();
 
         bool isOrganizationMentor = await _asapPermissionService.IsSubmissionMentorAsync(
             issuer.Id,
@@ -56,6 +62,7 @@ internal class PullRequestClosedHandler : IRequestHandler<Command>
 #pragma warning restore IDE0072
 
         await _notifier.SendCommentToPullRequest(message);
+        return new Response.Success();
     }
 
     private async Task<string> HandleAcceptedAsync(
