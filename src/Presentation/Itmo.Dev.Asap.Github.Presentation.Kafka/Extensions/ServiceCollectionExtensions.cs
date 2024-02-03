@@ -18,30 +18,32 @@ public static class ServiceCollectionExtensions
 
         string group = Assembly.GetExecutingAssembly().GetName().Name ?? string.Empty;
 
-        collection.AddKafka(builder => builder
-            .ConfigureOptions(b => b.BindConfiguration("Presentation:Kafka"))
-            .AddConsumer<AssignmentCreatedKey, AssignmentCreatedValue>(selector => selector
-                .HandleWith<AssignmentCreatedHandler>()
-                .DeserializeKeyWithProto()
-                .DeserializeValueWithProto()
-                .UseNamedOptionsConfiguration(
-                    "AssignmentCreated",
+        collection.AddPlatformKafka(builder => builder
+            .ConfigureOptions(configuration.GetSection("Presentation:Kafka"))
+            .AddConsumer(b => b
+                .WithKey<AssignmentCreatedKey>()
+                .WithValue<AssignmentCreatedValue>()
+                .WithConfiguration(
                     configuration.GetSection($"{consumerKey}:AssignmentCreated"),
-                    c => c.WithGroup(group)))
-            .AddConsumer<SubjectCourseCreatedKey, SubjectCourseCreatedValue>(selector => selector
-                .HandleWith<SubjectCourseCreatedHandler>()
+                    c => c.WithGroup(group))
                 .DeserializeKeyWithProto()
                 .DeserializeValueWithProto()
-                .UseNamedOptionsConfiguration(
-                    "SubjectCourseCreated",
+                .HandleWith<AssignmentCreatedHandler>())
+            .AddConsumer(b => b
+                .WithKey<SubjectCourseCreatedKey>()
+                .WithValue<SubjectCourseCreatedValue>()
+                .WithConfiguration(
                     configuration.GetSection($"{consumerKey}:SubjectCourseCreated"),
-                    c => c.WithGroup(group)))
-            .AddProducer<SubmissionDataKey, SubmissionDataValue>(selector => selector
+                    c => c.WithGroup(group))
+                .DeserializeKeyWithProto()
+                .DeserializeValueWithProto()
+                .HandleWith<SubjectCourseCreatedHandler>())
+            .AddProducer(b => b
+                .WithKey<SubmissionDataKey>()
+                .WithValue<SubmissionDataValue>()
+                .WithConfiguration(configuration.GetSection($"{producerKey}:SubmissionData"))
                 .SerializeKeyWithProto()
-                .SerializeValueWithProto()
-                .UseNamedOptionsConfiguration(
-                    "SubmissionData",
-                    configuration.GetSection($"{producerKey}:SubmissionData"))));
+                .SerializeValueWithProto()));
 
         collection.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
 

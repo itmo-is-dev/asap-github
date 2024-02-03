@@ -3,13 +3,12 @@ using Itmo.Dev.Asap.Github.Application.Models.Assignments;
 using Itmo.Dev.Asap.Github.Common.Tools;
 using Itmo.Dev.Asap.Kafka;
 using Itmo.Dev.Platform.Kafka.Consumer;
-using Itmo.Dev.Platform.Kafka.Consumer.Models;
 using Itmo.Dev.Platform.Kafka.Extensions;
 using MediatR;
 
 namespace Itmo.Dev.Asap.Github.Presentation.Kafka.ConsumerHandlers;
 
-public class AssignmentCreatedHandler : IKafkaMessageHandler<AssignmentCreatedKey, AssignmentCreatedValue>
+public class AssignmentCreatedHandler : IKafkaConsumerHandler<AssignmentCreatedKey, AssignmentCreatedValue>
 {
     private readonly IMediator _mediator;
 
@@ -19,7 +18,7 @@ public class AssignmentCreatedHandler : IKafkaMessageHandler<AssignmentCreatedKe
     }
 
     public async ValueTask HandleAsync(
-        IEnumerable<ConsumerKafkaMessage<AssignmentCreatedKey, AssignmentCreatedValue>> messages,
+        IEnumerable<IKafkaConsumerMessage<AssignmentCreatedKey, AssignmentCreatedValue>> messages,
         CancellationToken cancellationToken)
     {
         IEnumerable<AssignmentCreated.Notification> notifications = messages

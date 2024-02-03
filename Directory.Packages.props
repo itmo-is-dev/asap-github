@@ -14,29 +14,26 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Itmo.Dev.Platform.Common" Version="1.1.83" />
-    <PackageVersion Include="Itmo.Dev.Platform.Kafka" Version="1.1.83" />
-    <PackageVersion Include="Itmo.Dev.Platform.Postgres" Version="1.1.83" />
-    <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.83" />
-    <PackageVersion Include="Itmo.Dev.Platform.Logging" Version="1.0.83" />
+    <PackageVersion Include="Itmo.Dev.Platform.Common" Version="1.1.89" />
+    <PackageVersion Include="Itmo.Dev.Platform.Kafka" Version="2.0.89" />
+    <PackageVersion Include="Itmo.Dev.Platform.Postgres" Version="1.1.89" />
+    <PackageVersion Include="Itmo.Dev.Platform.Testing" Version="1.0.89" />
+    <PackageVersion Include="Itmo.Dev.Platform.Logging" Version="1.0.89" />
     <PackageVersion Include="Itmo.Dev.Platform.YandexCloud" Version="1.0.83" />
-    <PackageVersion Include="Itmo.Dev.Platform.BackgroundTasks" Version="1.1.83" />
+    <PackageVersion Include="Itmo.Dev.Platform.BackgroundTasks" Version="1.1.89" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
-    <PackageVersion Include="Npgsql" Version="8.0.0" />
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.1.0" />
     <PackageVersion Include="prometheus-net.AspNetCore.Grpc" Version="8.1.0" />
-    <PackageVersion Include="Respawn" Version="6.1.0" />
     <PackageVersion Include="ronimizy.FluentSerialization" Version="1.2.0" />
     <PackageVersion Include="Scrutor" Version="4.2.2" />
     <PackageVersion Include="Sentry.AspNetCore" Version="3.33.0" />
     <PackageVersion Include="Sentry.Serilog" Version="3.33.0" />
     <PackageVersion Include="SourceKit.Generators.Builder" Version="1.1.22" />
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="3.6.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Bogus" Version="34.0.2" />

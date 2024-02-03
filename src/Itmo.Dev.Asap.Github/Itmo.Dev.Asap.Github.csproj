@@ -34,4 +34,8 @@
       <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageVersion Update="Itmo.Dev.Platform.Yandexcloud" Version="1.0.89" />
+    </ItemGroup>
+
 </Project>

@@ -2,7 +2,6 @@ using Itmo.Dev.Asap.Github.Application.Models.Submissions;
 using Itmo.Dev.Asap.Kafka;
 using Itmo.Dev.Platform.Kafka.Extensions;
 using Itmo.Dev.Platform.Kafka.Producer;
-using Itmo.Dev.Platform.Kafka.Producer.Models;
 using MediatR;
 using SubmissionDataAdded = Itmo.Dev.Asap.Github.Application.Contracts.Submissions.Notifications.SubmissionDataAdded;
 using SubmissionDataCollectionFinished =
@@ -23,8 +22,8 @@ internal class SubmissionDataHandler :
 
     public async Task Handle(SubmissionDataAdded.Notification notification, CancellationToken cancellationToken)
     {
-        IAsyncEnumerable<ProducerKafkaMessage<SubmissionDataKey, SubmissionDataValue>> messages = notification.Data
-            .Select(data => new ProducerKafkaMessage<SubmissionDataKey, SubmissionDataValue>(
+        IAsyncEnumerable<KafkaProducerMessage<SubmissionDataKey, SubmissionDataValue>> messages = notification.Data
+            .Select(data => new KafkaProducerMessage<SubmissionDataKey, SubmissionDataValue>(
                 new SubmissionDataKey { TaskId = data.TaskId },
                 new SubmissionDataValue { SubmissionDataAdded = Map(data) }))
             .ToAsyncEnumerable();
@@ -36,7 +35,7 @@ internal class SubmissionDataHandler :
         SubmissionDataCollectionFinished.Notification notification,
         CancellationToken cancellationToken)
     {
-        var message = new ProducerKafkaMessage<SubmissionDataKey, SubmissionDataValue>(
+        var message = new KafkaProducerMessage<SubmissionDataKey, SubmissionDataValue>(
             new SubmissionDataKey { TaskId = notification.TaskId },
             new SubmissionDataValue { SubmissionDataCollectionFinished = new() });
 
